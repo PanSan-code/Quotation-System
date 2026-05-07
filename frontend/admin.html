@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>报价管理后台</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #66758f;
+      --line: #d9e2ef;
+      --accent: #ff6a3d;
+      --accent-soft: #fff1eb;
+      --success: #15803d;
+      --success-soft: #dcfce7;
+      --warning: #b45309;
+      --warning-soft: #fef3c7;
+      --danger: #b91c1c;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 14px 60px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.95rem;
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .link-btn,
+    .ghost-btn,
+    .primary-btn {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease, opacity 0.15s ease;
+    }
+
+    .ghost-btn {
+      background: #fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 6px 18px rgba(19, 31, 54, 0.06);
+    }
+
+    .ghost-btn:hover,
+    .primary-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .ghost-btn:active,
+    .primary-btn:active {
+      transform: scale(0.98);
+    }
+
+    .link-btn {
+      background: transparent;
+      color: var(--accent);
+      padding: 0;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .link-btn:hover {
+      opacity: 0.8;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 18px 40px rgba(24, 36, 58, 0.08);
+    }
+
+    h2,
+    h3 {
+      margin: 0 0 8px;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+
+    .subtitle,
+    .muted,
+    .help {
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+      font-weight: 400;
+    }
+
+    .field {
+      margin-top: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: #fbfcff;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid rgba(255, 106, 61, 0.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 106, 61, 0.08);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .row > * {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .primary-btn,
+    .ghost-btn.fill {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(255, 106, 61, 0.22);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .ghost-btn.fill {
+      border: 1px solid var(--line);
+      box-shadow: none;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .error {
+      color: var(--danger);
+      margin-top: 10px;
+      font-size: 0.92rem;
+    }
+
+    .list {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+      max-height: 72vh;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .list-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      background: #fbfcff;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      text-align: left;
+    }
+
+    .list-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .list-item.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 10px 22px rgba(255, 106, 61, 0.14);
+    }
+
+    .list-item strong {
+      font-size: 1rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .badge.pending {
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .badge.quoted {
+      color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .detail-block {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fcfdff;
+      margin-top: 14px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .detail-cell {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+    }
+
+    .detail-value {
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .gallery {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .gallery img {
+      width: 88px;
+      height: 88px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.04);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .split-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fbfcff;
+      margin-top: 14px;
+    }
+
+    .price-note {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--accent);
+      word-break: break-word;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div>
+        <h1>报价管理后台</h1>
+        <p>查看询价记录、录入运费和服务费，并同步客户查询结果。</p>
+      </div>
+      <a class="link-btn" href="./index.html">返回用户前台</a>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <h2>管理员认证</h2>
+        <p class="subtitle">先保存管理员 Token，再读取和更新报价记录。</p>
+
+        <div class="field">
+          <label for="tokenInput">ADMIN_TOKEN</label>
+          <div class="row">
+            <input type="password" id="tokenInput" placeholder="输入管理员 Token">
+            <button type="button" class="ghost-btn fill" id="saveTokenBtn">保存 Token</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="statusFilter">筛选状态</label>
+          <div class="row">
+            <select id="statusFilter">
+              <option value="">全部状态</option>
+              <option value="pending">待报价</option>
+              <option value="quoted">已报价</option>
+            </select>
+            <button type="button" class="primary-btn" id="refreshBtn">刷新列表</button>
+          </div>
+        </div>
+
+        <div class="error" id="listError"></div>
+        <div class="list" id="inquiryList"></div>
+      </section>
+
+      <section class="card">
+        <div class="split-header">
+          <div>
+            <h2>报价详情</h2>
+            <p class="subtitle">从左侧选择一条询价记录后，在这里查看详情并录入报价。</p>
+          </div>
+        </div>
+
+        <div id="detailEmpty" class="empty-state muted">还没有选中询价记录。</div>
+
+        <div id="detailPanel" style="display:none;">
+          <div id="detailSummary"></div>
+          <div class="gallery" id="detailGallery"></div>
+
+          <div class="field">
+            <h3>录入报价</h3>
+            <p class="help">总价可以留空，系统会用运费 + 服务费自动计算。</p>
+          </div>
+
+          <div class="field">
+            <label for="quoteStatus">报价状态</label>
+            <select id="quoteStatus">
+              <option value="quoted">已报价</option>
+              <option value="pending">待报价</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="row">
+              <div>
+                <label for="finalFreightInput">运费</label>
+                <input type="number" id="finalFreightInput" placeholder="输入运费" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="serviceFeeInput">服务费</label>
+                <input type="number" id="serviceFeeInput" placeholder="输入服务费" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="totalPriceInput">总价</label>
+                <input type="number" id="totalPriceInput" placeholder="留空自动计算" min="0" step="0.01">
+              </div>
+            </div>
+            <div class="price-note">切回“待报价”时，报价金额会被清空。</div>
+          </div>
+
+          <div class="field">
+            <label for="adminNoteInput">报价说明</label>
+            <textarea id="adminNoteInput" placeholder="填写时效、包装、补充说明等"></textarea>
+          </div>
+
+          <div class="field">
+            <div class="row">
+              <button type="button" class="primary-btn" id="saveQuoteBtn">保存报价</button>
+              <button type="button" class="ghost-btn fill" id="reloadDetailBtn">重新加载</button>
+            </div>
+          </div>
+
+          <div class="error" id="detailError"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script>
+    (() => {
+      const apiBaseUrl = String(window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl || "").replace(/\/$/, "");
+      const tokenInput = document.getElementById("tokenInput");
+      const saveTokenBtn = document.getElementById("saveTokenBtn");
+      const statusFilter = document.getElementById("statusFilter");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const inquiryList = document.getElementById("inquiryList");
+      const listError = document.getElementById("listError");
+      const detailEmpty = document.getElementById("detailEmpty");
+      const detailPanel = document.getElementById("detailPanel");
+      const detailSummary = document.getElementById("detailSummary");
+      const detailGallery = document.getElementById("detailGallery");
+      const quoteStatus = document.getElementById("quoteStatus");
+      const finalFreightInput = document.getElementById("finalFreightInput");
+      const serviceFeeInput = document.getElementById("serviceFeeInput");
+      const totalPriceInput = document.getElementById("totalPriceInput");
+      const adminNoteInput = document.getElementById("adminNoteInput");
+      const saveQuoteBtn = document.getElementById("saveQuoteBtn");
+      const reloadDetailBtn = document.getElementById("reloadDetailBtn");
+      const detailError = document.getElementById("detailError");
+
+      let selectedCode = "";
+
+      tokenInput.value = localStorage.getItem("quote_admin_token") || "";
+
+      function getToken() {
+        return tokenInput.value.trim();
+      }
+
+      function formatMoney(value) {
+        if (value == null || value === "") {
+          return "-";
+        }
+
+        return new Intl.NumberFormat("zh-CN", {
+          style: "currency",
+          currency: "CNY"
+        }).format(Number(value));
+      }
+
+      function formatDate(value) {
+        return new Date(value).toLocaleString("zh-CN");
+      }
+
+      function badgeClass(status) {
+        return status === "quoted" ? "quoted" : "pending";
+      }
+
+      function statusText(status) {
+        return status === "quoted" ? "已报价" : "待报价";
+      }
+
+      async function requestJson(path, options = {}) {
+        const response = await fetch(`${apiBaseUrl}${path}`, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+            ...(options.headers || {})
+          }
+        });
+
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch (err) {
+          payload = {};
+        }
+
+        if (!response.ok) {
+          throw new Error(payload.error || "请求失败，请稍后重试。");
+        }
+
+        return payload;
+      }
+
+      function renderSummary(item) {
+        detailSummary.innerHTML = `
+          <div class="detail-block">
+            <div class="split-header">
+              <div>
+                <h3 style="margin:0;">${item.code}</h3>
+                <p class="subtitle" style="margin:6px 0 0;">提交时间：${formatDate(item.created_at)}</p>
+              </div>
+              <span class="badge ${badgeClass(item.status)}">${statusText(item.status)}</span>
+            </div>
+            <div style="margin-top:14px;">
+              <div class="detail-label">商品链接</div>
+              <div class="detail-value"><a href="${item.product_url}" target="_blank" rel="noreferrer">${item.product_url}</a></div>
+            </div>
+            <div style="margin-top:14px;">
+              <div class="detail-label">备注</div>
+              <div class="detail-value">${item.remark || "-"}</div>
+            </div>
+            <div class="detail-grid">
+              <div class="detail-cell">
+                <div class="detail-label">运输方式</div>
+                <div class="detail-value">${item.shipping === "air" ? "空运" : "海运"}</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">预估重量</div>
+                <div class="detail-value">${item.weight_estimate} kg</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">更新时间</div>
+                <div class="detail-value">${formatDate(item.updated_at)}</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">当前运费</div>
+                <div class="detail-value">${formatMoney(item.final_freight)}</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">当前服务费</div>
+                <div class="detail-value">${formatMoney(item.service_fee)}</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">当前总价</div>
+                <div class="detail-value">${formatMoney(item.total_price)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        detailGallery.innerHTML = item.images && item.images.length
+          ? item.images.map((image) => `<a href="${image.url}" target="_blank" rel="noreferrer"><img src="${image.url}" alt="product image"></a>`).join("")
+          : `<div class="empty-state muted" style="width:100%;">该询价没有上传图片。</div>`;
+
+        quoteStatus.value = item.status;
+        finalFreightInput.value = item.final_freight ?? "";
+        serviceFeeInput.value = item.service_fee ?? "";
+        totalPriceInput.value = item.total_price ?? "";
+        adminNoteInput.value = item.admin_note || "";
+      }
+
+      async function loadList() {
+        if (!getToken()) {
+          listError.textContent = "请先输入并保存管理员 Token。";
+          inquiryList.innerHTML = "";
+          return;
+        }
+
+        listError.textContent = "";
+        inquiryList.innerHTML = `<div class="empty-state muted">正在加载询价列表...</div>`;
+
+        try {
+          const query = statusFilter.value ? `?status=${encodeURIComponent(statusFilter.value)}` : "";
+          const payload = await requestJson(`/api/admin/inquiries${query}`);
+
+          if (!payload.items.length) {
+            inquiryList.innerHTML = `<div class="empty-state muted">当前没有符合条件的询价记录。</div>`;
+            return;
+          }
+
+          inquiryList.innerHTML = payload.items.map((item) => `
+            <button type="button" class="list-item ${item.code === selectedCode ? "active" : ""}" data-code="${item.code}">
+              <div class="split-header">
+                <strong>${item.code}</strong>
+                <span class="badge ${badgeClass(item.status)}">${statusText(item.status)}</span>
+              </div>
+              <div class="muted" style="margin-top:8px;">${item.shipping === "air" ? "空运" : "海运"} | ${item.weight_estimate} kg</div>
+              <div class="muted" style="margin-top:6px;">${formatDate(item.created_at)}</div>
+            </button>
+          `).join("");
+        } catch (err) {
+          inquiryList.innerHTML = "";
+          listError.textContent = err.message;
+        }
+      }
+
+      async function loadDetail(code) {
+        detailError.textContent = "";
+        selectedCode = code;
+
+        try {
+          const item = await requestJson(`/api/admin/inquiries/${code}`);
+          detailEmpty.style.display = "none";
+          detailPanel.style.display = "block";
+          renderSummary(item);
+          await loadList();
+        } catch (err) {
+          detailError.textContent = err.message;
+        }
+      }
+
+      async function saveQuote() {
+        if (!selectedCode) {
+          return;
+        }
+
+        detailError.textContent = "";
+        saveQuoteBtn.disabled = true;
+
+        try {
+          await requestJson(`/api/admin/inquiries/${selectedCode}/quote`, {
+            method: "PUT",
+            body: JSON.stringify({
+              status: quoteStatus.value,
+              final_freight: finalFreightInput.value,
+              service_fee: serviceFeeInput.value,
+              total_price: totalPriceInput.value,
+              admin_note: adminNoteInput.value.trim()
+            })
+          });
+
+          await loadDetail(selectedCode);
+        } catch (err) {
+          detailError.textContent = err.message;
+        } finally {
+          saveQuoteBtn.disabled = false;
+        }
+      }
+
+      saveTokenBtn.addEventListener("click", () => {
+        localStorage.setItem("quote_admin_token", getToken());
+        loadList();
+      });
+
+      refreshBtn.addEventListener("click", loadList);
+      reloadDetailBtn.addEventListener("click", () => selectedCode && loadDetail(selectedCode));
+      saveQuoteBtn.addEventListener("click", saveQuote);
+      inquiryList.addEventListener("click", (event) => {
+        const target = event.target.closest("[data-code]");
+        if (target) {
+          loadDetail(target.dataset.code);
+        }
+      });
+
+      loadList();
+    })();
+  </script>
+</body>
+</html>

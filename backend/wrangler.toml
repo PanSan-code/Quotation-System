@@ -1,0 +1,17 @@
+name = "quote-system-api"
+main = "src/worker.js"
+compatibility_date = "2026-05-07"
+
+[vars]
+ALLOWED_ORIGINS = "http://127.0.0.1:8788,http://localhost:8788,https://your-pages-project.pages.dev"
+MAX_IMAGES = "5"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "quote-system"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "QUOTE_IMAGES"
+bucket_name = "REPLACE_WITH_YOUR_R2_BUCKET_NAME"
+

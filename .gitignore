@@ -1,0 +1,3 @@
+node_modules/
+backend/.wrangler/
+backend/.dev.vars
