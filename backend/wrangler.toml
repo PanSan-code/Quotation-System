@@ -3,8 +3,13 @@ main = "src/worker.js"
 compatibility_date = "2026-05-07"
 
 [vars]
-ALLOWED_ORIGINS = "*"
+# Set this to your frontend domain(s), comma-separated. Do NOT use "*".
+ALLOWED_ORIGINS = "https://your-frontend.pages.dev"
 MAX_IMAGES = "5"
+
+# IMPORTANT: Use `wrangler secret put ADMIN_TOKEN` for production deployment.
+# The ADMIN_TOKEN below is a placeholder for local dev only.
+ADMIN_TOKEN = "change-me"
 
 [[d1_databases]]
 binding = "DB"
