@@ -493,6 +493,22 @@
       accent-color: var(--accent);
     }
 
+    .weight-input {
+      width: 80px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      text-align: center;
+      font-family: inherit;
+      -moz-appearance: textfield;
+    }
+    .weight-input::-webkit-inner-spin-button,
+    .weight-input::-webkit-outer-spin-button {
+      opacity: 1;
+      height: 28px;
+    }
+
     .pill {
       min-width: 90px;
       text-align: center;
@@ -831,6 +847,7 @@
           <label for="weightSlider" id="weightLabel">预估重量</label>
           <div class="weight-row">
             <input type="range" id="weightSlider" min="0.01" max="50" step="0.01" value="3">
+            <input type="number" id="weightInput" min="0.01" max="50" step="0.01" value="3" class="weight-input" placeholder="kg">
             <div class="pill" id="weightDisplay">3.00 kg</div>
           </div>
         </div>
@@ -1260,6 +1277,7 @@
         paymentGcash: document.querySelector('input[name="payment"][value="gcash"]'),
         paymentShopee: document.querySelector('input[name="payment"][value="shopee"]'),
         weightSlider: document.getElementById("weightSlider"),
+        weightInput: document.getElementById("weightInput"),
         weightDisplay: document.getElementById("weightDisplay"),
         submitBtn: document.getElementById("submitBtn"),
         formError: document.getElementById("formError"),
@@ -1449,7 +1467,23 @@
       }
 
       function updateWeight() {
-        elements.weightDisplay.textContent = `${Number(elements.weightSlider.value).toFixed(2)} kg`;
+        const value = Number(elements.weightSlider.value);
+        elements.weightDisplay.textContent = `${value.toFixed(2)} kg`;
+        elements.weightInput.value = value.toFixed(2);
+      }
+
+      function updateWeightFromInput() {
+        const value = Number(elements.weightInput.value);
+        if (!Number.isFinite(value) || value <= 0) {
+          elements.weightSlider.value = 0.01;
+          elements.weightDisplay.textContent = "0.01 kg";
+          elements.weightInput.value = "0.01";
+          return;
+        }
+        const clamped = Math.min(50, Math.max(0.01, value));
+        elements.weightSlider.value = clamped;
+        elements.weightDisplay.textContent = `${clamped.toFixed(2)} kg`;
+        elements.weightInput.value = clamped.toFixed(2);
       }
 
       function fileToDataUrl(file) {
@@ -1481,6 +1515,8 @@
         selectedFiles = [];
         elements.previewList.innerHTML = "";
         elements.weightSlider.value = "3";
+        elements.weightInput.value = "3.00";
+        elements.weightDisplay.textContent = "3.00 kg";
         document.querySelector('input[name="shipping"][value="sea"]').checked = true;
         syncChoiceState();
         updateWeight();
@@ -1749,6 +1785,7 @@
       });
 
       elements.weightSlider.addEventListener("input", updateWeight);
+      elements.weightInput.addEventListener("input", updateWeightFromInput);
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
       elements.queryCodeInput.addEventListener("keypress", (event) => {
