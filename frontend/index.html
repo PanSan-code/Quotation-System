@@ -947,6 +947,9 @@
       <div class="self-order-section">
         <label id="resultCodeLabel">八字单号</label>
         <div class="result-code-display" id="resultCodeDisplay">--------</div>
+        <div style="text-align:center; margin-top:8px;">
+          <button type="button" class="ghost-btn" id="copyOrderCodeBtn">复制</button>
+        </div>
         <p class="muted" id="resultCodeHint">请保存此单号，后续可在管理员后台查询</p>
       </div>
       <div class="self-order-section">
@@ -1069,6 +1072,8 @@
           trackingEmpty: "暂无物流单号",
           selfOrderResultTitle: "订单已创建",
           resultCodeLabel: "八字单号",
+          copyOrderCodeBtn: "复制",
+          orderCodeCopied: "已复制",
           resultCodeHint: "请保存此单号，后续可在管理员后台查询",
           resultTrackingLabel: "物流单号",
           selfOrderResultOkBtn: "确定",
@@ -1172,6 +1177,8 @@
           trackingEmpty: "No tracking numbers yet",
           selfOrderResultTitle: "Order Created",
           resultCodeLabel: "Order Code",
+          copyOrderCodeBtn: "Copy",
+          orderCodeCopied: "Copied!",
           resultCodeHint: "Save this code to query in the admin panel",
           resultTrackingLabel: "Tracking Numbers",
           selfOrderResultOkBtn: "OK",
@@ -1274,6 +1281,7 @@
         selfOrderResultModal: document.getElementById("selfOrderResultModal"),
         selfOrderResultClose: document.getElementById("selfOrderResultClose"),
         resultCodeDisplay: document.getElementById("resultCodeDisplay"),
+        copyOrderCodeBtn: document.getElementById("copyOrderCodeBtn"),
         resultTrackingList: document.getElementById("resultTrackingList"),
         selfOrderResultOkBtn: document.getElementById("selfOrderResultOkBtn"),
         orderQueryBtn: document.getElementById("orderQueryBtn"),
@@ -1342,6 +1350,7 @@
         saveSelfOrderBtn: document.getElementById("saveSelfOrderBtn"),
         selfOrderResultTitle: document.getElementById("selfOrderResultTitle"),
         resultCodeLabel: document.getElementById("resultCodeLabel"),
+        copyOrderCodeBtn: document.getElementById("copyOrderCodeBtn"),
         resultCodeHint: document.getElementById("resultCodeHint"),
         resultTrackingLabel: document.getElementById("resultTrackingLabel"),
         selfOrderResultOkBtn: document.getElementById("selfOrderResultOkBtn"),
@@ -1781,6 +1790,7 @@
       const selfOrderResultModal = elements.selfOrderResultModal;
       const selfOrderResultClose = elements.selfOrderResultClose;
       const resultCodeDisplay = elements.resultCodeDisplay;
+      const copyOrderCodeBtn = elements.copyOrderCodeBtn;
       const resultTrackingList = elements.resultTrackingList;
       const selfOrderResultOkBtn = elements.selfOrderResultOkBtn;
       let trackingNumbers = [];
@@ -1953,6 +1963,24 @@
       selfOrderResultModal.addEventListener("click", (e) => {
         if (e.target === selfOrderResultModal) {
           selfOrderResultModal.classList.remove("active");
+        }
+      });
+
+      copyOrderCodeBtn.addEventListener("click", () => {
+        const code = resultCodeDisplay.textContent.trim();
+        if (code && code !== "--------") {
+          const ta = document.createElement("textarea");
+          ta.value = code;
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          copyOrderCodeBtn.textContent = text("orderCodeCopied");
+          setTimeout(() => {
+            copyOrderCodeBtn.textContent = text("copyOrderCodeBtn");
+          }, 2000);
         }
       });
 
