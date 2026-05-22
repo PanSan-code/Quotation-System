@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>代购转运报价系统</title>
+  <title>PanSan报价系统</title>
   <style>
     :root {
       --bg: #f3f6fb;
@@ -27,7 +27,7 @@
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
       color: var(--text);
       min-height: 100vh;
@@ -41,11 +41,109 @@
       margin: 0 auto;
     }
 
-    .topbar {
+    .hamburger-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1002;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      margin-bottom: 12px;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(19, 31, 54, 0.06);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      padding: 0;
+    }
+
+    .hamburger-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(19, 31, 54, 0.12);
+    }
+
+    .hamburger-line {
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .sidebar-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: #fff;
+      box-shadow: 4px 0 24px rgba(19, 31, 54, 0.12);
+      z-index: 1001;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 80px 20px 20px 20px;
+      gap: 12px;
+    }
+
+    .sidebar-nav.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-nav .link-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #f8f9fa;
+      border: none;
+      box-shadow: none;
+    }
+
+    .sidebar-nav .link-btn:hover {
+      background: #eef1f5;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .sidebar-nav .lang-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      margin-top: auto;
+      border-radius: 12px;
+      font-size: 1rem;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
     }
 
     .lang-btn,
@@ -80,15 +178,129 @@
     }
 
     .link-btn {
-      background: transparent;
+      background: #fff;
       color: var(--accent);
-      padding: 0;
-      font-weight: 600;
-      transition: opacity 0.15s;
+      padding: 8px 16px;
+      font-weight: normal;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+      border-radius: 999px;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      box-shadow: 0 2px 8px rgba(19, 31, 54, 0.04);
     }
 
     .link-btn:hover {
-      opacity: 0.8;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(19, 31, 54, 0.1);
+      border-color: var(--accent);
+    }
+
+    .link-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(19, 31, 54, 0.06);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+    }
+
+    .modal-card h2 {
+      margin: 0 0 20px;
+      font-size: 1.25rem;
+      color: var(--accent);
+      font-weight: normal;
+    }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .step-item:last-child {
+      border-bottom: none;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: normal;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content p {
+      margin: 0 0 4px;
+      font-size: 0.95rem;
+    }
+
+    .step-content .step-hint {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .step-content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .step-content a:hover {
+      text-decoration: underline;
     }
 
     .page {
@@ -111,7 +323,7 @@
     h2 {
       margin: 0 0 8px;
       line-height: 1.15;
-      font-weight: 700;
+      font-weight: normal;
     }
 
     .subtitle,
@@ -130,7 +342,7 @@
 
     label {
       display: block;
-      font-weight: 700;
+      font-weight: normal;
       margin-bottom: 8px;
       font-size: 0.95rem;
       letter-spacing: 0.02em;
@@ -243,7 +455,7 @@
       text-align: center;
       background: #fff;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: normal;
       transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
       display: flex;
       flex-direction: column;
@@ -287,7 +499,7 @@
       background: #eef3fb;
       border-radius: 12px;
       padding: 10px 12px;
-      font-weight: 700;
+      font-weight: normal;
       font-size: 1rem;
     }
 
@@ -296,7 +508,7 @@
       width: 100%;
       padding: 14px 16px;
       border-radius: 14px;
-      font-weight: 700;
+      font-weight: normal;
       font-size: 1.05rem;
       letter-spacing: 0.03em;
     }
@@ -337,7 +549,7 @@
       padding: 16px;
       font-size: 2rem;
       letter-spacing: 0.18em;
-      font-weight: 800;
+      font-weight: normal;
       margin: 18px 0 14px;
       font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
     }
@@ -348,7 +560,7 @@
       border-radius: 999px;
       padding: 6px 12px;
       font-size: 0.88rem;
-      font-weight: 700;
+      font-weight: normal;
     }
 
     .status.pending {
@@ -381,7 +593,7 @@
     .result strong {
       display: inline-block;
       min-width: 96px;
-      font-weight: 600;
+      font-weight: normal;
     }
 
     .gallery {
@@ -419,7 +631,7 @@
 
     .price-row.total {
       font-size: 1.08rem;
-      font-weight: 800;
+      font-weight: normal;
     }
 
     .error-text {
@@ -440,15 +652,141 @@
       .choice-grid {
         grid-template-columns: 1fr;
       }
+
+      .self-order-code-row {
+        flex-direction: column;
+      }
+
+      .self-order-code-row > * {
+        width: 100%;
+      }
+    }
+
+    /* =========================
+       Self Order Modal
+       ========================= */
+    .self-order-modal {
+      max-width: 480px;
+    }
+
+    .self-order-section {
+      margin-bottom: 18px;
+    }
+
+    .self-order-section label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: normal;
+      color: var(--text);
+    }
+
+    .self-order-code-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .result-code-display {
+      font-family: monospace;
+      font-size: 1.5rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: center;
+      padding: 16px;
+      background: var(--accent-soft);
+      border-radius: 12px;
+      border: 2px dashed var(--accent);
+      font-weight: normal;
+    }
+
+    .tracking-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      background: #f8f9fc;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+
+    .tracking-item input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .tracking-item input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 106, 61, 0.15);
+    }
+
+    .tracking-remove {
+      background: transparent;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .tracking-remove:hover {
+      background: rgba(185, 28, 28, 0.08);
+    }
+
+    .tracking-empty {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 8px 0;
+    }
+
+    .tracking-check {
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      color: #ccc;
+      transition: color 0.2s;
+    }
+
+    .tracking-check.checked {
+      color: var(--success);
+    }
+
+    /* =========================
+       English mode
+       ========================= */
+    html[lang="en"],
+    html[lang="en"] body,
+    html[lang="en"] * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: normal !important;
     }
   </style>
 </head>
 <body>
   <div class="shell">
-    <div class="topbar">
-      <button type="button" class="lang-btn" id="langBtn">EN</button>
-      <button type="button" class="link-btn" id="toQueryLink">查询报价</button>
-    </div>
+    <button type="button" class="hamburger-btn" id="hamburgerBtn">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <nav class="sidebar-nav" id="sidebarNav">
+    <button type="button" class="link-btn" id="orderBtn">下单流程</button>
+    <button type="button" class="link-btn" id="selfOrderBtn">自行下单</button>
+    <button type="button" class="link-btn" id="orderQueryBtn">查询订单</button>
+    <button type="button" class="link-btn" id="toQueryLink">查询报价</button>
+    <button type="button" class="link-btn" id="addressBtn">收货地址</button>
+    <button type="button" class="lang-btn" id="langBtn">EN</button>
+  </nav>
 
     <section class="page active" id="formPage">
       <div class="card">
@@ -492,8 +830,22 @@
         <div class="field">
           <label for="weightSlider" id="weightLabel">预估重量</label>
           <div class="weight-row">
-            <input type="range" id="weightSlider" min="0.5" max="50" step="0.5" value="3">
-            <div class="pill" id="weightDisplay">3.0 kg</div>
+            <input type="range" id="weightSlider" min="0.01" max="50" step="0.01" value="3">
+            <div class="pill" id="weightDisplay">3.00 kg</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label id="paymentLabel">付款方式</label>
+          <div class="choice-group">
+            <label class="choice">
+              <input type="radio" name="payment" value="gcash" checked>
+              <span id="gcashPayment">Gcash</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="payment" value="shopee">
+              <span id="shopeePayment">Shopee全款</span>
+            </label>
           </div>
         </div>
 
@@ -533,14 +885,151 @@
     </section>
   </div>
 
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="modalClose">&times;</button>
+      <h2 id="orderModalTitle">下单流程</h2>
+      <ol class="step-list" id="orderSteps">
+        <li class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <p id="step1Title">等待报价完成</p>
+            <p class="step-hint" id="step1Hint">提交询价后，请耐心等待PanSan完成报价</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <p id="step2Title">复制八字代码</p>
+            <p class="step-hint" id="step2Hint">查询报价后，复制您的8位查询代码</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <p id="step3Title">发送给PanSan</p>
+            <p class="step-hint" id="step3Hint">将代码发送至 <a href="https://www.facebook.com/share/1BMv7Zz6Fa/" target="_blank" rel="noreferrer">Facebook主页</a></p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <p id="step4Title">确认最终细节</p>
+            <p class="step-hint" id="step4Hint">与PanSan确认运费、重量等最终下单信息</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="selfOrderModal">
+    <div class="modal-card self-order-modal">
+      <button type="button" class="modal-close" id="selfOrderModalClose">&times;</button>
+      <h2 id="selfOrderModalTitle">自行下单</h2>
+
+      <div class="self-order-section">
+        <label id="trackingLabel">物流单号</label>
+        <div id="trackingList"></div>
+        <button type="button" class="ghost-btn fill" id="addTrackingBtn">+ 添加物流单号</button>
+      </div>
+
+      <div class="self-order-section">
+        <button type="button" class="primary-btn" id="saveSelfOrderBtn">创建订单</button>
+      </div>
+      <div class="error-text" id="selfOrderError"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="selfOrderResultModal">
+    <div class="modal-card self-order-modal">
+      <button type="button" class="modal-close" id="selfOrderResultClose">&times;</button>
+      <h2 id="selfOrderResultTitle">订单已创建</h2>
+      <div class="self-order-section">
+        <label id="resultCodeLabel">八字单号</label>
+        <div class="result-code-display" id="resultCodeDisplay">--------</div>
+        <p class="muted" id="resultCodeHint">请保存此单号，后续可在管理员后台查询</p>
+      </div>
+      <div class="self-order-section">
+        <label id="resultTrackingLabel">物流单号</label>
+        <div id="resultTrackingList"></div>
+      </div>
+      <div class="self-order-section">
+        <button type="button" class="primary-btn" id="selfOrderResultOkBtn">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="orderQueryModal">
+    <div class="modal-card self-order-modal">
+      <button type="button" class="modal-close" id="orderQueryModalClose">&times;</button>
+      <h2 id="orderQueryModalTitle">查询订单</h2>
+
+      <div class="self-order-section">
+        <label id="orderQueryCodeLabel">八字单号</label>
+        <input type="text" id="orderQueryCodeInput" placeholder="输入8位订单号">
+      </div>
+
+      <div class="self-order-section">
+        <button type="button" class="primary-btn" id="orderQuerySearchBtn">查询</button>
+      </div>
+      <div class="error-text" id="orderQueryError"></div>
+
+      <div id="orderQueryResult" style="display: none;">
+        <div class="self-order-section">
+          <label id="orderQueryResultCodeLabel">八字单号</label>
+          <div class="result-code-display" id="orderQueryResultCode">--------</div>
+        </div>
+        <div class="self-order-section">
+          <label id="orderQueryResultTrackingLabel">物流单号</label>
+          <div id="orderQueryResultTrackingList"></div>
+        </div>
+        <div class="self-order-section">
+          <label id="orderQueryAddTrackingLabel">添加物流单号</label>
+          <div id="orderQueryAddTrackingList"></div>
+          <button type="button" class="ghost-btn fill" id="orderQueryAddTrackingBtn">+ 添加物流单号</button>
+          <button type="button" class="primary-btn" id="orderQuerySaveTrackingBtn" style="margin-top: 12px;">保存</button>
+          <div class="error-text" id="orderQueryAddTrackingError"></div>
+        </div>
+        <div class="self-order-section">
+          <label id="orderQueryResultCreatedAtLabel">创建时间</label>
+          <div id="orderQueryResultCreatedAt"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="addressModal">
+    <div class="modal-content">
+      <button type="button" class="modal-close" id="addressModalClose">&times;</button>
+      <div class="modal-header">
+        <h2 id="addressModalTitle">收货地址</h2>
+      </div>
+      <div class="field">
+        <div id="addressContent" style="white-space: pre-wrap; background:#f8f9fa; padding: 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; min-height: 60px;"></div>
+      </div>
+      <div style="margin-top: 16px;">
+        <button type="button" class="primary-btn" id="copyAddressBtn">复制地址</button>
+      </div>
+    </div>
+  </div>
+
   <script src="./config.js"></script>
   <script>
     (() => {
       const apiBaseUrl = String(window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl || "").replace(/\/$/, "");
 
+      function closeSidebar() {
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const sidebarNav = document.getElementById("sidebarNav");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        if (hamburgerBtn) hamburgerBtn.classList.remove("open");
+        if (sidebarNav) sidebarNav.classList.remove("open");
+        if (sidebarOverlay) sidebarOverlay.classList.remove("active");
+      }
+
       const i18n = {
         zh: {
-          formTitle: "代购转运报价",
+          formTitle: "PanSan报价系统",
           formSubtitle: "填写商品信息，提交询价后即可用查询码查看报价。",
           toQueryLink: "查询报价",
           productUrlLabel: "商品链接",
@@ -553,6 +1042,9 @@
           shippingLabel: "运输方式",
           seaShipping: "海运",
           airShipping: "空运",
+          paymentLabel: "付款方式",
+          gcashPayment: "Gcash",
+          shopeePayment: "Shopee全款",
           weightLabel: "预估重量",
           submitBtn: "提交询价",
           submitting: "提交中...",
@@ -567,6 +1059,32 @@
           queryPlaceholder: "输入 8 位查询码",
           searchBtn: "查询",
           queryHint: "输入提交后收到的查询码即可查看报价进度。",
+          orderBtn: "下单流程",
+          orderModalTitle: "下单流程",
+          selfOrderBtn: "自行下单",
+          selfOrderModalTitle: "自行下单",
+          trackingLabel: "物流单号",
+          addTrackingBtn: "+ 添加物流单号",
+          saveSelfOrderBtn: "创建订单",
+          trackingEmpty: "暂无物流单号",
+          selfOrderResultTitle: "订单已创建",
+          resultCodeLabel: "八字单号",
+          resultCodeHint: "请保存此单号，后续可在管理员后台查询",
+          resultTrackingLabel: "物流单号",
+          selfOrderResultOkBtn: "确定",
+          alertNoTracking: "请至少添加一个物流单号",
+          alertDuplicateTracking: "物流单号不能重复",
+          orderCreateFailed: "创建订单失败，请稍后重试",
+          trackingPending: "待确认",
+          trackingConfirmed: "已确认",
+          step1Title: "等待报价完成",
+          step1Hint: "提交询价后，请耐心等待PanSan完成报价",
+          step2Title: "复制八字代码",
+          step2Hint: "查询报价后，复制您的8位查询代码",
+          step3Title: "发送给PanSan",
+          step3Hint: "将代码发送至 <a href=\"https://www.facebook.com/share/1BMv7Zz6Fa/\" target=\"_blank\" rel=\"noreferrer\">Facebook主页</a>",
+          step4Title: "确认最终细节",
+          step4Hint: "与PanSan确认运费、重量等最终下单信息",
           pending: "待报价",
           quoted: "已报价",
           product: "商品链接",
@@ -575,7 +1093,7 @@
           shipping: "运输方式",
           weight: "预估重量",
           freight: "运费",
-          serviceFee: "服务费",
+          serviceFee: "商品目前售价",
           total: "总价",
           note: "报价备注",
           submitTime: "提交时间",
@@ -586,10 +1104,35 @@
           alertNoShipping: "请选择运输方式",
           alertImageLimit: "最多上传 5 张图片",
           requestFailed: "请求失败，请稍后重试",
-          invalidCode: "未找到该查询码，请确认后重试。"
+          invalidCode: "未找到该查询码，请确认后重试。",
+          orderQueryBtn: "查询订单",
+          orderQueryModalTitle: "查询订单",
+          orderQueryCodeLabel: "八字单号",
+          orderQueryCodePlaceholder: "输入8位订单号",
+          orderQuerySearchBtn: "查询",
+          orderQueryResultCodeLabel: "八字单号",
+          orderQueryResultTrackingLabel: "物流单号",
+          orderQueryResultCreatedAtLabel: "创建时间",
+          orderQueryNotFound: "未找到该订单，请确认后重试。",
+          orderQueryCreatedAt: "创建时间",
+          orderQueryAddTrackingLabel: "添加物流单号",
+          orderQueryAddTrackingBtn: "+ 添加物流单号",
+          orderQuerySaveTrackingBtn: "保存",
+          orderQuerySaveSuccess: "物流单号已保存",
+          orderQuerySaveFailed: "保存失败，请稍后重试",
+          orderQueryDuplicateTracking: "物流单号已存在",
+          orderQueryTrackingExists: "以下物流单号已存在于其他订单中：\n{list}\n是否继续保存？",
+          orderQueryConfirmSave: "确认保存",
+          confirmRemoveTracking: "确认删除该物流单号？",
+          removeTrackingFailed: "删除失败，请稍后重试",
+          addressBtn: "收货地址",
+          addressModalTitle: "收货地址",
+          copyAddressBtn: "复制地址",
+          addressCopied: "地址已复制到剪贴板",
+          addressLoadFailed: "加载地址失败"
         },
         en: {
-          formTitle: "Forwarding Quote Request",
+          formTitle: "PanSan Quote System",
           formSubtitle: "Submit product details and check the result later with your inquiry code.",
           toQueryLink: "Track Quote",
           productUrlLabel: "Product URL",
@@ -602,6 +1145,9 @@
           shippingLabel: "Shipping Method",
           seaShipping: "Sea Freight",
           airShipping: "Air Freight",
+          paymentLabel: "Payment Method",
+          gcashPayment: "Gcash",
+          shopeePayment: "Shopee Full Payment",
           weightLabel: "Estimated Weight",
           submitBtn: "Submit Inquiry",
           submitting: "Submitting...",
@@ -616,6 +1162,32 @@
           queryPlaceholder: "Enter 8-character code",
           searchBtn: "Search",
           queryHint: "Enter your inquiry code to track quote progress.",
+          orderBtn: "Order Process",
+          orderModalTitle: "Order Process",
+          selfOrderBtn: "Self Order",
+          selfOrderModalTitle: "Self Order",
+          trackingLabel: "Tracking Numbers",
+          addTrackingBtn: "+ Add Tracking",
+          saveSelfOrderBtn: "Create Order",
+          trackingEmpty: "No tracking numbers yet",
+          selfOrderResultTitle: "Order Created",
+          resultCodeLabel: "Order Code",
+          resultCodeHint: "Save this code to query in the admin panel",
+          resultTrackingLabel: "Tracking Numbers",
+          selfOrderResultOkBtn: "OK",
+          alertNoTracking: "Please add at least one tracking number",
+          alertDuplicateTracking: "Tracking numbers cannot be duplicated",
+          orderCreateFailed: "Failed to create order, please try again later",
+          trackingPending: "Pending confirmation",
+          trackingConfirmed: "Confirmed",
+          step1Title: "Wait for Quote",
+          step1Hint: "After submitting, please wait for PanSan to complete the quote",
+          step2Title: "Copy 8-Character Code",
+          step2Hint: "After checking the quote, copy your 8-character inquiry code",
+          step3Title: "Send to PanSan",
+          step3Hint: "Send the code to <a href=\"https://www.facebook.com/share/1BMv7Zz6Fa/\" target=\"_blank\" rel=\"noreferrer\">Facebook Page</a>",
+          step4Title: "Confirm Final Details",
+          step4Hint: "Confirm freight, weight and final order details with PanSan",
           pending: "Pending",
           quoted: "Quoted",
           product: "Product URL",
@@ -624,7 +1196,7 @@
           shipping: "Shipping",
           weight: "Weight",
           freight: "Freight",
-          serviceFee: "Service Fee",
+          serviceFee: "Current Product Price",
           total: "Total",
           note: "Admin Note",
           submitTime: "Submitted At",
@@ -635,11 +1207,39 @@
           alertNoShipping: "Please select a shipping method",
           alertImageLimit: "You can upload up to 5 images",
           requestFailed: "Request failed, please try again later",
-          invalidCode: "Inquiry code not found"
+          invalidCode: "Inquiry code not found",
+          orderQueryBtn: "Track Order",
+          orderQueryModalTitle: "Track Order",
+          orderQueryCodeLabel: "Order Code",
+          orderQueryCodePlaceholder: "Enter 8-character order code",
+          orderQuerySearchBtn: "Search",
+          orderQueryResultCodeLabel: "Order Code",
+          orderQueryResultTrackingLabel: "Tracking Numbers",
+          orderQueryResultCreatedAtLabel: "Created At",
+          orderQueryNotFound: "Order not found, please verify and try again.",
+          orderQueryCreatedAt: "Created At",
+          orderQueryAddTrackingLabel: "Add Tracking Numbers",
+          orderQueryAddTrackingBtn: "+ Add Tracking",
+          orderQuerySaveTrackingBtn: "Save",
+          orderQuerySaveSuccess: "Tracking numbers saved",
+          orderQuerySaveFailed: "Failed to save, please try again later",
+          orderQueryDuplicateTracking: "Tracking number already exists",
+          orderQueryTrackingExists: "The following tracking numbers already exist in other orders:\n{list}\nContinue saving?",
+          orderQueryConfirmSave: "Confirm Save",
+          confirmRemoveTracking: "Confirm to remove this tracking number?",
+          removeTrackingFailed: "Failed to remove, please try again later",
+          addressBtn: "Shipping Address",
+          addressModalTitle: "Shipping Address",
+          copyAddressBtn: "Copy Address",
+          addressCopied: "Address copied to clipboard",
+          addressLoadFailed: "Failed to load address"
         }
       };
 
       const elements = {
+        hamburgerBtn: document.getElementById("hamburgerBtn"),
+        sidebarNav: document.getElementById("sidebarNav"),
+        sidebarOverlay: document.getElementById("sidebarOverlay"),
         langBtn: document.getElementById("langBtn"),
         toQueryLink: document.getElementById("toQueryLink"),
         formPage: document.getElementById("formPage"),
@@ -650,6 +1250,8 @@
         uploadTrigger: document.getElementById("uploadTrigger"),
         previewList: document.getElementById("previewList"),
         remark: document.getElementById("remark"),
+        paymentGcash: document.querySelector('input[name="payment"][value="gcash"]'),
+        paymentShopee: document.querySelector('input[name="payment"][value="shopee"]'),
         weightSlider: document.getElementById("weightSlider"),
         weightDisplay: document.getElementById("weightDisplay"),
         submitBtn: document.getElementById("submitBtn"),
@@ -661,7 +1263,39 @@
         queryCodeInput: document.getElementById("queryCodeInput"),
         searchBtn: document.getElementById("searchBtn"),
         queryResult: document.getElementById("queryResult"),
-        backToFormBtn: document.getElementById("backToFormBtn")
+        backToFormBtn: document.getElementById("backToFormBtn"),
+        selfOrderBtn: document.getElementById("selfOrderBtn"),
+        selfOrderModal: document.getElementById("selfOrderModal"),
+        selfOrderModalClose: document.getElementById("selfOrderModalClose"),
+        trackingList: document.getElementById("trackingList"),
+        addTrackingBtn: document.getElementById("addTrackingBtn"),
+        saveSelfOrderBtn: document.getElementById("saveSelfOrderBtn"),
+        selfOrderError: document.getElementById("selfOrderError"),
+        selfOrderResultModal: document.getElementById("selfOrderResultModal"),
+        selfOrderResultClose: document.getElementById("selfOrderResultClose"),
+        resultCodeDisplay: document.getElementById("resultCodeDisplay"),
+        resultTrackingList: document.getElementById("resultTrackingList"),
+        selfOrderResultOkBtn: document.getElementById("selfOrderResultOkBtn"),
+        orderQueryBtn: document.getElementById("orderQueryBtn"),
+        orderQueryModal: document.getElementById("orderQueryModal"),
+        orderQueryModalClose: document.getElementById("orderQueryModalClose"),
+        orderQueryCodeInput: document.getElementById("orderQueryCodeInput"),
+        orderQuerySearchBtn: document.getElementById("orderQuerySearchBtn"),
+        orderQueryError: document.getElementById("orderQueryError"),
+        orderQueryResult: document.getElementById("orderQueryResult"),
+        orderQueryResultCode: document.getElementById("orderQueryResultCode"),
+        orderQueryResultTrackingList: document.getElementById("orderQueryResultTrackingList"),
+        orderQueryResultCreatedAt: document.getElementById("orderQueryResultCreatedAt"),
+        orderQueryAddTrackingLabel: document.getElementById("orderQueryAddTrackingLabel"),
+        orderQueryAddTrackingList: document.getElementById("orderQueryAddTrackingList"),
+        orderQueryAddTrackingBtn: document.getElementById("orderQueryAddTrackingBtn"),
+        orderQuerySaveTrackingBtn: document.getElementById("orderQuerySaveTrackingBtn"),
+        orderQueryAddTrackingError: document.getElementById("orderQueryAddTrackingError"),
+        addressBtn: document.getElementById("addressBtn"),
+        addressModal: document.getElementById("addressModal"),
+        addressModalClose: document.getElementById("addressModalClose"),
+        addressContent: document.getElementById("addressContent"),
+        copyAddressBtn: document.getElementById("copyAddressBtn")
       };
 
       const pages = [elements.formPage, elements.successPage, elements.queryPage];
@@ -669,11 +1303,15 @@
         formTitle: document.getElementById("formTitle"),
         formSubtitle: document.getElementById("formSubtitle"),
         toQueryLink: document.getElementById("toQueryLink"),
+        orderBtn: document.getElementById("orderBtn"),
         productUrlLabel: document.getElementById("productUrlLabel"),
         imageLabel: document.getElementById("imageLabel"),
         imageHint: document.getElementById("imageHint"),
         uploadText: document.getElementById("uploadText"),
         remarkLabel: document.getElementById("remarkLabel"),
+        paymentLabel: document.getElementById("paymentLabel"),
+        gcashPayment: document.getElementById("gcashPayment"),
+        shopeePayment: document.getElementById("shopeePayment"),
         shippingLabel: document.getElementById("shippingLabel"),
         seaShipping: document.getElementById("seaShipping"),
         airShipping: document.getElementById("airShipping"),
@@ -687,10 +1325,42 @@
         queryTitle: document.getElementById("queryTitle"),
         backToFormBtn: document.getElementById("backToFormBtn"),
         searchBtn: document.getElementById("searchBtn"),
-        queryHint: document.getElementById("queryHint")
+        queryHint: document.getElementById("queryHint"),
+        orderModalTitle: document.getElementById("orderModalTitle"),
+        step1Title: document.getElementById("step1Title"),
+        step1Hint: document.getElementById("step1Hint"),
+        step2Title: document.getElementById("step2Title"),
+        step2Hint: document.getElementById("step2Hint"),
+        step3Title: document.getElementById("step3Title"),
+        step3Hint: document.getElementById("step3Hint"),
+        step4Title: document.getElementById("step4Title"),
+        step4Hint: document.getElementById("step4Hint"),
+        selfOrderBtn: document.getElementById("selfOrderBtn"),
+        selfOrderModalTitle: document.getElementById("selfOrderModalTitle"),
+        trackingLabel: document.getElementById("trackingLabel"),
+        addTrackingBtn: document.getElementById("addTrackingBtn"),
+        saveSelfOrderBtn: document.getElementById("saveSelfOrderBtn"),
+        selfOrderResultTitle: document.getElementById("selfOrderResultTitle"),
+        resultCodeLabel: document.getElementById("resultCodeLabel"),
+        resultCodeHint: document.getElementById("resultCodeHint"),
+        resultTrackingLabel: document.getElementById("resultTrackingLabel"),
+        selfOrderResultOkBtn: document.getElementById("selfOrderResultOkBtn"),
+        orderQueryBtn: document.getElementById("orderQueryBtn"),
+        orderQueryModalTitle: document.getElementById("orderQueryModalTitle"),
+        orderQueryCodeLabel: document.getElementById("orderQueryCodeLabel"),
+        orderQuerySearchBtn: document.getElementById("orderQuerySearchBtn"),
+        orderQueryResultCodeLabel: document.getElementById("orderQueryResultCodeLabel"),
+        orderQueryResultTrackingLabel: document.getElementById("orderQueryResultTrackingLabel"),
+        orderQueryResultCreatedAtLabel: document.getElementById("orderQueryResultCreatedAtLabel"),
+        orderQueryAddTrackingLabel: document.getElementById("orderQueryAddTrackingLabel"),
+        orderQueryAddTrackingBtn: document.getElementById("orderQueryAddTrackingBtn"),
+        orderQuerySaveTrackingBtn: document.getElementById("orderQuerySaveTrackingBtn"),
+        addressBtn: document.getElementById("addressBtn"),
+        addressModalTitle: document.getElementById("addressModalTitle"),
+        copyAddressBtn: document.getElementById("copyAddressBtn")
       };
 
-      let currentLang = "zh";
+      let currentLang = "en";
       let selectedFiles = [];
 
       function text(key) {
@@ -700,12 +1370,38 @@
       function formatCurrency(value) {
         return new Intl.NumberFormat(currentLang === "zh" ? "zh-CN" : "en-US", {
           style: "currency",
-          currency: "CNY"
+          currency: "PHP"
         }).format(Number(value || 0));
       }
 
       function formatDate(value) {
         return new Date(value).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function safeUrl(value) {
+        try {
+          const parsed = new URL(String(value), window.location.origin);
+          return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '#';
+        } catch {
+          return '#';
+        }
+      }
+
+      function safeImageUrl(value) {
+        const str = String(value ?? '');
+        if (str.startsWith('data:image/')) {
+          return str;
+        }
+        return safeUrl(str);
       }
 
       function showPage(page) {
@@ -715,18 +1411,24 @@
 
       function applyLanguage(lang) {
         currentLang = lang;
+        document.title = lang === "zh" ? "PanSan报价系统" : "PanSan Quote System";
         document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
         elements.langBtn.textContent = lang === "zh" ? "EN" : "中文";
 
         Object.keys(labels).forEach((key) => {
           if (labels[key]) {
-            labels[key].textContent = text(key);
+            if (labels[key].tagName === "A" || key.startsWith("step3Hint")) {
+              labels[key].innerHTML = text(key);
+            } else {
+              labels[key].textContent = text(key);
+            }
           }
         });
 
         elements.productUrl.placeholder = text("productUrlPlaceholder");
         elements.remark.placeholder = text("remarkPlaceholder");
         elements.queryCodeInput.placeholder = text("queryPlaceholder");
+        elements.orderQueryCodeInput.placeholder = text("orderQueryCodePlaceholder");
         renderQueryResult(elements.queryResult.dataset.payload ? JSON.parse(elements.queryResult.dataset.payload) : null);
       }
 
@@ -738,7 +1440,7 @@
       }
 
       function updateWeight() {
-        elements.weightDisplay.textContent = `${Number(elements.weightSlider.value).toFixed(1)} kg`;
+        elements.weightDisplay.textContent = `${Number(elements.weightSlider.value).toFixed(2)} kg`;
       }
 
       function fileToDataUrl(file) {
@@ -757,7 +1459,7 @@
           reader.onload = (event) => {
             const wrapper = document.createElement("div");
             wrapper.className = "preview-item";
-            wrapper.innerHTML = `<img alt="preview" src="${event.target.result}"><button type="button" data-index="${index}">×</button>`;
+            wrapper.innerHTML = `<img alt="preview" src="${safeImageUrl(event.target.result)}"><button type="button" data-index="${index}">×</button>`;
             elements.previewList.appendChild(wrapper);
           };
           reader.readAsDataURL(file);
@@ -779,8 +1481,10 @@
       async function requestJson(path, options = {}) {
         const response = await fetch(`${apiBaseUrl}${path}`, {
           ...options,
+          cache: "no-store",
           headers: {
             "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
             ...(options.headers || {})
           }
         });
@@ -810,41 +1514,47 @@
         elements.queryResult.dataset.payload = JSON.stringify(payload);
 
         const imagesHtml = payload.images && payload.images.length
-          ? `<div class="gallery">${payload.images.map((item) => `<a href="${item.url}" target="_blank" rel="noreferrer"><img src="${item.url}" alt="product image"></a>`).join("")}</div>`
+          ? `<div class="gallery">${payload.images.map((item) => `<a href="${safeUrl(item.url)}" target="_blank" rel="noreferrer"><img src="${safeImageUrl(item.url)}" alt="product image"></a>`).join("")}</div>`
           : `<p class="muted">${text("noImages")}</p>`;
 
         const isQuoted = payload.status === "quoted";
+        const freightDisplay = payload.freight2 ? payload.freight2 : (payload.final_freight ? Math.round(payload.final_freight * 1.15 * 100) / 100 : null);
         const priceHtml = isQuoted
           ? `
             <div class="price-box">
-              <div class="price-row"><span>${text("freight")}</span><strong>${formatCurrency(payload.final_freight)}</strong></div>
+              <div class="price-row"><span>${text("freight")}</span><strong>${formatCurrency(freightDisplay)}</strong></div>
               <div class="price-row"><span>${text("serviceFee")}</span><strong>${formatCurrency(payload.service_fee)}</strong></div>
               <div class="price-row total"><span>${text("total")}</span><strong>${formatCurrency(payload.total_price)}</strong></div>
-              ${payload.admin_note ? `<p><strong>${text("note")}</strong>${payload.admin_note}</p>` : ""}
+              ${payload.admin_note ? `<p><strong>${escapeHtml(text("note"))}</strong>${escapeHtml(payload.admin_note)}</p>` : ""}
             </div>
           `
           : `<p class="muted">${text("pendingMessage")}</p>`;
 
         const shippingText = payload.shipping === "air" ? text("airShipping") : text("seaShipping");
+        const paymentText = payload.payment_method === "shopee" ? text("shopeePayment") : text("gcashPayment");
         const statusText = payload.status === "quoted" ? text("quoted") : text("pending");
         const statusClass = payload.status === "quoted" ? "quoted" : "pending";
 
         elements.queryResult.innerHTML = `
           <div class="result">
             <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-              <h3>${payload.code}</h3>
-              <span class="status ${statusClass}">${statusText}</span>
+              <h3>${escapeHtml(payload.code)}</h3>
+              <span class="status ${statusClass}">${escapeHtml(statusText)}</span>
             </div>
-            <p><strong>${text("product")}</strong><a href="${payload.product_url}" target="_blank" rel="noreferrer">${payload.product_url}</a></p>
+            <p><strong>${text("product")}</strong><a href="${safeUrl(payload.product_url)}" target="_blank" rel="noreferrer">${escapeHtml(payload.product_url)}</a></p>
             <p><strong>${text("images")}</strong></p>
             ${imagesHtml}
-            <p><strong>${text("remark")}</strong>${payload.remark || "-"}</p>
-            <p><strong>${text("shipping")}</strong>${shippingText}</p>
-            <p><strong>${text("weight")}</strong>${payload.weight_estimate} kg</p>
+            <p><strong>${text("remark")}</strong>${escapeHtml(payload.remark || "-")}</p>
+            <p><strong>${text("shipping")}</strong>${escapeHtml(shippingText)}</p>
+            <p><strong>${text("paymentLabel")}</strong>${escapeHtml(paymentText)}</p>
+            <p><strong>${text("weight")}</strong>${escapeHtml(payload.weight_estimate)} kg</p>
             ${priceHtml}
             <p class="muted"><strong>${text("submitTime")}</strong>${formatDate(payload.created_at)}</p>
+            <div id="orderTrackingSection"></div>
           </div>
         `;
+
+        loadOrderStatus(payload.code);
       }
 
       async function submitInquiry() {
@@ -858,7 +1568,10 @@
         }
 
         try {
-          new URL(productUrl);
+          const parsedUrl = new URL(productUrl);
+          if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+            throw new Error('Invalid protocol');
+          }
         } catch (error) {
           elements.formError.textContent = text("alertBadUrl");
           return;
@@ -881,6 +1594,7 @@
               images,
               remark: elements.remark.value.trim(),
               shipping: shippingNode.value,
+              payment_method: document.querySelector('input[name="payment"]:checked').value,
               weight_estimate: Number(elements.weightSlider.value)
             })
           });
@@ -908,15 +1622,22 @@
           renderQueryResult(payload);
         } catch (error) {
           elements.queryResult.dataset.payload = "";
-          elements.queryResult.innerHTML = `<p class="error-text">${error.message || text("invalidCode")}</p>`;
+          const msg = error.message || "";
+          if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("invalid")) {
+            elements.queryResult.innerHTML = `<p class="error-text">${text("invalidCode")}</p>`;
+          } else {
+            elements.queryResult.innerHTML = `<p class="error-text">${text("requestFailed")}</p>`;
+          }
         }
       }
 
       elements.langBtn.addEventListener("click", () => {
+        closeSidebar();
         applyLanguage(currentLang === "zh" ? "en" : "zh");
       });
 
       elements.toQueryLink.addEventListener("click", () => {
+        closeSidebar();
         elements.queryCodeInput.value = "";
         renderQueryResult(null);
         showPage(elements.queryPage);
@@ -929,6 +1650,46 @@
         elements.queryCodeInput.value = code;
         showPage(elements.queryPage);
         performQuery(code);
+      });
+
+      elements.addressBtn.addEventListener("click", async () => {
+        closeSidebar();
+        elements.addressModal.classList.add("active");
+        elements.addressContent.textContent = text("addressLoadFailed");
+        try {
+          const data = await requestJson("/api/settings/address");
+          elements.addressContent.textContent = data.address || "";
+        } catch (err) {
+          elements.addressContent.textContent = text("addressLoadFailed");
+        }
+      });
+
+      elements.addressModalClose.addEventListener("click", () => {
+        elements.addressModal.classList.remove("active");
+      });
+
+      elements.addressModal.addEventListener("click", (e) => {
+        if (e.target === elements.addressModal) {
+          elements.addressModal.classList.remove("active");
+        }
+      });
+
+      elements.copyAddressBtn.addEventListener("click", () => {
+        const content = elements.addressContent.textContent;
+        if (content && content !== text("addressLoadFailed")) {
+          const ta = document.createElement("textarea");
+          ta.value = content;
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          elements.copyAddressBtn.textContent = text("addressCopied");
+          setTimeout(() => {
+            elements.copyAddressBtn.textContent = text("copyAddressBtn");
+          }, 2000);
+        }
       });
 
       elements.copyCodeBtn.addEventListener("click", async () => {
@@ -974,6 +1735,10 @@
         node.addEventListener("change", syncChoiceState);
       });
 
+      document.querySelectorAll('input[name="payment"]').forEach((node) => {
+        node.addEventListener("change", syncChoiceState);
+      });
+
       elements.weightSlider.addEventListener("input", updateWeight);
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
@@ -985,8 +1750,465 @@
 
       updateWeight();
       syncChoiceState();
-      applyLanguage("zh");
+      applyLanguage("en");
+
+      const orderModal = document.getElementById("orderModal");
+      const orderBtn = document.getElementById("orderBtn");
+      const modalClose = document.getElementById("modalClose");
+
+      orderBtn.addEventListener("click", () => {
+        closeSidebar();
+        orderModal.classList.add("active");
+      });
+
+      modalClose.addEventListener("click", () => {
+        orderModal.classList.remove("active");
+      });
+
+      orderModal.addEventListener("click", (e) => {
+        if (e.target === orderModal) {
+          orderModal.classList.remove("active");
+        }
+      });
+
+      // Self Order Modal
+      const selfOrderModal = elements.selfOrderModal;
+      const selfOrderModalClose = elements.selfOrderModalClose;
+      const trackingList = elements.trackingList;
+      const addTrackingBtn = elements.addTrackingBtn;
+      const saveSelfOrderBtn = elements.saveSelfOrderBtn;
+      const selfOrderError = elements.selfOrderError;
+      const selfOrderResultModal = elements.selfOrderResultModal;
+      const selfOrderResultClose = elements.selfOrderResultClose;
+      const resultCodeDisplay = elements.resultCodeDisplay;
+      const resultTrackingList = elements.resultTrackingList;
+      const selfOrderResultOkBtn = elements.selfOrderResultOkBtn;
+      let trackingNumbers = [];
+
+      function generateOrderCode() {
+        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let code = "";
+        for (let i = 0; i < 8; i++) {
+          code += alphabet[Math.floor(Math.random() * alphabet.length)];
+        }
+        return code;
+      }
+
+      function renderTrackingList() {
+        if (!trackingNumbers.length) {
+          trackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+          return;
+        }
+        trackingList.innerHTML = trackingNumbers.map((num, idx) => `
+          <div class="tracking-item">
+            <input type="text" value="${escapeHtml(num)}" data-idx="${idx}" placeholder="输入物流单号">
+            <button type="button" class="tracking-remove" data-idx="${idx}">&times;</button>
+          </div>
+        `).join("");
+      }
+
+      function renderResultTrackingList(confirmedTrackings, allTrackings) {
+        if (!allTrackings || !allTrackings.length) {
+          resultTrackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+          return;
+        }
+        resultTrackingList.innerHTML = allTrackings.map(t => {
+          const isConfirmed = confirmedTrackings.includes(t);
+          return `<div class="tracking-item">
+            <span class="tracking-check ${isConfirmed ? 'checked' : ''}" style="font-size:1.1rem;">
+              ${isConfirmed ? '✓' : '○'}
+            </span>
+            <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
+          </div>`;
+        }).join("");
+      }
+
+      function addTrackingNumber() {
+        trackingNumbers.push("");
+        renderTrackingList();
+        const inputs = trackingList.querySelectorAll("input");
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }
+
+      function removeTrackingNumber(idx) {
+        trackingNumbers.splice(idx, 1);
+        renderTrackingList();
+      }
+
+      function updateTrackingNumber(idx, value) {
+        trackingNumbers[idx] = value;
+      }
+
+      trackingList.addEventListener("input", (e) => {
+        if (e.target.tagName === "INPUT") {
+          const idx = Number(e.target.dataset.idx);
+          updateTrackingNumber(idx, e.target.value.trim());
+        }
+      });
+
+      trackingList.addEventListener("click", (e) => {
+        const btn = e.target.closest(".tracking-remove");
+        if (btn) {
+          removeTrackingNumber(Number(btn.dataset.idx));
+        }
+      });
+
+      addTrackingBtn.addEventListener("click", addTrackingNumber);
+
+      saveSelfOrderBtn.addEventListener("click", async () => {
+        selfOrderError.textContent = "";
+        const validTrackings = trackingNumbers.filter(t => t.trim());
+        if (!validTrackings.length) {
+          selfOrderError.textContent = text("alertNoTracking");
+          return;
+        }
+        const uniqueTrackings = [...new Set(validTrackings)];
+        if (uniqueTrackings.length !== validTrackings.length) {
+          selfOrderError.textContent = text("alertDuplicateTracking");
+          return;
+        }
+        const code = generateOrderCode();
+        saveSelfOrderBtn.disabled = true;
+        saveSelfOrderBtn.textContent = "创建中...";
+        try {
+          const result = await requestJson("/api/orders", {
+            method: "POST",
+            body: JSON.stringify({
+              code: code,
+              tracking_numbers: validTrackings
+            })
+          });
+          selfOrderModal.classList.remove("active");
+          resultCodeDisplay.textContent = code;
+          renderResultTrackingList(result.confirmed_trackings || [], validTrackings);
+          selfOrderResultModal.classList.add("active");
+        } catch (err) {
+          selfOrderError.textContent = text("orderCreateFailed");
+        } finally {
+          saveSelfOrderBtn.disabled = false;
+          saveSelfOrderBtn.textContent = text("saveSelfOrderBtn");
+        }
+      });
+
+      async function loadOrderStatus(code) {
+        try {
+          const data = await requestJson(`/api/orders?code=${encodeURIComponent(code)}`);
+          if (data.code) {
+            const section = document.getElementById("orderTrackingSection");
+            if (section && data.tracking_numbers.length) {
+              section.innerHTML = `
+                <div style="margin-top:6px;">
+                  ${data.tracking_numbers.map(t => {
+                    const isConfirmed = data.confirmed_trackings.includes(t);
+                    return `<span class="tracking-tag">
+                      <span class="tracking-check ${isConfirmed ? 'checked' : ''}">
+                        ${isConfirmed ? '✓' : '○'}
+                      </span>
+                      ${escapeHtml(t)}
+                    </span>`;
+                  }).join("")}
+                </div>
+              `;
+            }
+          }
+        } catch (err) {
+        }
+      }
+
+      elements.hamburgerBtn.addEventListener("click", () => {
+        const isOpen = elements.hamburgerBtn.classList.contains("open");
+        if (isOpen) {
+          closeSidebar();
+        } else {
+          elements.hamburgerBtn.classList.add("open");
+          elements.sidebarNav.classList.add("open");
+          elements.sidebarOverlay.classList.add("active");
+        }
+      });
+
+      elements.sidebarOverlay.addEventListener("click", closeSidebar);
+
+      elements.selfOrderBtn.addEventListener("click", () => {
+        closeSidebar();
+        trackingNumbers = [];
+        selfOrderError.textContent = "";
+        renderTrackingList();
+        selfOrderModal.classList.add("active");
+      });
+
+      selfOrderModalClose.addEventListener("click", () => {
+        selfOrderModal.classList.remove("active");
+      });
+
+      selfOrderModal.addEventListener("click", (e) => {
+        if (e.target === selfOrderModal) {
+          selfOrderModal.classList.remove("active");
+        }
+      });
+
+      selfOrderResultClose.addEventListener("click", () => {
+        selfOrderResultModal.classList.remove("active");
+      });
+
+      selfOrderResultModal.addEventListener("click", (e) => {
+        if (e.target === selfOrderResultModal) {
+          selfOrderResultModal.classList.remove("active");
+        }
+      });
+
+      selfOrderResultOkBtn.addEventListener("click", () => {
+        selfOrderResultModal.classList.remove("active");
+      });
+
+      elements.orderQueryBtn.addEventListener("click", () => {
+        closeSidebar();
+        elements.orderQueryModal.classList.add("active");
+        elements.orderQueryCodeInput.value = "";
+        elements.orderQueryError.textContent = "";
+        elements.orderQueryResult.style.display = "none";
+      });
+
+      elements.orderQueryModalClose.addEventListener("click", () => {
+        elements.orderQueryModal.classList.remove("active");
+      });
+
+      elements.orderQueryModal.addEventListener("click", (e) => {
+        if (e.target === elements.orderQueryModal) {
+          elements.orderQueryModal.classList.remove("active");
+        }
+      });
+
+      elements.orderQuerySearchBtn.addEventListener("click", async () => {
+        const code = elements.orderQueryCodeInput.value.trim();
+        elements.orderQueryError.textContent = "";
+        elements.orderQueryResult.style.display = "none";
+
+        if (!code) {
+          elements.orderQueryError.textContent = text("orderQueryNotFound");
+          return;
+        }
+
+        elements.orderQuerySearchBtn.disabled = true;
+        elements.orderQuerySearchBtn.textContent = "查询中...";
+
+        try {
+          const data = await requestJson(`/api/orders?code=${encodeURIComponent(code)}`);
+          if (!data.code) {
+            elements.orderQueryError.textContent = text("orderQueryNotFound");
+            return;
+          }
+
+          elements.orderQueryResultCode.textContent = data.code;
+          currentOrderCode = data.code;
+          addTrackingNumbers = [];
+          renderAddTrackingList();
+          elements.orderQueryResultCreatedAt.textContent = new Date(data.created_at).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+
+          if (data.tracking_numbers && data.tracking_numbers.length) {
+            elements.orderQueryResultTrackingList.innerHTML = data.tracking_numbers.map(t => {
+              const isConfirmed = data.confirmed_trackings && data.confirmed_trackings.includes(t);
+              return `<div class="tracking-item">
+                <span class="tracking-check ${isConfirmed ? 'checked' : ''}" style="font-size:1.1rem;">
+                  ${isConfirmed ? '✓' : '○'}
+                </span>
+                <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
+                <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}">&times;</button>
+              </div>`;
+            }).join("");
+          } else {
+            elements.orderQueryResultTrackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+          }
+
+          elements.orderQueryResult.style.display = "block";
+        } catch (err) {
+          elements.orderQueryError.textContent = text("orderQueryNotFound");
+        } finally {
+          elements.orderQuerySearchBtn.disabled = false;
+          elements.orderQuerySearchBtn.textContent = text("orderQuerySearchBtn");
+        }
+      });
+
+      elements.orderQueryCodeInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          elements.orderQuerySearchBtn.click();
+        }
+      });
+
+      let currentOrderCode = "";
+      let addTrackingNumbers = [];
+
+      function renderAddTrackingList() {
+        if (!addTrackingNumbers.length) {
+          elements.orderQueryAddTrackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+          return;
+        }
+        elements.orderQueryAddTrackingList.innerHTML = addTrackingNumbers.map((num, idx) => `
+          <div class="tracking-item">
+            <input type="text" value="${escapeHtml(num)}" data-idx="${idx}" placeholder="输入物流单号">
+            <button type="button" class="tracking-remove" data-idx="${idx}">&times;</button>
+          </div>
+        `).join("");
+      }
+
+      elements.orderQueryAddTrackingBtn.addEventListener("click", () => {
+        addTrackingNumbers.push("");
+        renderAddTrackingList();
+        const inputs = elements.orderQueryAddTrackingList.querySelectorAll("input");
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      });
+
+      elements.orderQueryAddTrackingList.addEventListener("input", (e) => {
+        if (e.target.tagName === "INPUT") {
+          const idx = Number(e.target.dataset.idx);
+          addTrackingNumbers[idx] = e.target.value.trim();
+        }
+      });
+
+      elements.orderQueryAddTrackingList.addEventListener("click", (e) => {
+        const btn = e.target.closest(".tracking-remove");
+        if (btn) {
+          addTrackingNumbers.splice(Number(btn.dataset.idx), 1);
+          renderAddTrackingList();
+        }
+      });
+
+      elements.orderQueryResultTrackingList.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".tracking-remove");
+        if (btn) {
+          const trackingNumber = btn.dataset.tracking;
+          if (!confirm(`${text("confirmRemoveTracking")}\n${escapeHtml(trackingNumber)}`)) {
+            return;
+          }
+
+          try {
+            const data = await requestJson("/api/orders/tracking", {
+              method: "DELETE",
+              body: JSON.stringify({
+                code: currentOrderCode,
+                tracking_number: trackingNumber
+              })
+            });
+
+            elements.orderQueryResultCode.textContent = data.code;
+            elements.orderQueryResultCreatedAt.textContent = new Date(data.created_at).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+
+            if (data.tracking_numbers && data.tracking_numbers.length) {
+              elements.orderQueryResultTrackingList.innerHTML = data.tracking_numbers.map(t => {
+                const isConfirmed = data.confirmed_trackings && data.confirmed_trackings.includes(t);
+                return `<div class="tracking-item">
+                  <span class="tracking-check ${isConfirmed ? 'checked' : ''}" style="font-size:1.1rem;">
+                    ${isConfirmed ? '✓' : '○'}
+                  </span>
+                  <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
+                  <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}">&times;</button>
+                </div>`;
+              }).join("");
+            } else {
+              elements.orderQueryResultTrackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+            }
+          } catch (err) {
+            alert(text("removeTrackingFailed"));
+          }
+        }
+      });
+
+      elements.orderQuerySaveTrackingBtn.addEventListener("click", async () => {
+        elements.orderQueryAddTrackingError.textContent = "";
+        const validTrackings = addTrackingNumbers.filter(t => t.trim());
+        if (!validTrackings.length) {
+          elements.orderQueryAddTrackingError.textContent = text("alertNoTracking");
+          return;
+        }
+
+        const uniqueTrackings = [...new Set(validTrackings)];
+        if (uniqueTrackings.length !== validTrackings.length) {
+          elements.orderQueryAddTrackingError.textContent = text("alertDuplicateTracking");
+          return;
+        }
+
+        let existingTrackings = [];
+        try {
+          const result = await requestJson("/api/orders/check-tracking", {
+            method: "POST",
+            body: JSON.stringify({
+              code: currentOrderCode,
+              tracking_numbers: validTrackings
+            })
+          });
+          existingTrackings = result.conflicts || [];
+        } catch (e) {
+          // If check fails, proceed without check
+        }
+
+        if (existingTrackings.length > 0) {
+          const msg = text("orderQueryTrackingExists").replace("{list}", existingTrackings.join(", "));
+          if (!confirm(msg)) {
+            return;
+          }
+        }
+
+        elements.orderQuerySaveTrackingBtn.disabled = true;
+        elements.orderQuerySaveTrackingBtn.textContent = "保存中...";
+
+        try {
+          await requestJson("/api/orders", {
+            method: "PUT",
+            body: JSON.stringify({
+              code: currentOrderCode,
+              tracking_numbers: validTrackings
+            })
+          });
+
+          elements.orderQueryAddTrackingError.textContent = text("orderQuerySaveSuccess");
+          addTrackingNumbers = [];
+          renderAddTrackingList();
+
+          const data = await requestJson(`/api/orders?code=${encodeURIComponent(currentOrderCode)}`);
+          elements.orderQueryResultCode.textContent = data.code;
+          elements.orderQueryResultCreatedAt.textContent = new Date(data.created_at).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+
+          if (data.tracking_numbers && data.tracking_numbers.length) {
+            elements.orderQueryResultTrackingList.innerHTML = data.tracking_numbers.map(t => {
+              const isConfirmed = data.confirmed_trackings && data.confirmed_trackings.includes(t);
+              return `<div class="tracking-item">
+                <span class="tracking-check ${isConfirmed ? 'checked' : ''}" style="font-size:1.1rem;">
+                  ${isConfirmed ? '✓' : '○'}
+                </span>
+                <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
+              </div>`;
+            }).join("");
+          } else {
+            elements.orderQueryResultTrackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+          }
+        } catch (err) {
+          const msg = err.message || "";
+          if (msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("already exists")) {
+            elements.orderQueryAddTrackingError.textContent = text("orderQueryDuplicateTracking");
+          } else {
+            elements.orderQueryAddTrackingError.textContent = text("orderQuerySaveFailed");
+          }
+        } finally {
+          elements.orderQuerySaveTrackingBtn.disabled = false;
+          elements.orderQuerySaveTrackingBtn.textContent = text("orderQuerySaveTrackingBtn");
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const sidebarNav = document.getElementById("sidebarNav");
+          if (sidebarNav && sidebarNav.classList.contains("open")) {
+            closeSidebar();
+          } else if (selfOrderResultModal.classList.contains("active")) {
+            selfOrderResultModal.classList.remove("active");
+          } else if (selfOrderModal.classList.contains("active")) {
+            selfOrderModal.classList.remove("active");
+          } else if (elements.orderQueryModal.classList.contains("active")) {
+            elements.orderQueryModal.classList.remove("active");
+          }
+        }
+      });
     })();
   </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"956d1b8221d34e09823b68cef9b3b4af","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

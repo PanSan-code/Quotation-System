@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PanSan订单管理</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #66758f;
+      --line: #d9e2ef;
+      --accent: #ff6a3d;
+      --accent-soft: #fff1eb;
+      --success: #15803d;
+      --success-soft: #dcfce7;
+      --danger: #b91c1c;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 14px 60px;
+    }
+
+    .shell { max-width: 800px; margin: 0 auto; }
+
+    .hamburger-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1002;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(19, 31, 54, 0.06);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      padding: 0;
+    }
+
+    .hamburger-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(19, 31, 54, 0.12);
+    }
+
+    .hamburger-line {
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .sidebar-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: #fff;
+      box-shadow: 4px 0 24px rgba(19, 31, 54, 0.12);
+      z-index: 1001;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 80px 20px 20px 20px;
+      gap: 12px;
+    }
+
+    .sidebar-nav.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-nav .link-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #f8f9fa;
+      border: none;
+      box-shadow: none;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .sidebar-nav .link-btn:hover {
+      background: #eef1f5;
+      transform: none;
+      box-shadow: none;
+      opacity: 1;
+    }
+
+    .sidebar-nav .lang-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      margin-top: auto;
+      border-radius: 12px;
+      font-size: 1rem;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .lang-btn, .link-btn, .ghost-btn, .primary-btn {
+      border: 0; cursor: pointer; font: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+    }
+
+    .lang-btn, .ghost-btn {
+      background: #fff; color: var(--text);
+      border-radius: 999px; padding: 10px 14px;
+      box-shadow: 0 6px 18px rgba(19, 31, 54, 0.06);
+    }
+
+    .lang-btn:hover, .ghost-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(19, 31, 54, 0.12);
+    }
+
+    .link-btn {
+      background: transparent; color: var(--accent);
+      padding: 0; font-weight: normal;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 1.2rem;
+      color: var(--accent);
+      font-weight: normal;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: normal;
+      color: var(--text);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 106, 61, 0.15);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .row > * { flex: 1; min-width: 140px; }
+
+    .primary-btn, .ghost-btn.fill {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: normal;
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(255, 106, 61, 0.22);
+    }
+
+    .primary-btn:disabled { opacity: 0.65; cursor: wait; }
+
+    .error {
+      color: var(--danger);
+      font-size: 0.88rem;
+      margin-top: 8px;
+    }
+
+    .muted { color: var(--muted); font-size: 0.85rem; }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--muted);
+    }
+
+    .list {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      max-height: 72vh;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .list-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      background: #fbfcff;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      text-align: left;
+    }
+
+    .list-item:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(255, 106, 61, 0.1);
+    }
+
+    .list-item strong {
+      font-size: 0.92rem;
+      color: var(--accent);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: normal;
+    }
+
+    .badge-pending { background: var(--warning-soft); color: var(--warning); }
+    .badge-quoted { background: var(--success-soft); color: var(--success); }
+
+    .tracking-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: #f0f4ff;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      margin: 2px 4px 2px 0;
+      color: var(--text);
+    }
+
+    .tracking-check {
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      color: #ccc;
+      transition: color 0.2s;
+    }
+
+    .tracking-check.checked {
+      color: var(--success);
+    }
+
+    .tracking-check:hover {
+      color: var(--primary);
+    }
+
+    .order-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .list-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .confirm-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .confirm-btn:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .confirm-btn.confirmed {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .confirm-btn.confirmed:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: #fef2f2;
+    }
+
+    .whitelist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fbfcff;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .whitelist-item:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .whitelist-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .whitelist-number {
+      font-weight: normal;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .whitelist-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .whitelist-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .whitelist-delete {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+
+    .whitelist-delete:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: #fef2f2;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .search-box input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box .primary-btn,
+    .search-box .ghost-btn.fill {
+      width: auto !important;
+      min-width: 70px;
+      padding: 12px 18px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 900px) {
+      .row > * { min-width: 0; }
+      .card { padding: 18px 14px; }
+      .list-item { padding: 8px 10px; }
+      .list-item strong { font-size: 0.88rem; }
+      .badge { padding: 4px 8px; font-size: 0.78rem; }
+      .muted { font-size: 0.78rem !important; }
+      .primary-btn, .ghost-btn.fill { padding: 12px 14px; font-size: 0.95rem; }
+      input, select, textarea { padding: 11px 12px; font-size: 16px; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .topbar h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <button type="button" class="hamburger-btn" id="hamburgerBtn">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <nav class="sidebar-nav" id="sidebarNav">
+    <button type="button" class="lang-btn" id="langBtn">中文</button>
+    <a class="link-btn" href="./admin.html">报价管理</a>
+    <a class="link-btn" href="./admin.html#address">管理地址</a>
+    <a class="link-btn" href="./index.html">返回用户前台</a>
+  </nav>
+
+  <div class="shell">
+    <div class="card">
+      <h2>管理员认证</h2>
+      <p class="subtitle">先保存管理员 Token，再读取订单记录。</p>
+
+      <div class="field">
+        <label for="tokenInput">ADMIN_TOKEN</label>
+        <div class="row">
+          <input type="password" id="tokenInput" placeholder="输入管理员 Token">
+          <button type="button" class="ghost-btn fill" id="saveTokenBtn">保存 Token</button>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="输入物流单号搜索订单">
+        <button type="button" class="primary-btn" id="searchBtn">搜索</button>
+        <button type="button" class="ghost-btn fill" id="refreshBtn">刷新</button>
+      </div>
+
+      <div class="error" id="listError"></div>
+      <div class="list" id="orderList"></div>
+    </div>
+
+    <div class="card">
+      <h2>物流单号白名单</h2>
+      <p class="subtitle">添加已知的物流单号，用户提交匹配的订单将自动确认。</p>
+
+      <div class="field">
+        <label for="whitelistInput">物流单号</label>
+        <div class="row">
+          <input type="text" id="whitelistInput" placeholder="输入物流单号">
+          <input type="text" id="whitelistNote" placeholder="备注（可选）">
+          <button type="button" class="ghost-btn fill" id="addWhitelistBtn">添加</button>
+        </div>
+      </div>
+
+      <div class="error" id="whitelistError"></div>
+      <div class="list" id="whitelistList"></div>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script>
+    (() => {
+      const apiBaseUrl = String(window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl || "").replace(/\/$/, "");
+
+      function closeSidebar() {
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const sidebarNav = document.getElementById("sidebarNav");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        if (hamburgerBtn) hamburgerBtn.classList.remove("open");
+        if (sidebarNav) sidebarNav.classList.remove("open");
+        if (sidebarOverlay) sidebarOverlay.classList.remove("active");
+      }
+
+      document.getElementById("hamburgerBtn").addEventListener("click", () => {
+        const btn = document.getElementById("hamburgerBtn");
+        const sidebarNav = document.getElementById("sidebarNav");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        const isOpen = btn.classList.contains("open");
+        if (isOpen) {
+          closeSidebar();
+        } else {
+          btn.classList.add("open");
+          sidebarNav.classList.add("open");
+          sidebarOverlay.classList.add("active");
+        }
+      });
+
+      document.getElementById("sidebarOverlay").addEventListener("click", closeSidebar);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const sidebarNav = document.getElementById("sidebarNav");
+          if (sidebarNav && sidebarNav.classList.contains("open")) {
+            closeSidebar();
+          }
+        }
+      });
+
+      const i18n = {
+        zh: {
+          tokenLabel: "ADMIN_TOKEN",
+          tokenPlaceholder: "输入管理员 Token",
+          saveTokenBtn: "保存 Token",
+          searchPlaceholder: "输入物流单号搜索订单",
+          searchBtn: "搜索",
+          refreshBtn: "刷新",
+          listError: "请先输入并保存管理员 Token。",
+          emptyList: "当前没有订单记录。",
+          loading: "正在加载订单列表...",
+          orderCode: "八字单号",
+          trackingNumbers: "物流单号",
+          createdAt: "创建时间",
+          noTracking: "无物流单号",
+          requestFailed: "请求失败，请稍后重试",
+          confirmBtn: "确认",
+          confirmed: "已确认",
+          unconfirmBtn: "取消确认",
+          whitelistTitle: "物流单号白名单",
+          whitelistSubtitle: "添加已知的物流单号，用户提交匹配的订单将自动确认。",
+          whitelistLabel: "物流单号",
+          whitelistPlaceholder: "输入物流单号",
+          whitelistNotePlaceholder: "备注（可选）",
+          whitelistAddBtn: "添加",
+          whitelistEmpty: "当前没有白名单记录。",
+          whitelistLoading: "正在加载白名单...",
+          whitelistNote: "备注",
+          whitelistAddedAt: "添加时间",
+          whitelistDeleteBtn: "删除",
+          whitelistAddSuccess: "添加成功",
+          whitelistAddFailed: "添加失败",
+          whitelistDeleteFailed: "删除失败"
+        },
+        en: {
+          tokenLabel: "ADMIN_TOKEN",
+          tokenPlaceholder: "Enter admin token",
+          saveTokenBtn: "Save Token",
+          searchPlaceholder: "Search by tracking number",
+          searchBtn: "Search",
+          refreshBtn: "Refresh",
+          listError: "Please enter and save admin token first.",
+          emptyList: "No orders found.",
+          loading: "Loading orders...",
+          orderCode: "Order Code",
+          trackingNumbers: "Tracking Numbers",
+          createdAt: "Created At",
+          noTracking: "No tracking numbers",
+          requestFailed: "Request failed, please try again later",
+          confirmBtn: "Confirm",
+          confirmed: "Confirmed",
+          unconfirmBtn: "Unconfirm",
+          whitelistTitle: "Tracking Number Whitelist",
+          whitelistSubtitle: "Add known tracking numbers. Orders with matching numbers will be auto-confirmed.",
+          whitelistLabel: "Tracking Number",
+          whitelistPlaceholder: "Enter tracking number",
+          whitelistNotePlaceholder: "Note (optional)",
+          whitelistAddBtn: "Add",
+          whitelistEmpty: "No whitelist records.",
+          whitelistLoading: "Loading whitelist...",
+          whitelistNote: "Note",
+          whitelistAddedAt: "Added At",
+          whitelistDeleteBtn: "Delete",
+          whitelistAddSuccess: "Added successfully",
+          whitelistAddFailed: "Failed to add",
+          whitelistDeleteFailed: "Failed to delete"
+        }
+      };
+
+      const elements = {
+        langBtn: document.getElementById("langBtn"),
+        tokenInput: document.getElementById("tokenInput"),
+        saveTokenBtn: document.getElementById("saveTokenBtn"),
+        searchInput: document.getElementById("searchInput"),
+        searchBtn: document.getElementById("searchBtn"),
+        refreshBtn: document.getElementById("refreshBtn"),
+        listError: document.getElementById("listError"),
+        orderList: document.getElementById("orderList"),
+        whitelistInput: document.getElementById("whitelistInput"),
+        whitelistNote: document.getElementById("whitelistNote"),
+        addWhitelistBtn: document.getElementById("addWhitelistBtn"),
+        whitelistError: document.getElementById("whitelistError"),
+        whitelistList: document.getElementById("whitelistList")
+      };
+
+      let currentLang = "en";
+
+      function text(key) {
+        return i18n[currentLang][key];
+      }
+
+      function getToken() {
+        return elements.tokenInput.value.trim();
+      }
+
+      function formatDate(value) {
+        return new Date(value).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function applyLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        elements.langBtn.textContent = lang === "zh" ? "EN" : "中文";
+        loadList();
+        if (getToken()) loadWhitelist();
+      }
+
+      async function requestJson(path, options = {}) {
+        const url = `${apiBaseUrl}${path}`;
+        const headers = { "Content-Type": "application/json" };
+        const token = getToken();
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        let response;
+        try {
+          response = await fetch(url, {
+            ...options,
+            headers: { ...headers, ...(options.headers || {}) }
+          });
+        } catch (err) {
+          throw new Error(text("requestFailed"));
+        }
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.error || text("requestFailed"));
+        }
+
+        return data;
+      }
+
+      async function loadList(keyword) {
+        if (!getToken()) {
+          elements.listError.textContent = text("listError");
+          elements.orderList.innerHTML = "";
+          return;
+        }
+
+        elements.listError.textContent = "";
+        elements.orderList.innerHTML = `<div class="empty-state muted">${text("loading")}</div>`;
+
+        try {
+          let payload;
+          if (keyword) {
+            payload = await requestJson(`/api/admin/orders/search?keyword=${encodeURIComponent(keyword)}`);
+          } else {
+            payload = await requestJson("/api/admin/orders");
+          }
+
+          if (!payload.orders.length) {
+            elements.orderList.innerHTML = `<div class="empty-state muted">${text("emptyList")}</div>`;
+            return;
+          }
+
+          elements.orderList.innerHTML = payload.orders.map(order => `
+            <div class="list-item" data-code="${escapeHtml(order.code)}">
+              <div class="list-item-header">
+                <strong>${escapeHtml(order.code)}</strong>
+              </div>
+              <div class="order-meta">${text("createdAt")}: ${formatDate(order.created_at)}</div>
+              <div style="margin-top:6px;">
+                ${order.tracking_numbers.length
+                  ? order.tracking_numbers.map(t => {
+                      const isConfirmed = order.confirmed_trackings.includes(t);
+                      return `<span class="tracking-tag">
+                        <span class="tracking-check ${isConfirmed ? 'checked' : ''}" data-code="${escapeHtml(order.code)}" data-tracking="${escapeHtml(t)}">
+                          ${isConfirmed ? '✓' : '○'}
+                        </span>
+                        ${escapeHtml(t)}
+                      </span>`;
+                    }).join("")
+                  : `<span class="muted">${text("noTracking")}</span>`
+                }
+              </div>
+            </div>
+          `).join("");
+
+          document.querySelectorAll(".tracking-check").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+              e.stopPropagation();
+              const code = btn.dataset.code;
+              const tracking = btn.dataset.tracking;
+              btn.style.pointerEvents = "none";
+              try {
+                await requestJson(`/api/admin/orders/${encodeURIComponent(code)}/confirm`, {
+                  method: "PUT",
+                  body: JSON.stringify({ tracking_number: tracking })
+                });
+                btn.classList.toggle("checked");
+                btn.textContent = btn.classList.contains("checked") ? '✓' : '○';
+              } catch (err) {
+                elements.listError.textContent = err.message;
+              } finally {
+                btn.style.pointerEvents = "";
+              }
+            });
+          });
+        } catch (err) {
+          elements.orderList.innerHTML = "";
+          elements.listError.textContent = err.message;
+        }
+      }
+
+      elements.langBtn.addEventListener("click", () => {
+        closeSidebar();
+        applyLanguage(currentLang === "zh" ? "en" : "zh");
+      });
+
+      elements.saveTokenBtn.addEventListener("click", () => {
+        localStorage.setItem("quote_admin_token", getToken());
+        loadList();
+        if (getToken()) loadWhitelist();
+      });
+
+      elements.refreshBtn.addEventListener("click", () => {
+        elements.searchInput.value = "";
+        loadList();
+      });
+
+      elements.searchBtn.addEventListener("click", () => {
+        loadList(elements.searchInput.value.trim());
+      });
+
+      elements.searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          loadList(elements.searchInput.value.trim());
+        }
+      });
+
+      async function loadWhitelist() {
+        if (!getToken()) {
+          elements.whitelistError.textContent = "";
+          elements.whitelistList.innerHTML = `<div class="empty-state muted">${text("whitelistEmpty")}</div>`;
+          return;
+        }
+
+        elements.whitelistError.textContent = "";
+        elements.whitelistList.innerHTML = `<div class="empty-state muted">${text("whitelistLoading")}</div>`;
+
+        try {
+          const payload = await requestJson("/api/admin/tracking-whitelist");
+
+          if (!payload.items.length) {
+            elements.whitelistList.innerHTML = `<div class="empty-state muted">${text("whitelistEmpty")}</div>`;
+            return;
+          }
+
+          elements.whitelistList.innerHTML = payload.items.map(item => `
+            <div class="whitelist-item" data-id="${item.id}">
+              <div class="whitelist-info">
+                <div class="whitelist-number">${escapeHtml(item.tracking_number)}</div>
+                ${item.note ? `<div class="whitelist-note">${escapeHtml(item.note)}</div>` : ""}
+                <div class="whitelist-date">${text("whitelistAddedAt")}: ${formatDate(item.created_at)}</div>
+              </div>
+              <button type="button" class="whitelist-delete" data-id="${item.id}">${text("whitelistDeleteBtn")}</button>
+            </div>
+          `).join("");
+
+          elements.whitelistList.querySelectorAll(".whitelist-delete").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const id = btn.dataset.id;
+              btn.disabled = true;
+              try {
+                await requestJson(`/api/admin/tracking-whitelist/${id}`, { method: "DELETE" });
+                loadWhitelist();
+              } catch (err) {
+                elements.whitelistError.textContent = text("whitelistDeleteFailed");
+              } finally {
+                btn.disabled = false;
+              }
+            });
+          });
+        } catch (err) {
+          elements.whitelistList.innerHTML = `<div class="empty-state muted">${text("whitelistEmpty")}</div>`;
+          elements.whitelistError.textContent = "";
+        }
+      }
+
+      elements.addWhitelistBtn.addEventListener("click", async () => {
+        const trackingNumber = elements.whitelistInput.value.trim();
+        if (!trackingNumber) {
+          elements.whitelistError.textContent = text("whitelistPlaceholder");
+          return;
+        }
+
+        elements.whitelistError.textContent = "";
+        elements.addWhitelistBtn.disabled = true;
+        elements.addWhitelistBtn.textContent = "...";
+
+        try {
+          await requestJson("/api/admin/tracking-whitelist", {
+            method: "POST",
+            body: JSON.stringify({
+              tracking_number: trackingNumber,
+              note: elements.whitelistNote.value.trim()
+            })
+          });
+
+          elements.whitelistInput.value = "";
+          elements.whitelistNote.value = "";
+          loadWhitelist();
+        } catch (err) {
+          elements.whitelistError.textContent = err.message;
+        } finally {
+          elements.addWhitelistBtn.disabled = false;
+          elements.addWhitelistBtn.textContent = text("whitelistAddBtn");
+        }
+      });
+
+      elements.tokenInput.value = localStorage.getItem("quote_admin_token") || "";
+      applyLanguage("en");
+    })();
+  </script>
+</body>
+</html>

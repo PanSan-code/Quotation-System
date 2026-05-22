@@ -21,13 +21,11 @@
       --radius: 18px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
       color: var(--text);
       min-height: 100vh;
@@ -39,6 +37,105 @@
     .shell {
       max-width: 1180px;
       margin: 0 auto;
+    }
+
+    .hamburger-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1002;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(19, 31, 54, 0.06);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      padding: 0;
+    }
+
+    .hamburger-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(19, 31, 54, 0.12);
+    }
+
+    .hamburger-line {
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger-btn.open .hamburger-line:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .sidebar-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: #fff;
+      box-shadow: 4px 0 24px rgba(19, 31, 54, 0.12);
+      z-index: 1001;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 80px 20px 20px 20px;
+      gap: 12px;
+    }
+
+    .sidebar-nav.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-nav .link-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #f8f9fa;
+      border: none;
+      box-shadow: none;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .sidebar-nav .link-btn:hover {
+      background: #eef1f5;
+      transform: none;
+      box-shadow: none;
+      opacity: 1;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
     }
 
     .topbar {
@@ -54,7 +151,7 @@
       margin: 0;
       font-size: 1.95rem;
       line-height: 1.1;
-      font-weight: 700;
+      font-weight: normal;
     }
 
     .topbar p {
@@ -95,7 +192,7 @@
       background: transparent;
       color: var(--accent);
       padding: 0;
-      font-weight: 600;
+      font-weight: normal;
       text-decoration: none;
     }
 
@@ -105,9 +202,83 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 360px minmax(0, 1fr);
+      grid-template-columns: 1fr;
       gap: 18px;
       align-items: start;
+    }
+
+    /* 模态框样式 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: 0 24px 60px rgba(24, 36, 58, 0.15);
+      width: 100%;
+      max-width: 800px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: #f0f2f5;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--muted);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      padding-right: 40px;
+    }
+
+    .modal-header h2 {
+      margin: 0 0 8px;
+      line-height: 1.15;
+      font-weight: normal;
+    }
+
+    .modal-header .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.45;
     }
 
     .card {
@@ -121,7 +292,7 @@
     h3 {
       margin: 0 0 8px;
       line-height: 1.15;
-      font-weight: 700;
+      font-weight: normal;
     }
 
     .subtitle,
@@ -140,7 +311,7 @@
 
     label {
       display: block;
-      font-weight: 700;
+      font-weight: normal;
       margin-bottom: 8px;
       font-size: 0.95rem;
       letter-spacing: 0.02em;
@@ -195,7 +366,7 @@
       width: 100%;
       padding: 14px 16px;
       border-radius: 14px;
-      font-weight: 700;
+      font-weight: normal;
     }
 
     .primary-btn {
@@ -225,7 +396,7 @@
     .list {
       margin-top: 16px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
       max-height: 72vh;
       overflow: auto;
       padding-right: 2px;
@@ -233,8 +404,8 @@
 
     .list-item {
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 10px 12px;
       cursor: pointer;
       background: #fbfcff;
       transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
@@ -243,17 +414,17 @@
 
     .list-item:hover {
       transform: translateY(-1px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
     }
 
     .list-item.active {
       border-color: var(--accent);
       background: var(--accent-soft);
-      box-shadow: 0 10px 22px rgba(255, 106, 61, 0.14);
+      box-shadow: 0 6px 16px rgba(255, 106, 61, 0.14);
     }
 
     .list-item strong {
-      font-size: 1rem;
+      font-size: 0.92rem;
     }
 
     .badge {
@@ -262,7 +433,7 @@
       border-radius: 999px;
       padding: 6px 12px;
       font-size: 0.88rem;
-      font-weight: 700;
+      font-weight: normal;
     }
 
     .badge.pending {
@@ -304,7 +475,7 @@
     }
 
     .detail-value {
-      font-weight: 700;
+      font-weight: normal;
       word-break: break-word;
     }
 
@@ -351,9 +522,107 @@
       color: var(--muted);
     }
 
+    .calc-box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fffaf7;
+      margin-top: 14px;
+    }
+
+    .calc-result {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .calc-cell {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .calc-formula {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
     a {
       color: var(--accent);
       word-break: break-word;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 8px 20px rgba(255, 106, 61, 0.3);
+      transition: transform 0.2s, opacity 0.2s;
+      z-index: 999;
+    }
+
+    .back-to-top.visible {
+      display: flex;
+    }
+
+    .back-to-top:hover {
+      transform: scale(1.1);
+    }
+
+    .back-to-top:active {
+      transform: scale(0.95);
+    }
+
+    .modal-back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 8px 20px rgba(255, 106, 61, 0.3);
+      transition: transform 0.2s, opacity 0.2s;
+      z-index: 1001;
+    }
+
+    .modal-back-to-top.visible {
+      display: flex;
+    }
+
+    .modal-back-to-top:hover {
+      transform: scale(1.1);
+    }
+
+    .modal-back-to-top:active {
+      transform: scale(0.95);
     }
 
     @media (max-width: 900px) {
@@ -361,20 +630,149 @@
         grid-template-columns: 1fr;
       }
 
-      .detail-grid {
+      .detail-grid,
+      .calc-result {
         grid-template-columns: 1fr;
       }
+
+      .modal-overlay {
+        padding: 20px 10px;
+      }
+
+      .modal-content {
+        padding: 20px 16px;
+      }
+
+      .row > * {
+        min-width: 0;
+      }
+
+      .card {
+        padding: 18px 14px;
+      }
+
+      .list-item {
+        padding: 8px 10px;
+      }
+
+      .list-item strong {
+        font-size: 0.88rem;
+      }
+
+      .badge {
+        padding: 4px 8px;
+        font-size: 0.78rem;
+      }
+
+      .muted {
+        font-size: 0.78rem !important;
+      }
+
+      .primary-btn,
+      .ghost-btn.fill {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+      }
+
+      input,
+      select,
+      textarea {
+        padding: 11px 12px;
+        font-size: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .topbar h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* =========================
+       English mode: Microsoft YaHei
+       Restore default weight & color
+       ========================= */
+    html[lang="en"],
+    html[lang="en"] body,
+    html[lang="en"] * {
+      font-family: "Microsoft YaHei", "微软雅黑", sans-serif !important;
+      font-weight: normal !important;
+      color: inherit !important;
+    }
+
+    /* headings */
+    html[lang="en"] h1,
+    html[lang="en"] h2,
+    html[lang="en"] h3,
+    html[lang="en"] h4,
+    html[lang="en"] h5,
+    html[lang="en"] h6 {
+      font-family: "Microsoft YaHei", "微软雅黑", sans-serif !important;
+      font-weight: inherit !important;
+      color: inherit !important;
+    }
+
+    /* buttons */
+    html[lang="en"] button,
+    html[lang="en"] .btn,
+    html[lang="en"] input[type="submit"] {
+      font-family: "Microsoft YaHei", "微软雅黑", sans-serif !important;
+      font-weight: inherit !important;
+      color: inherit !important;
+    }
+
+    /* form fields */
+    html[lang="en"] input,
+    html[lang="en"] textarea,
+    html[lang="en"] select,
+    html[lang="en"] label {
+      font-family: "Microsoft YaHei", "微软雅黑", sans-serif !important;
+      font-weight: inherit !important;
+      color: inherit !important;
+    }
+
+    /* links */
+    html[lang="en"] a {
+      font-family: "Microsoft YaHei", "微软雅黑", sans-serif !important;
+      font-weight: inherit !important;
+      color: inherit !important;
+    }
+
+    /* status / badges */
+    html[lang="en"] .status,
+    html[lang="en"] .badge,
+    html[lang="en"] .muted,
+    html[lang="en"] .subtitle,
+    html[lang="en"] .detail-label,
+    html[lang="en"] .detail-value {
+      font-family: "Microsoft YaHei", "微软雅黑", sans-serif !important;
+      font-weight: inherit !important;
+      color: inherit !important;
     }
   </style>
 </head>
 <body>
+  <button type="button" class="hamburger-btn" id="hamburgerBtn">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <nav class="sidebar-nav" id="sidebarNav">
+    <a class="link-btn" href="./orders.html">订单管理</a>
+    <a class="link-btn" href="#" id="adminAddressBtn">管理地址</a>
+    <a class="link-btn" href="./index.html">返回用户前台</a>
+  </nav>
+
   <div class="shell">
     <div class="topbar">
       <div>
         <h1>报价管理后台</h1>
-        <p>查看询价记录、录入运费和服务费，并同步客户查询结果。</p>
+        <p>查看询价记录，自动计算运费或手动修正，并同步客户查询结果。</p>
       </div>
-      <a class="link-btn" href="./index.html">返回用户前台</a>
     </div>
 
     <div class="layout">
@@ -405,114 +803,362 @@
         <div class="error" id="listError"></div>
         <div class="list" id="inquiryList"></div>
       </section>
+    </div>
 
+    <div class="layout" id="addressPage" style="display:none;">
       <section class="card">
-        <div class="split-header">
-          <div>
-            <h2>报价详情</h2>
-            <p class="subtitle">从左侧选择一条询价记录后，在这里查看详情并录入报价。</p>
-          </div>
+        <h2>管理收货地址</h2>
+        <p class="subtitle">编辑收货地址，保存后前端用户即可查看。</p>
+
+        <div class="field">
+          <label for="addressTokenInput">ADMIN_TOKEN</label>
+          <input type="password" id="addressTokenInput" placeholder="输入管理员 Token" style="width:100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;">
         </div>
 
-        <div id="detailEmpty" class="empty-state muted">还没有选中询价记录。</div>
-
-        <div id="detailPanel" style="display:none;">
-          <div id="detailSummary"></div>
-          <div class="gallery" id="detailGallery"></div>
-
-          <div class="field">
-            <h3>录入报价</h3>
-            <p class="help">总价可以留空，系统会用运费 + 服务费自动计算。</p>
-          </div>
-
-          <div class="field">
-            <label for="quoteStatus">报价状态</label>
-            <select id="quoteStatus">
-              <option value="quoted">已报价</option>
-              <option value="pending">待报价</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <div class="row">
-              <div>
-                <label for="finalFreightInput">运费</label>
-                <input type="number" id="finalFreightInput" placeholder="输入运费" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="serviceFeeInput">服务费</label>
-                <input type="number" id="serviceFeeInput" placeholder="输入服务费" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="totalPriceInput">总价</label>
-                <input type="number" id="totalPriceInput" placeholder="留空自动计算" min="0" step="0.01">
-              </div>
-            </div>
-            <div class="price-note">切回“待报价”时，报价金额会被清空。</div>
-          </div>
-
-          <div class="field">
-            <label for="adminNoteInput">报价说明</label>
-            <textarea id="adminNoteInput" placeholder="填写时效、包装、补充说明等"></textarea>
-          </div>
-
-          <div class="field">
-            <div class="row">
-              <button type="button" class="primary-btn" id="saveQuoteBtn">保存报价</button>
-              <button type="button" class="ghost-btn fill" id="reloadDetailBtn">重新加载</button>
-            </div>
-          </div>
-
-          <div class="error" id="detailError"></div>
+        <div class="field">
+          <label for="addressTextarea">收货地址</label>
+          <textarea id="addressTextarea" rows="8" style="width:100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; resize: vertical;"></textarea>
         </div>
+
+        <div class="row">
+          <button type="button" class="primary-btn" id="saveAddressBtn">保存地址</button>
+          <button type="button" class="ghost-btn fill" id="backToInquiryBtn">返回询价管理</button>
+        </div>
+
+        <div class="error" id="addressError"></div>
+        <div class="success" id="addressSuccess" style="display:none; color: #16a34a; font-size: 0.9rem; margin-top: 8px;"></div>
       </section>
     </div>
   </div>
+
+  <!-- 报价详情模态框 -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <button type="button" class="modal-close" id="modalCloseBtn">&times;</button>
+      <div class="modal-header">
+        <h2>报价详情</h2>
+        <p class="subtitle">查看询价详情并录入报价。</p>
+      </div>
+
+      <div id="detailEmpty" class="empty-state muted">还没有选中询价记录。</div>
+
+      <div id="detailPanel" style="display:none;">
+        <div id="detailSummary"></div>
+        <div class="gallery" id="detailGallery"></div>
+
+        <div class="field">
+          <h3>录入报价</h3>
+          <p class="help">总价可以留空，系统会用运费 + 服务费自动计算。</p>
+        </div>
+
+        <div class="field">
+          <label for="quoteStatus">报价状态</label>
+          <select id="quoteStatus">
+            <option value="quoted">已报价</option>
+            <option value="pending">待报价</option>
+          </select>
+        </div>
+
+        <div class="calc-box">
+          <div class="row">
+            <div>
+              <label for="channelSelect">物流渠道</label>
+              <select id="channelSelect">
+                <option value="standard">空运</option>
+                <option value="economy">海运</option>
+              </select>
+            </div>
+            <div>
+              <label for="zoneSelect">地区</label>
+              <select id="zoneSelect">
+                <option value="A">Zone A</option>
+              </select>
+            </div>
+            <div>
+              <label for="calcWeightInput">计费重量</label>
+              <input type="number" id="calcWeightInput" min="0.01" step="0.001" placeholder="单位 kg">
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 12px;">
+            <button type="button" class="primary-btn" id="applyCalcBtn">自动计算并填入运费</button>
+            <button type="button" class="ghost-btn fill" id="syncWeightBtn">同步询价重量</button>
+          </div>
+
+          <div class="calc-formula" id="calcFormula">选择渠道、地区和重量后可以自动计算。校验示例：50g = 43，500g = 133.5，5000g = 718.5。</div>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <div>
+              <label for="finalFreightInput">运费1</label>
+              <input type="number" id="finalFreightInput" placeholder="可自动填入，也可手动修改" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="freight2Input">运费2</label>
+              <input type="number" id="freight2Input" placeholder="自动计算（运费1 × 1.15），也可手动修改" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="serviceFeeInput">商品目前售价</label>
+              <input type="number" id="serviceFeeInput" placeholder="输入商品目前售价" min="0" step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <div>
+              <label for="totalPriceInput">总价</label>
+              <input type="number" id="totalPriceInput" placeholder="留空自动计算（运费2 + 售价）" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="shopeeAfterTaxInput">Shopee平台税后总价</label>
+              <input type="number" id="shopeeAfterTaxInput" placeholder="自动计算（总价 × 1.25）" min="0" step="0.01" readonly>
+            </div>
+          </div>
+          <div class="price-note">总价 = 运费2 + 商品目前售价。如果总价输入框留空，系统会自动计算。</div>
+        </div>
+
+        <div class="field">
+          <label for="adminNoteInput">报价说明</label>
+          <textarea id="adminNoteInput" placeholder="填写时效、包装、补充说明等"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <button type="button" class="primary-btn" id="saveQuoteBtn">保存报价</button>
+            <button type="button" class="ghost-btn fill" id="reloadDetailBtn">重新加载</button>
+          </div>
+        </div>
+
+        <div class="error" id="detailError"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 一键回顶按钮 -->
+  <button type="button" class="back-to-top" id="backToTopBtn" title="回到顶部">&#8679;</button>
+  <button type="button" class="modal-back-to-top" id="modalBackToTopBtn" title="回到顶部">&#8679;</button>
 
   <script src="./config.js"></script>
   <script>
     (() => {
       const apiBaseUrl = String(window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl || "").replace(/\/$/, "");
+
+      function closeSidebar() {
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const sidebarNav = document.getElementById("sidebarNav");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        if (hamburgerBtn) hamburgerBtn.classList.remove("open");
+        if (sidebarNav) sidebarNav.classList.remove("open");
+        if (sidebarOverlay) sidebarOverlay.classList.remove("active");
+      }
+
+      document.getElementById("hamburgerBtn").addEventListener("click", () => {
+        const btn = document.getElementById("hamburgerBtn");
+        const sidebarNav = document.getElementById("sidebarNav");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        const isOpen = btn.classList.contains("open");
+        if (isOpen) {
+          closeSidebar();
+        } else {
+          btn.classList.add("open");
+          sidebarNav.classList.add("open");
+          sidebarOverlay.classList.add("active");
+        }
+      });
+
+      document.getElementById("sidebarOverlay").addEventListener("click", closeSidebar);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const sidebarNav = document.getElementById("sidebarNav");
+          if (sidebarNav && sidebarNav.classList.contains("open")) {
+            closeSidebar();
+          }
+        }
+      });
+
+      const FREIGHT_RULES = {
+        standard: {
+          label: "空运",
+          buyerPaysByZone: { A: 40 },
+          calcHidden(weightG) {
+            if (weightG <= 50) {
+              return 23;
+            }
+            return 23 + Math.ceil((weightG - 50) / 10) * 4.5;
+          }
+        },
+        economy: {
+          label: "海运",
+          buyerPaysByZone: { A: 20 },
+          calcHidden(weightG) {
+            if (weightG <= 50) {
+              return 23;
+            }
+            if (weightG <= 150) {
+              return 23 + Math.ceil((weightG - 50) / 10) * 4.5;
+            }
+            return 23 + Math.ceil((150 - 50) / 10) * 4.5 + Math.ceil((weightG - 150) / 10) * 1.3;
+          }
+        }
+      };
+
+      const DEFAULT_CHANNEL_BY_SHIPPING = {
+        sea: "economy",
+        air: "standard"
+      };
+
       const tokenInput = document.getElementById("tokenInput");
       const saveTokenBtn = document.getElementById("saveTokenBtn");
       const statusFilter = document.getElementById("statusFilter");
       const refreshBtn = document.getElementById("refreshBtn");
       const inquiryList = document.getElementById("inquiryList");
       const listError = document.getElementById("listError");
+      const detailModal = document.getElementById("detailModal");
       const detailEmpty = document.getElementById("detailEmpty");
       const detailPanel = document.getElementById("detailPanel");
       const detailSummary = document.getElementById("detailSummary");
       const detailGallery = document.getElementById("detailGallery");
+      const channelSelect = document.getElementById("channelSelect");
+      const zoneSelect = document.getElementById("zoneSelect");
+      const calcWeightInput = document.getElementById("calcWeightInput");
+      const applyCalcBtn = document.getElementById("applyCalcBtn");
+      const syncWeightBtn = document.getElementById("syncWeightBtn");
+      const calcFormula = document.getElementById("calcFormula");
       const quoteStatus = document.getElementById("quoteStatus");
       const finalFreightInput = document.getElementById("finalFreightInput");
+      const freight2Input = document.getElementById("freight2Input");
       const serviceFeeInput = document.getElementById("serviceFeeInput");
       const totalPriceInput = document.getElementById("totalPriceInput");
+      const shopeeAfterTaxInput = document.getElementById("shopeeAfterTaxInput");
       const adminNoteInput = document.getElementById("adminNoteInput");
       const saveQuoteBtn = document.getElementById("saveQuoteBtn");
       const reloadDetailBtn = document.getElementById("reloadDetailBtn");
+      const modalCloseBtn = document.getElementById("modalCloseBtn");
       const detailError = document.getElementById("detailError");
+      const backToTopBtn = document.getElementById("backToTopBtn");
+      const modalBackToTopBtn = document.getElementById("modalBackToTopBtn");
+
+      const adminAddressBtn = document.getElementById("adminAddressBtn");
+      const addressPage = document.getElementById("addressPage");
+      const addressTokenInput = document.getElementById("addressTokenInput");
+      const addressTextarea = document.getElementById("addressTextarea");
+      const saveAddressBtn = document.getElementById("saveAddressBtn");
+      const backToInquiryBtn = document.getElementById("backToInquiryBtn");
+      const addressError = document.getElementById("addressError");
+      const addressSuccess = document.getElementById("addressSuccess");
+      const layoutDiv = document.querySelector(".layout:not(#addressPage)");
 
       let selectedCode = "";
+      let currentInquiry = null;
+      let lastCalculatedFreight = null;
+
+      // 主页面回顶按钮逻辑
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+          backToTopBtn.classList.add("visible");
+        } else {
+          backToTopBtn.classList.remove("visible");
+        }
+      });
+
+      backToTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      // 模态框回顶按钮逻辑
+      const modalContent = document.querySelector(".modal-content");
+      if (modalContent) {
+        modalContent.addEventListener("scroll", () => {
+          if (modalContent.scrollTop > 300) {
+            modalBackToTopBtn.classList.add("visible");
+          } else {
+            modalBackToTopBtn.classList.remove("visible");
+          }
+        });
+      }
+
+      modalBackToTopBtn.addEventListener("click", () => {
+        if (modalContent) {
+          modalContent.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+
+      function openModal() {
+        detailModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal() {
+        detailModal.classList.remove("active");
+        document.body.style.overflow = "";
+        selectedCode = "";
+        currentInquiry = null;
+        detailPanel.style.display = "none";
+        detailEmpty.style.display = "block";
+      }
+
+      modalCloseBtn.addEventListener("click", closeModal);
+
+      detailModal.addEventListener("click", (event) => {
+        if (event.target === detailModal) {
+          closeModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && detailModal.classList.contains("active")) {
+          closeModal();
+        }
+      });
 
       tokenInput.value = localStorage.getItem("quote_admin_token") || "";
 
       function getToken() {
-        return tokenInput.value.trim();
+        return tokenInput.value.trim() || addressTokenInput.value.trim() || localStorage.getItem("quote_admin_token") || "";
       }
 
       function formatMoney(value) {
         if (value == null || value === "") {
           return "-";
         }
-
-        return new Intl.NumberFormat("zh-CN", {
-          style: "currency",
-          currency: "CNY"
-        }).format(Number(value));
+        return new Intl.NumberFormat("zh-CN", { style: "currency", currency: "PHP" }).format(Number(value));
       }
 
       function formatDate(value) {
         return new Date(value).toLocaleString("zh-CN");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function safeUrl(value) {
+        try {
+          const parsed = new URL(String(value), window.location.origin);
+          return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '#';
+        } catch {
+          return '#';
+        }
+      }
+
+      function safeImageUrl(value) {
+        const str = String(value ?? '');
+        if (str.startsWith('data:image/')) {
+          return str;
+        }
+        return safeUrl(str);
+      }
+
+      function roundMoney(value) {
+        return Math.round(Number(value) * 100) / 100;
       }
 
       function badgeClass(status) {
@@ -521,6 +1167,14 @@
 
       function statusText(status) {
         return status === "quoted" ? "已报价" : "待报价";
+      }
+
+      function shippingText(value) {
+        return value === "air" ? "空运" : "海运";
+      }
+
+      function zoneText(channel, zone) {
+        return `Zone ${zone}`;
       }
 
       async function requestJson(path, options = {}) {
@@ -541,10 +1195,76 @@
         }
 
         if (!response.ok) {
-          throw new Error(payload.error || "请求失败，请稍后重试。");
+          throw new Error(payload.error || "Request failed.");
         }
 
         return payload;
+      }
+
+      function calculateFreight(channel, zone, weightKg) {
+        const rule = FREIGHT_RULES[channel];
+        const numericWeightKg = Number(weightKg);
+
+        if (!rule || !Number.isFinite(numericWeightKg) || numericWeightKg <= 0) {
+          return null;
+        }
+
+        const weightG = roundMoney(numericWeightKg * 1000);
+        const buyerPays = rule.buyerPaysByZone[zone];
+
+        if (!Number.isFinite(buyerPays)) {
+          return null;
+        }
+
+        const hiddenCost = roundMoney(rule.calcHidden(weightG));
+        const sellerPays = roundMoney(hiddenCost + buyerPays);
+
+        let formula = `${rule.label}, ${zoneText(channel, zone)}, weight ${weightG}g. `;
+        if (channel === "economy") {
+          if (weightG <= 50) {
+            formula += "Hidden cost = 23.";
+          } else if (weightG <= 150) {
+            formula += `Hidden cost = 23 + ceil((${weightG} - 50) / 10) * 4.5.`;
+          } else {
+            formula += `Hidden cost = 23 + ceil((150 - 50) / 10) * 4.5 + ceil((${weightG} - 150) / 10) * 1.3.`;
+          }
+        } else if (weightG <= 50) {
+          formula += "Hidden cost = 23.";
+        } else {
+          formula += `Hidden cost = 23 + ceil((${weightG} - 50) / 10) * 4.5.`;
+        }
+        formula += ` Buyer pays ${buyerPays}. Seller freight = ${sellerPays}.`;
+
+        return {
+          channel,
+          zone,
+          weightKg: numericWeightKg,
+          weightG,
+          hiddenCost,
+          buyerPays,
+          sellerPays,
+          formula
+        };
+      }
+
+      function renderCalculation() {
+        const result = calculateFreight(channelSelect.value, zoneSelect.value, calcWeightInput.value);
+
+        if (!result) {
+          lastCalculatedFreight = null;
+          calcFormula.textContent = "选择渠道、地区和重量后可以自动计算。校验示例：50g = 43，500g = 133.5，5000g = 718.5。";
+          return;
+        }
+
+        lastCalculatedFreight = result;
+        calcFormula.textContent = result.formula;
+      }
+
+      function syncFreightDefaults(item) {
+        channelSelect.value = DEFAULT_CHANNEL_BY_SHIPPING[item.shipping] || "standard";
+        zoneSelect.value = "A";
+        calcWeightInput.value = item.weight_estimate;
+        renderCalculation();
       }
 
       function renderSummary(item) {
@@ -552,57 +1272,86 @@
           <div class="detail-block">
             <div class="split-header">
               <div>
-                <h3 style="margin:0;">${item.code}</h3>
-                <p class="subtitle" style="margin:6px 0 0;">提交时间：${formatDate(item.created_at)}</p>
+                <h3 style="margin:0;">${escapeHtml(item.code)}</h3>
+                <p class="subtitle" style="margin:6px 0 0;">提交时间: ${escapeHtml(formatDate(item.created_at))}</p>
               </div>
-              <span class="badge ${badgeClass(item.status)}">${statusText(item.status)}</span>
+              <span class="badge ${escapeHtml(badgeClass(item.status))}">${escapeHtml(statusText(item.status))}</span>
             </div>
             <div style="margin-top:14px;">
               <div class="detail-label">商品链接</div>
-              <div class="detail-value"><a href="${item.product_url}" target="_blank" rel="noreferrer">${item.product_url}</a></div>
+              <div class="detail-value"><a href="${safeUrl(item.product_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.product_url)}</a></div>
             </div>
             <div style="margin-top:14px;">
               <div class="detail-label">备注</div>
-              <div class="detail-value">${item.remark || "-"}</div>
+              <div class="detail-value">${escapeHtml(item.remark || "-")}</div>
             </div>
             <div class="detail-grid">
               <div class="detail-cell">
                 <div class="detail-label">运输方式</div>
-                <div class="detail-value">${item.shipping === "air" ? "空运" : "海运"}</div>
+                <div class="detail-value">${escapeHtml(shippingText(item.shipping))}</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">付款方式</div>
+                <div class="detail-value">${escapeHtml(item.payment_method === "shopee" ? "Shopee全款" : "Gcash")}</div>
               </div>
               <div class="detail-cell">
                 <div class="detail-label">预估重量</div>
-                <div class="detail-value">${item.weight_estimate} kg</div>
+                <div class="detail-value">${escapeHtml(item.weight_estimate)} kg</div>
               </div>
               <div class="detail-cell">
                 <div class="detail-label">更新时间</div>
-                <div class="detail-value">${formatDate(item.updated_at)}</div>
+                <div class="detail-value">${escapeHtml(formatDate(item.updated_at))}</div>
               </div>
               <div class="detail-cell">
                 <div class="detail-label">当前运费</div>
-                <div class="detail-value">${formatMoney(item.final_freight)}</div>
+                <div class="detail-value">${escapeHtml(formatMoney(item.final_freight))}</div>
               </div>
               <div class="detail-cell">
-                <div class="detail-label">当前服务费</div>
-                <div class="detail-value">${formatMoney(item.service_fee)}</div>
+                <div class="detail-label">当前商品目前售价</div>
+                <div class="detail-value">${escapeHtml(formatMoney(item.service_fee))}</div>
               </div>
               <div class="detail-cell">
                 <div class="detail-label">当前总价</div>
-                <div class="detail-value">${formatMoney(item.total_price)}</div>
+                <div class="detail-value">${escapeHtml(formatMoney(item.total_price))}</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">当前Shopee平台税后总价</div>
+                <div class="detail-value">${escapeHtml(formatMoney(item.shopee_after_tax))}</div>
               </div>
             </div>
           </div>
         `;
 
         detailGallery.innerHTML = item.images && item.images.length
-          ? item.images.map((image) => `<a href="${image.url}" target="_blank" rel="noreferrer"><img src="${image.url}" alt="product image"></a>`).join("")
+          ? item.images.map((image) => `<a href="${safeUrl(image.url)}" target="_blank" rel="noreferrer"><img src="${safeUrl(image.url)}" alt="product image"></a>`).join("")
           : `<div class="empty-state muted" style="width:100%;">该询价没有上传图片。</div>`;
 
         quoteStatus.value = item.status;
         finalFreightInput.value = item.final_freight ?? "";
+        freight2Input.value = item.freight2 ?? "";
         serviceFeeInput.value = item.service_fee ?? "";
         totalPriceInput.value = item.total_price ?? "";
+        shopeeAfterTaxInput.value = item.shopee_after_tax ?? "";
         adminNoteInput.value = item.admin_note || "";
+        syncFreightDefaults(item);
+        updateAutoCalculations();
+      }
+
+      function getDateGroup(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const itemDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diffDays = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return "今天";
+        if (diffDays === 1) return "昨天";
+        if (diffDays < 7) return "最近 7 天";
+        if (diffDays < 30) return "最近 30 天";
+        
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        return `${year}年${month}月`;
       }
 
       async function loadList() {
@@ -624,16 +1373,31 @@
             return;
           }
 
-          inquiryList.innerHTML = payload.items.map((item) => `
-            <button type="button" class="list-item ${item.code === selectedCode ? "active" : ""}" data-code="${item.code}">
-              <div class="split-header">
-                <strong>${item.code}</strong>
-                <span class="badge ${badgeClass(item.status)}">${statusText(item.status)}</span>
-              </div>
-              <div class="muted" style="margin-top:8px;">${item.shipping === "air" ? "空运" : "海运"} | ${item.weight_estimate} kg</div>
-              <div class="muted" style="margin-top:6px;">${formatDate(item.created_at)}</div>
-            </button>
-          `).join("");
+          const grouped = {};
+          payload.items.forEach((item) => {
+            const group = getDateGroup(item.created_at);
+            if (!grouped[group]) {
+              grouped[group] = [];
+            }
+            grouped[group].push(item);
+          });
+
+          let html = "";
+          Object.keys(grouped).forEach((group) => {
+            html += `<div style="margin-top: 12px; margin-bottom: 6px; font-weight: normal; color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(group)}</div>`;
+            html += grouped[group].map((item) => `
+              <button type="button" class="list-item ${item.code === selectedCode ? "active" : ""}" data-code="${escapeHtml(item.code)}">
+                <div class="split-header">
+                  <strong>${escapeHtml(item.code)}</strong>
+                  <span class="badge ${escapeHtml(badgeClass(item.status))}">${escapeHtml(statusText(item.status))}</span>
+                </div>
+                <div class="muted" style="margin-top:4px; font-size: 0.82rem;">${escapeHtml(shippingText(item.shipping))} | ${escapeHtml(item.weight_estimate)} kg</div>
+                <div class="muted" style="margin-top:2px; font-size: 0.8rem;">${escapeHtml(formatDate(item.created_at))}</div>
+              </button>
+            `).join("");
+          });
+
+          inquiryList.innerHTML = html;
         } catch (err) {
           inquiryList.innerHTML = "";
           listError.textContent = err.message;
@@ -646,10 +1410,12 @@
 
         try {
           const item = await requestJson(`/api/admin/inquiries/${code}`);
+          currentInquiry = item;
           detailEmpty.style.display = "none";
           detailPanel.style.display = "block";
           renderSummary(item);
           await loadList();
+          openModal();
         } catch (err) {
           detailError.textContent = err.message;
         }
@@ -664,13 +1430,18 @@
         saveQuoteBtn.disabled = true;
 
         try {
+          const autoFreight = lastCalculatedFreight ? lastCalculatedFreight.sellerPays : "";
+          const finalFreight = finalFreightInput.value === "" ? autoFreight : finalFreightInput.value;
+
           await requestJson(`/api/admin/inquiries/${selectedCode}/quote`, {
             method: "PUT",
             body: JSON.stringify({
               status: quoteStatus.value,
-              final_freight: finalFreightInput.value,
+              final_freight: finalFreight,
+              freight2: freight2Input.value,
               service_fee: serviceFeeInput.value,
               total_price: totalPriceInput.value,
+              shopee_after_tax: shopeeAfterTaxInput.value,
               admin_note: adminNoteInput.value.trim()
             })
           });
@@ -691,12 +1462,144 @@
       refreshBtn.addEventListener("click", loadList);
       reloadDetailBtn.addEventListener("click", () => selectedCode && loadDetail(selectedCode));
       saveQuoteBtn.addEventListener("click", saveQuote);
+
       inquiryList.addEventListener("click", (event) => {
         const target = event.target.closest("[data-code]");
         if (target) {
           loadDetail(target.dataset.code);
         }
       });
+
+      channelSelect.addEventListener("change", renderCalculation);
+      zoneSelect.addEventListener("change", renderCalculation);
+      calcWeightInput.addEventListener("input", renderCalculation);
+
+      syncWeightBtn.addEventListener("click", () => {
+        if (!currentInquiry) {
+          return;
+        }
+        calcWeightInput.value = currentInquiry.weight_estimate;
+        renderCalculation();
+      });
+
+      applyCalcBtn.addEventListener("click", () => {
+        renderCalculation();
+        if (!lastCalculatedFreight) {
+          detailError.textContent = "请先选择可计算的渠道、地区和重量。";
+          return;
+        }
+        detailError.textContent = "";
+        finalFreightInput.value = lastCalculatedFreight.sellerPays;
+        updateAutoCalculations();
+      });
+
+      function updateAutoCalculations() {
+        const freight1 = Number(finalFreightInput.value);
+        const freight2FromInput = Number(freight2Input.value);
+        
+        // 如果运费2为空或为0，自动计算；否则使用用户手动输入的值
+        if (!freight2Input.value || !Number.isFinite(freight2FromInput) || freight2FromInput === 0) {
+          if (Number.isFinite(freight1) && freight1 > 0) {
+            freight2Input.value = roundMoney(freight1 * 1.15);
+          } else {
+            freight2Input.value = "";
+          }
+        }
+        
+        // 自动计算总价（如果总价为空）
+        const freight2 = Number(freight2Input.value);
+        const serviceFee = Number(serviceFeeInput.value);
+        const totalPriceFromInput = Number(totalPriceInput.value);
+        
+        // 如果总价为空或用户没有手动输入，则自动计算
+        if (!totalPriceInput.value || !Number.isFinite(totalPriceFromInput) || totalPriceFromInput === 0) {
+          if (Number.isFinite(freight2) && freight2 > 0 && Number.isFinite(serviceFee) && serviceFee > 0) {
+            totalPriceInput.value = roundMoney(freight2 + serviceFee);
+          } else if (Number.isFinite(freight2) && freight2 > 0) {
+            totalPriceInput.value = roundMoney(freight2);
+          } else if (Number.isFinite(serviceFee) && serviceFee > 0) {
+            totalPriceInput.value = roundMoney(serviceFee);
+          }
+        }
+        
+        // 更新 Shopee 税后总价
+        const totalPrice = Number(totalPriceInput.value);
+        if (Number.isFinite(totalPrice) && totalPrice > 0) {
+          shopeeAfterTaxInput.value = roundMoney(totalPrice * 1.25);
+        } else {
+          shopeeAfterTaxInput.value = "";
+        }
+      }
+
+      finalFreightInput.addEventListener("input", updateAutoCalculations);
+      freight2Input.addEventListener("input", () => {
+        // 运费2手动输入时，只更新总价，不重新计算运费2
+        const freight2 = Number(freight2Input.value);
+        const serviceFee = Number(serviceFeeInput.value);
+        const totalPriceFromInput = Number(totalPriceInput.value);
+        
+        if (!totalPriceInput.value || !Number.isFinite(totalPriceFromInput) || totalPriceFromInput === 0) {
+          if (Number.isFinite(freight2) && freight2 > 0 && Number.isFinite(serviceFee) && serviceFee > 0) {
+            totalPriceInput.value = roundMoney(freight2 + serviceFee);
+          } else if (Number.isFinite(freight2) && freight2 > 0) {
+            totalPriceInput.value = roundMoney(freight2);
+          } else if (Number.isFinite(serviceFee) && serviceFee > 0) {
+            totalPriceInput.value = roundMoney(serviceFee);
+          }
+        }
+        
+        const totalPrice = Number(totalPriceInput.value);
+        if (Number.isFinite(totalPrice) && totalPrice > 0) {
+          shopeeAfterTaxInput.value = roundMoney(totalPrice * 1.25);
+        } else {
+          shopeeAfterTaxInput.value = "";
+        }
+      });
+      serviceFeeInput.addEventListener("input", updateAutoCalculations);
+      totalPriceInput.addEventListener("input", updateAutoCalculations);
+
+      adminAddressBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        closeSidebar();
+        if (layoutDiv) layoutDiv.style.display = "none";
+        addressPage.style.display = "";
+        addressError.textContent = "";
+        addressSuccess.style.display = "none";
+        addressTokenInput.value = getToken();
+        try {
+          const data = await requestJson("/api/settings/address");
+          addressTextarea.value = data.address || "";
+        } catch (err) {
+          addressTextarea.value = "";
+        }
+      });
+
+      backToInquiryBtn.addEventListener("click", () => {
+        if (layoutDiv) layoutDiv.style.display = "";
+        addressPage.style.display = "none";
+      });
+
+      saveAddressBtn.addEventListener("click", async () => {
+        addressError.textContent = "";
+        addressSuccess.style.display = "none";
+        try {
+          await requestJson("/api/settings/address", {
+            method: "PUT",
+            body: JSON.stringify({ address: addressTextarea.value })
+          });
+          addressSuccess.textContent = "地址保存成功";
+          addressSuccess.style.display = "";
+          setTimeout(() => {
+            addressSuccess.style.display = "none";
+          }, 3000);
+        } catch (err) {
+          addressError.textContent = err.message;
+        }
+      });
+
+      if (window.location.hash === "#address") {
+        adminAddressBtn.click();
+      }
 
       loadList();
     })();
