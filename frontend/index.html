@@ -1469,20 +1469,31 @@
       function updateWeight() {
         const value = Number(elements.weightSlider.value);
         elements.weightDisplay.textContent = `${value.toFixed(2)} kg`;
-        elements.weightInput.value = value.toFixed(2);
+        if (document.activeElement !== elements.weightInput) {
+          elements.weightInput.value = value.toFixed(2);
+        }
       }
 
       function updateWeightFromInput() {
-        const value = Number(elements.weightInput.value);
-        if (!Number.isFinite(value) || value <= 0) {
+        const rawValue = parseFloat(elements.weightInput.value);
+        if (!Number.isFinite(rawValue) || rawValue <= 0) {
           elements.weightSlider.value = 0.01;
           elements.weightDisplay.textContent = "0.01 kg";
+          return;
+        }
+        const clamped = Math.min(50, Math.max(0.01, rawValue));
+        elements.weightSlider.value = clamped;
+        elements.weightDisplay.textContent = `${clamped.toFixed(2)} kg`;
+        // Reformat only when the user finishes typing
+      }
+
+      function formatWeightInput() {
+        const rawValue = parseFloat(elements.weightInput.value);
+        if (!Number.isFinite(rawValue) || rawValue <= 0) {
           elements.weightInput.value = "0.01";
           return;
         }
-        const clamped = Math.min(50, Math.max(0.01, value));
-        elements.weightSlider.value = clamped;
-        elements.weightDisplay.textContent = `${clamped.toFixed(2)} kg`;
+        const clamped = Math.min(50, Math.max(0.01, rawValue));
         elements.weightInput.value = clamped.toFixed(2);
       }
 
@@ -1786,6 +1797,8 @@
 
       elements.weightSlider.addEventListener("input", updateWeight);
       elements.weightInput.addEventListener("input", updateWeightFromInput);
+      elements.weightInput.addEventListener("change", formatWeightInput);
+      elements.weightInput.addEventListener("blur", formatWeightInput);
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
       elements.queryCodeInput.addEventListener("keypress", (event) => {
