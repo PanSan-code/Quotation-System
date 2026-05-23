@@ -324,6 +324,21 @@
       margin: 0 0 8px;
       line-height: 1.15;
       font-weight: normal;
+      text-align: center;
+    }
+
+    #formTitle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .title-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
     }
 
     .subtitle,
@@ -806,7 +821,7 @@
 
     <section class="page active" id="formPage">
       <div class="card">
-        <h1 id="formTitle">代购转运报价</h1>
+        <h1 id="formTitle"><img src="logo.jpg" alt="logo" class="title-logo"><span id="formTitleText">代购转运报价</span></h1>
         <p class="subtitle" id="formSubtitle">填写商品信息，提交询价后即可用查询码查看报价。</p>
 
         <div class="field">
@@ -1049,7 +1064,7 @@
 
       const i18n = {
         zh: {
-          formTitle: "PanSan报价系统",
+          formTitleText: "PanSan报价系统",
           formSubtitle: "填写商品信息，提交询价后即可用查询码查看报价。",
           toQueryLink: "查询报价",
           productUrlLabel: "商品链接",
@@ -1154,7 +1169,7 @@
           addressLoadFailed: "加载地址失败"
         },
         en: {
-          formTitle: "PanSan Quote System",
+          formTitleText: "PanSan Quote System",
           formSubtitle: "Submit product details and check the result later with your inquiry code.",
           toQueryLink: "Track Quote",
           productUrlLabel: "Product URL",
@@ -1326,7 +1341,7 @@
 
       const pages = [elements.formPage, elements.successPage, elements.queryPage];
       const labels = {
-        formTitle: document.getElementById("formTitle"),
+        formTitleText: document.getElementById("formTitleText"),
         formSubtitle: document.getElementById("formSubtitle"),
         toQueryLink: document.getElementById("toQueryLink"),
         orderBtn: document.getElementById("orderBtn"),
