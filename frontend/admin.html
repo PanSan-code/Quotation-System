@@ -498,6 +498,37 @@
     .gallery img:hover {
       transform: scale(1.04);
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox.active {
+      display: flex;
+    }
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 12px;
+      object-fit: contain;
+      cursor: default;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 40px;
+      color: #fff;
+      cursor: pointer;
+      line-height: 1;
     }
 
     .split-header {
@@ -1114,6 +1145,9 @@
         }
       });
 
+      const imgLightbox = document.getElementById("imgLightbox");
+      imgLightbox.addEventListener("click", () => imgLightbox.classList.remove("active"));
+
       tokenInput.value = localStorage.getItem("quote_admin_token") || "";
 
       function getToken() {
@@ -1323,7 +1357,7 @@
         `;
 
         detailGallery.innerHTML = item.images && item.images.length
-          ? item.images.map((image) => `<a href="${safeUrl(image.url)}" target="_blank" rel="noreferrer"><img src="${safeUrl(image.url)}" alt="product image"></a>`).join("")
+          ? item.images.map((image) => `<img src="${safeUrl(image.url)}" alt="product image" onclick="document.getElementById('imgLightbox').querySelector('img').src='${safeUrl(image.url)}';document.getElementById('imgLightbox').classList.add('active')">`).join("")
           : `<div class="empty-state muted" style="width:100%;">该询价没有上传图片。</div>`;
 
         quoteStatus.value = item.status;
@@ -1604,5 +1638,9 @@
       loadList();
     })();
   </script>
+  <div class="lightbox" id="imgLightbox">
+    <span class="lightbox-close">&times;</span>
+    <img src="" alt="product image">
+  </div>
 </body>
 </html>

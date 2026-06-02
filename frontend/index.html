@@ -645,6 +645,37 @@
 
     .gallery img:hover {
       transform: scale(1.08);
+      cursor: pointer;
+    }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox.active {
+      display: flex;
+    }
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 12px;
+      object-fit: contain;
+      cursor: default;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 40px;
+      color: #fff;
+      cursor: pointer;
+      line-height: 1;
     }
 
     .price-box {
@@ -1585,7 +1616,7 @@
         elements.queryResult.dataset.payload = JSON.stringify(payload);
 
         const imagesHtml = payload.images && payload.images.length
-          ? `<div class="gallery">${payload.images.map((item) => `<a href="${safeUrl(item.url)}" target="_blank" rel="noreferrer"><img src="${safeImageUrl(item.url)}" alt="product image"></a>`).join("")}</div>`
+          ? `<div class="gallery">${payload.images.map((item) => `<img src="${safeImageUrl(item.url)}" alt="product image" onclick="document.getElementById('imgLightbox').querySelector('img').src='${safeImageUrl(item.url)}';document.getElementById('imgLightbox').classList.add('active')">`).join("")}</div>`
           : `<p class="muted">${text("noImages")}</p>`;
 
         const isQuoted = payload.status === "quoted";
@@ -1814,6 +1845,9 @@
       elements.weightInput.addEventListener("input", updateWeightFromInput);
       elements.weightInput.addEventListener("change", formatWeightInput);
       elements.weightInput.addEventListener("blur", formatWeightInput);
+
+      const imgLightbox = document.getElementById("imgLightbox");
+      imgLightbox.addEventListener("click", () => imgLightbox.classList.remove("active"));
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
       elements.queryCodeInput.addEventListener("keypress", (event) => {
@@ -2303,5 +2337,9 @@
     })();
   </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"956d1b8221d34e09823b68cef9b3b4af","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<div class="lightbox" id="imgLightbox">
+    <span class="lightbox-close">&times;</span>
+    <img src="" alt="product image">
+  </div>
 </body>
 </html>
