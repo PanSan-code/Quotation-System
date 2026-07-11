@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>报价管理后台</title>
+  <title>PanSan Admin Panel</title>
+  <meta name="description" content="PanSan Quote System Admin Panel">
+  <meta property="og:title" content="PanSan Admin Panel">
+  <meta property="og:description" content="PanSan Quote System Administration">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pansanrequest.ccwu.cc/admin">
+  <meta property="og:site_name" content="PanSan Forwarding">
   <style>
     :root {
       --bg: #f3f6fb;
@@ -795,6 +801,8 @@
   <nav class="sidebar-nav" id="sidebarNav">
     <a class="link-btn" href="./orders.html">订单管理</a>
     <a class="link-btn" href="#" id="adminAddressBtn">管理地址</a>
+    <a class="link-btn" href="#" id="adminRatesBtn">费率管理</a>
+    <a class="link-btn" href="#" id="adminAnnounceBtn">公告管理</a>
     <a class="link-btn" href="./index.html">返回用户前台</a>
   </nav>
 
@@ -838,8 +846,8 @@
 
     <div class="layout" id="addressPage" style="display:none;">
       <section class="card">
-        <h2>管理收货地址</h2>
-        <p class="subtitle">编辑收货地址，保存后前端用户即可查看。</p>
+        <h2>管理转运地址</h2>
+        <p class="subtitle">编辑转运地址，保存后前端用户即可查看。</p>
 
         <div class="field">
           <label for="addressTokenInput">ADMIN_TOKEN</label>
@@ -847,7 +855,7 @@
         </div>
 
         <div class="field">
-          <label for="addressTextarea">收货地址</label>
+          <label for="addressTextarea">转运地址</label>
           <textarea id="addressTextarea" rows="8" style="width:100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; resize: vertical;"></textarea>
         </div>
 
@@ -858,6 +866,62 @@
 
         <div class="error" id="addressError"></div>
         <div class="success" id="addressSuccess" style="display:none; color: #16a34a; font-size: 0.9rem; margin-top: 8px;"></div>
+      </section>
+    </div>
+
+    <div class="layout" id="ratesPage" style="display:none;">
+      <section class="card">
+        <h2>运费费率管理</h2>
+        <p class="subtitle">维护空运 / 海运 × Zone A/B/C/D 的重量阶梯。保存后即时生效，不影响已报价订单（已报价订单已锁定当时费率）。</p>
+
+        <div class="field">
+          <label for="ratesTokenInput">ADMIN_TOKEN</label>
+          <input type="password" id="ratesTokenInput" placeholder="输入管理员 Token" style="width:100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div class="row" style="margin-bottom: 16px;">
+          <button type="button" class="ghost-btn fill" id="loadRatesBtn">加载费率</button>
+          <button type="button" class="ghost-btn fill" id="resetRatesBtn">恢复默认费率</button>
+          <button type="button" class="primary-btn" id="saveRatesBtn">保存修改</button>
+          <button type="button" class="ghost-btn fill" id="backFromRatesBtn">返回询价管理</button>
+        </div>
+
+        <div class="error" id="ratesError"></div>
+        <div class="success" id="ratesSuccess" style="display:none; color: #16a34a; font-size: 0.9rem; margin-top: 8px;"></div>
+
+        <div id="ratesTable"></div>
+      </section>
+    </div>
+
+    <div class="layout" id="announcePage" style="display:none;">
+      <section class="card">
+        <h2>公告管理</h2>
+        <p class="subtitle">编辑首页温馨提示内容。保存后前端用户打开网站时可以看到。可启用/禁用。</p>
+
+        <div class="field">
+          <label for="announceTokenInput">ADMIN_TOKEN</label>
+          <input type="password" id="announceTokenInput" placeholder="输入管理员 Token" style="width:100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div class="field">
+          <label for="announceContentInput">公告内容</label>
+          <textarea id="announceContentInput" rows="6" placeholder="输入公告内容，支持 HTML 标签" style="width:100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; resize: vertical;"></textarea>
+        </div>
+
+        <div class="field">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="announceEnabledCheck" checked>
+            <span>启用公告（关闭后前台不显示）</span>
+          </label>
+        </div>
+
+        <div class="row">
+          <button type="button" class="primary-btn" id="saveAnnounceBtn">保存公告</button>
+          <button type="button" class="ghost-btn fill" id="backFromAnnounceBtn">返回询价管理</button>
+        </div>
+
+        <div class="error" id="announceError"></div>
+        <div class="success" id="announceSuccess" style="display:none; color: #16a34a; font-size: 0.9rem; margin-top: 8px;"></div>
       </section>
     </div>
   </div>
@@ -880,14 +944,6 @@
         <div class="field">
           <h3>录入报价</h3>
           <p class="help">总价可以留空，系统会用运费 + 服务费自动计算。</p>
-        </div>
-
-        <div class="field">
-          <label for="quoteStatus">报价状态</label>
-          <select id="quoteStatus">
-            <option value="quoted">已报价</option>
-            <option value="pending">待报价</option>
-          </select>
         </div>
 
         <div class="calc-box">
@@ -916,7 +972,7 @@
             <button type="button" class="ghost-btn fill" id="syncWeightBtn">同步询价重量</button>
           </div>
 
-          <div class="calc-formula" id="calcFormula">选择渠道、地区和重量后可以自动计算。校验示例：50g = 43，500g = 133.5，5000g = 718.5。</div>
+          <div class="calc-formula" id="calcFormula">选择渠道、地区和重量后可以自动计算。校验示例（海运 Zone A）：50g = 43，100g = 65.5，1000g = 246.9，5000g = 1006.9。</div>
         </div>
 
         <div class="field">
@@ -944,7 +1000,7 @@
             </div>
             <div>
               <label for="shopeeAfterTaxInput">Shopee平台税后总价</label>
-              <input type="number" id="shopeeAfterTaxInput" placeholder="自动计算（总价 × 1.25）" min="0" step="0.01" readonly>
+              <input type="number" id="shopeeAfterTaxInput" placeholder="自动计算（总价 × 1.25）" min="0" step="0.01">
             </div>
           </div>
           <div class="price-note">总价 = 运费2 + 商品目前售价。如果总价输入框留空，系统会自动计算。</div>
@@ -953,6 +1009,14 @@
         <div class="field">
           <label for="adminNoteInput">报价说明</label>
           <textarea id="adminNoteInput" placeholder="填写时效、包装、补充说明等"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="quoteStatus">报价状态</label>
+          <select id="quoteStatus">
+            <option value="quoted">已报价</option>
+            <option value="pending">待报价</option>
+          </select>
         </div>
 
         <div class="field">
@@ -972,6 +1036,10 @@
   <button type="button" class="modal-back-to-top" id="modalBackToTopBtn" title="回到顶部">&#8679;</button>
 
   <script src="./config.js"></script>
+  <div class="lightbox" id="imgLightbox">
+    <span class="lightbox-close">&times;</span>
+    <img src="" alt="product image">
+  </div>
   <script>
     (() => {
       const apiBaseUrl = String(window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl || "").replace(/\/$/, "");
@@ -1028,10 +1096,10 @@
             if (weightG <= 50) {
               return 23;
             }
-            if (weightG <= 150) {
+            if (weightG <= 140) {
               return 23 + Math.ceil((weightG - 50) / 10) * 4.5;
             }
-            return 23 + Math.ceil((150 - 50) / 10) * 4.5 + Math.ceil((weightG - 150) / 10) * 1.3;
+            return 23 + Math.ceil((140 - 50) / 10) * 4.5 + Math.ceil((weightG - 140) / 10) * 1.9;
           }
         }
       };
@@ -1047,6 +1115,7 @@
       const refreshBtn = document.getElementById("refreshBtn");
       const inquiryList = document.getElementById("inquiryList");
       const listError = document.getElementById("listError");
+      let inquiryData = []; // 数据数组，用于 findIndex 等操作
       const detailModal = document.getElementById("detailModal");
       const detailEmpty = document.getElementById("detailEmpty");
       const detailPanel = document.getElementById("detailPanel");
@@ -1080,7 +1149,35 @@
       const backToInquiryBtn = document.getElementById("backToInquiryBtn");
       const addressError = document.getElementById("addressError");
       const addressSuccess = document.getElementById("addressSuccess");
-      const layoutDiv = document.querySelector(".layout:not(#addressPage)");
+      const layoutDiv = document.querySelector(".layout:not(#addressPage):not(#ratesPage):not(#announcePage)");
+
+      const adminRatesBtn = document.getElementById("adminRatesBtn");
+      const ratesPage = document.getElementById("ratesPage");
+      const ratesTokenInput = document.getElementById("ratesTokenInput");
+      const loadRatesBtn = document.getElementById("loadRatesBtn");
+      const saveRatesBtn = document.getElementById("saveRatesBtn");
+      const resetRatesBtn = document.getElementById("resetRatesBtn");
+      const backFromRatesBtn = document.getElementById("backFromRatesBtn");
+      const ratesError = document.getElementById("ratesError");
+      const ratesSuccess = document.getElementById("ratesSuccess");
+      const ratesTable = document.getElementById("ratesTable");
+      let ratesEditing = []; // 当前编辑中的费率数据
+
+      // 公告管理
+      const adminAnnounceBtn = document.getElementById("adminAnnounceBtn");
+      const announcePage = document.getElementById("announcePage");
+      const announceTokenInput = document.getElementById("announceTokenInput");
+      const announceContentInput = document.getElementById("announceContentInput");
+      const announceEnabledCheck = document.getElementById("announceEnabledCheck");
+      const saveAnnounceBtn = document.getElementById("saveAnnounceBtn");
+      const backFromAnnounceBtn = document.getElementById("backFromAnnounceBtn");
+      const announceError = document.getElementById("announceError");
+      const announceSuccess = document.getElementById("announceSuccess");
+
+      const CHANNEL_LABELS = { standard: "空运 (Standard)", economy: "海运 (Economy)" };
+      const COST_TYPE_LABELS = { flat: "首重固定", per_increment: "按重量阶梯" };
+      const ZONE_LIST = ["A", "B", "C", "D"];
+      const CHANNEL_LIST = ["standard", "economy"];
 
       let selectedCode = "";
       let currentInquiry = null;
@@ -1146,12 +1243,30 @@
       });
 
       const imgLightbox = document.getElementById("imgLightbox");
-      imgLightbox.addEventListener("click", () => imgLightbox.classList.remove("active"));
+      if (imgLightbox) {
+        imgLightbox.addEventListener("click", (e) => {
+          if (e.target === imgLightbox || e.target.classList.contains("lightbox-close")) {
+            imgLightbox.classList.remove("active");
+          }
+        });
+      }
 
       tokenInput.value = localStorage.getItem("quote_admin_token") || "";
 
       function getToken() {
-        return tokenInput.value.trim() || addressTokenInput.value.trim() || localStorage.getItem("quote_admin_token") || "";
+        return (
+          tokenInput.value.trim() ||
+          addressTokenInput.value.trim() ||
+          ratesTokenInput.value.trim() ||
+          localStorage.getItem("quote_admin_token") ||
+          ""
+        );
+      }
+
+      function syncTokensToInputs() {
+        const t = getToken();
+        if (addressTokenInput && !addressTokenInput.value) addressTokenInput.value = t;
+        if (ratesTokenInput && !ratesTokenInput.value) ratesTokenInput.value = t;
       }
 
       function formatMoney(value) {
@@ -1212,13 +1327,17 @@
       }
 
       async function requestJson(path, options = {}) {
+        const useAuth = options.auth !== false;
+        const headers = {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        };
+        if (useAuth) {
+          headers.Authorization = `Bearer ${getToken()}`;
+        }
         const response = await fetch(`${apiBaseUrl}${path}`, {
           ...options,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getToken()}`,
-            ...(options.headers || {})
-          }
+          headers
         });
 
         let payload = {};
@@ -1257,10 +1376,10 @@
         if (channel === "economy") {
           if (weightG <= 50) {
             formula += "Hidden cost = 23.";
-          } else if (weightG <= 150) {
+          } else if (weightG <= 140) {
             formula += `Hidden cost = 23 + ceil((${weightG} - 50) / 10) * 4.5.`;
           } else {
-            formula += `Hidden cost = 23 + ceil((150 - 50) / 10) * 4.5 + ceil((${weightG} - 150) / 10) * 1.3.`;
+            formula += `Hidden cost = 23 + ceil((140 - 50) / 10) * 4.5 + ceil((${weightG} - 140) / 10) * 1.9.`;
           }
         } else if (weightG <= 50) {
           formula += "Hidden cost = 23.";
@@ -1277,21 +1396,98 @@
           hiddenCost,
           buyerPays,
           sellerPays,
-          formula
+          formula,
+          source: "local"
         };
       }
 
-      function renderCalculation() {
-        const result = calculateFreight(channelSelect.value, zoneSelect.value, calcWeightInput.value);
+      // 异步调用后端 /api/shipping/estimate 获得权威运费
+      async function calculateFreightRemote(channel, zone, weightKg) {
+        const numericWeightKg = Number(weightKg);
+        if (!Number.isFinite(numericWeightKg) || numericWeightKg <= 0) {
+          return null;
+        }
+        try {
+          const data = await requestJson("/api/shipping/estimate", {
+            method: "POST",
+            auth: false,
+            body: JSON.stringify({
+              channel,
+              zone,
+              weight_kg: numericWeightKg
+            })
+          });
+          if (!data) return null;
+          const sellerPays = Number(data.seller_pays);
+          const hiddenCost = Number(data.hidden_cost);
+          const buyerPays = Number(data.buyer_pays);
+          const weightG = Number(data.weight_g);
+          if (!Number.isFinite(sellerPays)) return null;
 
-        if (!result) {
+          const channelLabel = channel === "economy" ? "海运" : "空运";
+          let formula = `${channelLabel}, Zone ${data.zone}, weight ${weightG}g. Hidden cost = ${hiddenCost}. Buyer pays = ${buyerPays}. Seller freight = ${sellerPays}. (来源：后端)`;
+          return {
+            channel: data.channel,
+            zone: data.zone,
+            weightKg: numericWeightKg,
+            weightG,
+            hiddenCost,
+            buyerPays,
+            sellerPays,
+            formula,
+            source: "remote"
+          };
+        } catch (err) {
+          return null;
+        }
+      }
+
+      let calcDebounceTimer = null;
+      let calcRequestSeq = 0;
+
+      function renderCalculation() {
+        const channel = channelSelect.value;
+        const zone = zoneSelect.value;
+        const weightKg = calcWeightInput.value;
+        const numericWeightKg = Number(weightKg);
+
+        if (!Number.isFinite(numericWeightKg) || numericWeightKg <= 0) {
           lastCalculatedFreight = null;
-          calcFormula.textContent = "选择渠道、地区和重量后可以自动计算。校验示例：50g = 43，500g = 133.5，5000g = 718.5。";
+          calcFormula.textContent = "选择渠道、地区和重量后可以自动计算。校验示例（海运 Zone A）：50g = 43，100g = 65.5，1000g = 246.9，5000g = 1006.9。";
           return;
         }
 
-        lastCalculatedFreight = result;
-        calcFormula.textContent = result.formula;
+        // 即时本地预估（保证输入响应流畅）
+        const local = calculateFreight(channel, zone, weightKg);
+        if (local) {
+          lastCalculatedFreight = local;
+          calcFormula.textContent = local.formula + "（本地预估，后端校验中…）";
+        } else {
+          lastCalculatedFreight = null;
+          calcFormula.textContent = "无法计算，请检查渠道、地区和重量。";
+          return;
+        }
+
+        // 异步调用后端获得权威结果
+        if (calcDebounceTimer) clearTimeout(calcDebounceTimer);
+        const mySeq = ++calcRequestSeq;
+        calcDebounceTimer = setTimeout(async () => {
+          const remote = await calculateFreightRemote(channel, zone, weightKg);
+          if (mySeq !== calcRequestSeq) return; // 已有更新的请求，忽略旧结果
+          if (remote) {
+            lastCalculatedFreight = remote;
+            calcFormula.textContent = remote.formula;
+            // 如果与本地预估不一致，给出提示
+            if (local && Math.abs(remote.sellerPays - local.sellerPays) > 0.01) {
+              calcFormula.textContent += `（本地预估 ${local.sellerPays} PHP 与后端不一致，已采用后端值）`;
+            }
+          } else {
+            // 后端失败：保留本地结果
+            if (lastCalculatedFreight && lastCalculatedFreight.source === "local") {
+              calcFormula.textContent = local.formula + "（后端不可达，使用本地预估）";
+            }
+          }
+        }, 250);
       }
 
       function syncFreightDefaults(item) {
@@ -1361,11 +1557,12 @@
           : `<div class="empty-state muted" style="width:100%;">该询价没有上传图片。</div>`;
 
         quoteStatus.value = item.status;
-        finalFreightInput.value = item.final_freight ?? "";
+        finalFreightInput.value = item.final_freight ?? 0;
         freight2Input.value = item.freight2 ?? "";
         serviceFeeInput.value = item.service_fee ?? "";
         totalPriceInput.value = item.total_price ?? "";
         shopeeAfterTaxInput.value = item.shopee_after_tax ?? "";
+        shopeeAfterTaxInput.dataset.manual = "false";
         adminNoteInput.value = item.admin_note || "";
         syncFreightDefaults(item);
         updateAutoCalculations();
@@ -1401,8 +1598,9 @@
         try {
           const query = statusFilter.value ? `?status=${encodeURIComponent(statusFilter.value)}` : "";
           const payload = await requestJson(`/api/admin/inquiries${query}`);
+          inquiryData = payload.items;
 
-          if (!payload.items.length) {
+          if (!payload.items || !payload.items.length) {
             inquiryList.innerHTML = `<div class="empty-state muted">当前没有符合条件的询价记录。</div>`;
             return;
           }
@@ -1444,15 +1642,19 @@
 
         try {
           const item = await requestJson(`/api/admin/inquiries/${code}`);
-          currentInquiry = item;
-          detailEmpty.style.display = "none";
-          detailPanel.style.display = "block";
-          renderSummary(item);
+          renderDetail(item);
           await loadList();
-          openModal();
         } catch (err) {
           detailError.textContent = err.message;
         }
+      }
+
+      function renderDetail(item) {
+        currentInquiry = item;
+        detailEmpty.style.display = "none";
+        detailPanel.style.display = "block";
+        renderSummary(item);
+        openModal();
       }
 
       async function saveQuote() {
@@ -1467,7 +1669,7 @@
           const autoFreight = lastCalculatedFreight ? lastCalculatedFreight.sellerPays : "";
           const finalFreight = finalFreightInput.value === "" ? autoFreight : finalFreightInput.value;
 
-          await requestJson(`/api/admin/inquiries/${selectedCode}/quote`, {
+          const updated = await requestJson(`/api/admin/inquiries/${selectedCode}/quote`, {
             method: "PUT",
             body: JSON.stringify({
               status: quoteStatus.value,
@@ -1480,7 +1682,12 @@
             })
           });
 
-          await loadDetail(selectedCode);
+          // 直接更新列表中的该条数据，不重新请求整个列表
+          const idx = inquiryData.findIndex(it => it.code === selectedCode);
+          if (idx !== -1) inquiryData[idx] = updated;
+          loadList();
+          // 用返回的数据渲染详情，避免额外请求
+          renderDetail(updated);
         } catch (err) {
           detailError.textContent = err.message;
         } finally {
@@ -1516,15 +1723,36 @@
         renderCalculation();
       });
 
-      applyCalcBtn.addEventListener("click", () => {
-        renderCalculation();
-        if (!lastCalculatedFreight) {
-          detailError.textContent = "请先选择可计算的渠道、地区和重量。";
+      applyCalcBtn.addEventListener("click", async () => {
+        const channel = channelSelect.value;
+        const zone = zoneSelect.value;
+        const weightKg = Number(calcWeightInput.value);
+        if (!Number.isFinite(weightKg) || weightKg <= 0) {
+          detailError.textContent = "请先输入有效的重量。";
           return;
         }
+        applyCalcBtn.disabled = true;
         detailError.textContent = "";
-        finalFreightInput.value = lastCalculatedFreight.sellerPays;
+        // 优先调用后端获取权威运费
+        const remote = await calculateFreightRemote(channel, zone, weightKg);
+        if (remote) {
+          lastCalculatedFreight = remote;
+          calcFormula.textContent = remote.formula;
+          finalFreightInput.value = remote.sellerPays;
+        } else {
+          // 后端失败：使用本地规则
+          const local = calculateFreight(channel, zone, weightKg);
+          if (!local) {
+            detailError.textContent = "请先选择可计算的渠道、地区和重量。";
+            applyCalcBtn.disabled = false;
+            return;
+          }
+          lastCalculatedFreight = local;
+          calcFormula.textContent = local.formula + "（后端不可达，使用本地预估）";
+          finalFreightInput.value = local.sellerPays;
+        }
         updateAutoCalculations();
+        applyCalcBtn.disabled = false;
       });
 
       function updateAutoCalculations() {
@@ -1556,11 +1784,13 @@
           }
         }
         
-        // 更新 Shopee 税后总价
+        // 更新 Shopee 税后总价（仅在未手动编辑时自动计算）
         const totalPrice = Number(totalPriceInput.value);
         if (Number.isFinite(totalPrice) && totalPrice > 0) {
-          shopeeAfterTaxInput.value = roundMoney(totalPrice * 1.25);
-        } else {
+          if (!shopeeAfterTaxInput.dataset.manual || shopeeAfterTaxInput.dataset.manual === "false") {
+            shopeeAfterTaxInput.value = roundMoney(totalPrice * 1.25);
+          }
+        } else if (!shopeeAfterTaxInput.dataset.manual || shopeeAfterTaxInput.dataset.manual === "false") {
           shopeeAfterTaxInput.value = "";
         }
       }
@@ -1591,6 +1821,9 @@
       });
       serviceFeeInput.addEventListener("input", updateAutoCalculations);
       totalPriceInput.addEventListener("input", updateAutoCalculations);
+      shopeeAfterTaxInput.addEventListener("input", () => {
+        shopeeAfterTaxInput.dataset.manual = "true";
+      });
 
       adminAddressBtn.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -1635,12 +1868,427 @@
         adminAddressBtn.click();
       }
 
+      // ============= 运费费率管理 =============
+      function showRatesError(msg) {
+        ratesError.textContent = msg || "";
+      }
+
+      function showRatesSuccess(msg) {
+        ratesSuccess.textContent = msg || "";
+        ratesSuccess.style.display = msg ? "" : "none";
+        if (msg) {
+          setTimeout(() => {
+            ratesSuccess.style.display = "none";
+          }, 3000);
+        }
+      }
+
+      function normalizeRatesForRender(rates) {
+        // 确保 channel x zone 的所有组合都存在，缺失的用空模板占位
+        const map = new Map();
+        for (const r of (rates || [])) {
+          map.set(`${r.channel}:${r.zone}`, JSON.parse(JSON.stringify(r)));
+        }
+        const out = [];
+        for (const ch of CHANNEL_LIST) {
+          for (const z of ZONE_LIST) {
+            const key = `${ch}:${z}`;
+            if (map.has(key)) {
+              out.push(map.get(key));
+            } else {
+              // 缺失的占位：单档 flat
+              out.push({
+                channel: ch,
+                zone: z,
+                buyer_pays: 0,
+                tiers: [
+                  { tier_index: 0, min_weight_g: 0, max_weight_g: 50, cost_type: "flat", flat_cost: 0, increment_g: null, rate_per_increment: null },
+                  { tier_index: 1, min_weight_g: 50, max_weight_g: null, cost_type: "per_increment", flat_cost: null, increment_g: 10, rate_per_increment: 0 }
+                ]
+              });
+            }
+          }
+        }
+        return out;
+      }
+
+      function renderRatesTable(rates) {
+        const data = normalizeRatesForRender(rates);
+        ratesEditing = JSON.parse(JSON.stringify(data));
+
+        const cssStyle = `
+          <style>
+            .rates-table-wrap { overflow-x: auto; }
+            .rates-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 12px; }
+            .rates-table th, .rates-table td { border: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+            .rates-table thead th { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+            .rates-channel-group td { background: #f8fafc; }
+            .rates-table input[type="number"], .rates-table input[type="text"] {
+              width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;
+            }
+            .rates-table select {
+              width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 0.85rem; background: #fff;
+            }
+            .rates-tier-row td { background: #ffffff; }
+            .rates-table .tier-actions { white-space: nowrap; }
+            .rates-table .add-tier-btn {
+              background: #eef4ff; color: #1d4ed8; border: 1px dashed #93c5fd; border-radius: 6px;
+              padding: 4px 10px; font-size: 0.8rem; cursor: pointer; margin-top: 4px;
+            }
+            .rates-table .del-tier-btn {
+              background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 6px;
+              padding: 2px 8px; font-size: 0.75rem; cursor: pointer;
+            }
+            .rates-channel-name { font-weight: 600; color: var(--text); }
+            .rates-zone-name { display: inline-block; min-width: 56px; font-weight: 600; }
+          </style>
+        `;
+
+        let html = cssStyle;
+        html += '<div class="rates-table-wrap"><table class="rates-table"><thead><tr>';
+        html += '<th>渠道 / 地区</th><th>买家支付 (PHP)</th><th>阶梯</th><th>min (g)</th><th>max (g)</th><th>类型</th><th>固定价 (PHP)</th><th>步长 (g)</th><th>单价 (PHP/步)</th><th>操作</th>';
+        html += '</tr></thead><tbody>';
+
+        for (let i = 0; i < ratesEditing.length; i += 1) {
+          const rule = ratesEditing[i];
+          const tierCount = Math.max(rule.tiers.length, 1);
+          // 每一组的第一行：合并 渠道/地区 + buyer_pays 跨多行
+          html += `<tr class="rates-channel-group" data-rule-index="${i}">`;
+          html += `<td rowspan="${tierCount}"><span class="rates-channel-name">${escapeHtml(CHANNEL_LABELS[rule.channel] || rule.channel)}</span><br><span class="rates-zone-name">Zone ${escapeHtml(rule.zone)}</span></td>`;
+          html += `<td rowspan="${tierCount}"><input type="number" step="0.01" min="0" data-field="buyer_pays" data-rule="${i}" value="${escapeHtml(rule.buyer_pays)}"></td>`;
+          if (rule.tiers.length > 0) {
+            html += tierRowCells(rule, 0, i);
+          } else {
+            html += '<td colspan="8" class="muted">暂无阶梯，请添加</td>';
+          }
+          html += '</tr>';
+          // 后续行：每条阶梯（从 1 开始）
+          for (let t = 1; t < rule.tiers.length; t += 1) {
+            html += `<tr class="rates-tier-row" data-rule-index="${i}">`;
+            html += tierRowCells(rule, t, i);
+            html += '</tr>';
+          }
+        }
+        html += '</tbody></table></div>';
+        ratesTable.innerHTML = html;
+        bindRatesTableEvents();
+      }
+
+      function tierRowCells(rule, tIdx, ruleIdx) {
+        const tier = rule.tiers[tIdx];
+        const maxAttr = (tier.max_weight_g == null) ? "" : String(tier.max_weight_g);
+        const isLast = tIdx === rule.tiers.length - 1;
+        let html = `<td>${escapeHtml(tier.tier_index)}</td>`;
+        html += `<td><input type="number" step="0.01" min="0" data-field="min_weight_g" data-rule="${ruleIdx}" data-tier="${tIdx}" value="${escapeHtml(tier.min_weight_g)}"></td>`;
+        if (isLast) {
+          html += `<td><input type="number" step="0.01" min="0" placeholder="留空=无上限" data-field="max_weight_g" data-rule="${ruleIdx}" data-tier="${tIdx}" value="${escapeHtml(maxAttr)}"></td>`;
+        } else {
+          html += `<td><input type="number" step="0.01" min="0" data-field="max_weight_g" data-rule="${ruleIdx}" data-tier="${tIdx}" value="${escapeHtml(maxAttr)}"></td>`;
+        }
+        html += `<td><select data-field="cost_type" data-rule="${ruleIdx}" data-tier="${tIdx}">`;
+        html += `<option value="flat"${tier.cost_type === "flat" ? " selected" : ""}>首重固定</option>`;
+        html += `<option value="per_increment"${tier.cost_type === "per_increment" ? " selected" : ""}>按重量阶梯</option>`;
+        html += `</select></td>`;
+        if (tier.cost_type === "flat") {
+          html += `<td><input type="number" step="0.01" min="0" data-field="flat_cost" data-rule="${ruleIdx}" data-tier="${tIdx}" value="${escapeHtml(tier.flat_cost ?? 0)}"></td>`;
+          html += `<td><input type="number" step="0.01" min="0" disabled placeholder="-" data-field="increment_g" data-rule="${ruleIdx}" data-tier="${tIdx}" value=""></td>`;
+          html += `<td><input type="number" step="0.01" min="0" disabled placeholder="-" data-field="rate_per_increment" data-rule="${ruleIdx}" data-tier="${tIdx}" value=""></td>`;
+        } else {
+          html += `<td><input type="number" step="0.01" min="0" disabled placeholder="-" data-field="flat_cost" data-rule="${ruleIdx}" data-tier="${tIdx}" value=""></td>`;
+          html += `<td><input type="number" step="0.01" min="0" data-field="increment_g" data-rule="${ruleIdx}" data-tier="${tIdx}" value="${escapeHtml(tier.increment_g ?? 10)}"></td>`;
+          html += `<td><input type="number" step="0.01" min="0" data-field="rate_per_increment" data-rule="${ruleIdx}" data-tier="${tIdx}" value="${escapeHtml(tier.rate_per_increment ?? 0)}"></td>`;
+        }
+        html += `<td class="tier-actions">`;
+        if (rule.tiers.length > 1) {
+          html += `<button type="button" class="del-tier-btn" data-action="del-tier" data-rule="${ruleIdx}" data-tier="${tIdx}">删除</button>`;
+        }
+        html += `</td>`;
+        return html;
+      }
+
+      function bindRatesTableEvents() {
+        ratesTable.querySelectorAll("input, select").forEach((el) => {
+          el.addEventListener("change", onRatesFieldChange);
+          el.addEventListener("blur", onRatesFieldChange);
+        });
+        ratesTable.querySelectorAll("[data-action='del-tier']").forEach((el) => {
+          el.addEventListener("click", onRatesDeleteTier);
+        });
+      }
+
+      function onRatesFieldChange(e) {
+        const el = e.target;
+        const field = el.dataset.field;
+        const ruleIdx = Number(el.dataset.rule);
+        const tierIdx = el.dataset.tier != null ? Number(el.dataset.tier) : null;
+        if (Number.isNaN(ruleIdx) || ruleIdx < 0 || ruleIdx >= ratesEditing.length) return;
+        const rule = ratesEditing[ruleIdx];
+
+        if (field === "buyer_pays") {
+          rule.buyer_pays = Number(el.value) || 0;
+          return;
+        }
+        if (tierIdx == null) return;
+        const tier = rule.tiers[tierIdx];
+        if (!tier) return;
+
+        if (field === "cost_type") {
+          tier.cost_type = el.value;
+          // 切换类型时清空对侧字段
+          if (el.value === "flat") {
+            tier.flat_cost = tier.flat_cost ?? 0;
+            tier.increment_g = null;
+            tier.rate_per_increment = null;
+          } else {
+            tier.increment_g = tier.increment_g ?? 10;
+            tier.rate_per_increment = tier.rate_per_increment ?? 0;
+            tier.flat_cost = null;
+          }
+          // 重渲染以更新输入框启用状态
+          renderRatesTable(ratesEditing);
+          return;
+        }
+
+        if (field === "min_weight_g") {
+          tier.min_weight_g = Number(el.value) || 0;
+        } else if (field === "max_weight_g") {
+          if (el.value === "" || el.value == null) {
+            tier.max_weight_g = null;
+          } else {
+            tier.max_weight_g = Number(el.value);
+          }
+        } else if (field === "flat_cost") {
+          tier.flat_cost = Number(el.value) || 0;
+        } else if (field === "increment_g") {
+          tier.increment_g = Number(el.value) || 0;
+        } else if (field === "rate_per_increment") {
+          tier.rate_per_increment = Number(el.value) || 0;
+        }
+      }
+
+      function onRatesDeleteTier(e) {
+        const btn = e.currentTarget;
+        const ruleIdx = Number(btn.dataset.rule);
+        const tierIdx = Number(btn.dataset.tier);
+        if (Number.isNaN(ruleIdx) || Number.isNaN(tierIdx)) return;
+        const rule = ratesEditing[ruleIdx];
+        if (!rule || rule.tiers.length <= 1) {
+          showRatesError("至少需要保留 1 个阶梯。");
+          return;
+        }
+        rule.tiers.splice(tierIdx, 1);
+        // 重新整理 tier_index
+        rule.tiers.forEach((t, i) => { t.tier_index = i; });
+        renderRatesTable(ratesEditing);
+        showRatesError("");
+      }
+
+      function collectRatesForSave() {
+        // 简单构造 payload：保留编辑中的内存数据
+        return ratesEditing.map((rule) => ({
+          channel: rule.channel,
+          zone: rule.zone,
+          buyer_pays: Number(rule.buyer_pays) || 0,
+          tiers: rule.tiers.map((t, i) => {
+            const base = {
+              tier_index: i,
+              min_weight_g: Number(t.min_weight_g) || 0,
+              cost_type: t.cost_type
+            };
+            if (t.cost_type === "flat") {
+              base.flat_cost = Number(t.flat_cost) || 0;
+            } else {
+              base.increment_g = Number(t.increment_g) || 0;
+              base.rate_per_increment = Number(t.rate_per_increment) || 0;
+            }
+            if (t.max_weight_g == null || t.max_weight_g === "") {
+              // 最后一档允许 null
+              base.max_weight_g = null;
+            } else {
+              base.max_weight_g = Number(t.max_weight_g);
+            }
+            return base;
+          })
+        }));
+      }
+
+      async function handleLoadRates() {
+        showRatesError("");
+        showRatesSuccess("");
+        if (!getToken()) {
+          showRatesError("请先填写 ADMIN_TOKEN。");
+          return;
+        }
+        loadRatesBtn.disabled = true;
+        try {
+          const data = await requestJson("/api/admin/shipping-rates", { method: "GET" });
+          if (data && Array.isArray(data.rates)) {
+            renderRatesTable(data.rates);
+            showRatesSuccess(`已加载 ${data.rates.length} 条费率规则`);
+          } else {
+            showRatesError("返回数据格式不正确。");
+          }
+        } catch (err) {
+          showRatesError(err.message || "加载失败。");
+        } finally {
+          loadRatesBtn.disabled = false;
+        }
+      }
+
+      async function handleSaveRates() {
+        showRatesError("");
+        showRatesSuccess("");
+        if (!getToken()) {
+          showRatesError("请先填写 ADMIN_TOKEN。");
+          return;
+        }
+        const payload = collectRatesForSave();
+        // 前端快速预检
+        for (const rule of payload) {
+          const tiers = rule.tiers;
+          for (let i = 0; i < tiers.length; i += 1) {
+            if (i === 0 && tiers[i].min_weight_g !== 0) {
+              showRatesError(`${rule.channel}/${rule.zone} 第 1 档起始重量必须为 0。`);
+              return;
+            }
+            if (i > 0 && tiers[i].min_weight_g !== tiers[i - 1].max_weight_g) {
+              showRatesError(`${rule.channel}/${rule.zone} 第 ${i + 1} 档起始重量必须等于上一档的结束重量 (${tiers[i - 1].max_weight_g}g)。`);
+              return;
+            }
+          }
+          if (tiers[tiers.length - 1].max_weight_g != null) {
+            showRatesError(`${rule.channel}/${rule.zone} 最后一档 max_weight_g 必须留空。`);
+            return;
+          }
+        }
+
+        saveRatesBtn.disabled = true;
+        try {
+          const data = await requestJson("/api/admin/shipping-rates", {
+            method: "PUT",
+            body: JSON.stringify({ rates: payload })
+          });
+          if (data && Array.isArray(data.rates)) {
+            renderRatesTable(data.rates);
+            showRatesSuccess(`保存成功，共 ${data.rates.length} 条规则。已报价订单不受影响。`);
+          } else {
+            showRatesSuccess("保存成功。");
+          }
+        } catch (err) {
+          showRatesError(err.message || "保存失败。");
+        } finally {
+          saveRatesBtn.disabled = false;
+        }
+      }
+
+      async function handleResetRates() {
+        showRatesError("");
+        showRatesSuccess("");
+        if (!getToken()) {
+          showRatesError("请先填写 ADMIN_TOKEN。");
+          return;
+        }
+        if (!confirm("确定要恢复默认费率吗？现有自定义费率会被覆盖。")) {
+          return;
+        }
+        resetRatesBtn.disabled = true;
+        try {
+          const data = await requestJson("/api/admin/shipping-rates/reset", { method: "POST" });
+          if (data && Array.isArray(data.rates)) {
+            renderRatesTable(data.rates);
+            showRatesSuccess(`已恢复默认费率，共 ${data.rates.length} 条规则。`);
+          } else {
+            showRatesSuccess("已恢复默认费率。");
+          }
+        } catch (err) {
+          showRatesError(err.message || "恢复失败。");
+        } finally {
+          resetRatesBtn.disabled = false;
+        }
+      }
+
+      adminRatesBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        closeSidebar();
+        syncTokensToInputs();
+        if (layoutDiv) layoutDiv.style.display = "none";
+        if (addressPage) addressPage.style.display = "none";
+        ratesPage.style.display = "";
+        showRatesError("");
+        showRatesSuccess("");
+        if (ratesEditing.length === 0) {
+          await handleLoadRates();
+        }
+      });
+
+      backFromRatesBtn.addEventListener("click", () => {
+        ratesPage.style.display = "none";
+        if (layoutDiv) layoutDiv.style.display = "";
+      });
+
+      loadRatesBtn.addEventListener("click", handleLoadRates);
+      saveRatesBtn.addEventListener("click", handleSaveRates);
+      resetRatesBtn.addEventListener("click", handleResetRates);
+
+      if (window.location.hash === "#rates") {
+        // 等待 getToken 完成再触发
+        setTimeout(() => adminRatesBtn.click(), 50);
+      }
+
+      // ============= 公告管理 =============
+      adminAnnounceBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        closeSidebar();
+        syncTokensToInputs();
+        if (layoutDiv) layoutDiv.style.display = "none";
+        if (addressPage) addressPage.style.display = "none";
+        if (ratesPage) ratesPage.style.display = "none";
+        announcePage.style.display = "";
+        announceError.textContent = "";
+        announceSuccess.style.display = "none";
+        announceTokenInput.value = getToken();
+        try {
+          const data = await requestJson("/api/announcement");
+          announceContentInput.value = data.content || "";
+          announceEnabledCheck.checked = data.is_enabled !== false;
+        } catch (err) {
+          announceContentInput.value = "";
+          announceEnabledCheck.checked = true;
+        }
+      });
+
+      backFromAnnounceBtn.addEventListener("click", () => {
+        announcePage.style.display = "none";
+        if (layoutDiv) layoutDiv.style.display = "";
+      });
+
+      saveAnnounceBtn.addEventListener("click", async () => {
+        announceError.textContent = "";
+        announceSuccess.style.display = "none";
+        try {
+          await requestJson("/api/admin/announcement", {
+            method: "PUT",
+            body: JSON.stringify({
+              content: announceContentInput.value,
+              is_enabled: announceEnabledCheck.checked
+            })
+          });
+          announceSuccess.textContent = "公告保存成功";
+          announceSuccess.style.display = "";
+          setTimeout(() => {
+            announceSuccess.style.display = "none";
+          }, 3000);
+        } catch (err) {
+          announceError.textContent = err.message;
+        }
+      });
+
+      if (window.location.hash === "#announce") {
+        setTimeout(() => adminAnnounceBtn.click(), 50);
+      }
+
       loadList();
     })();
   </script>
-  <div class="lightbox" id="imgLightbox">
-    <span class="lightbox-close">&times;</span>
-    <img src="" alt="product image">
-  </div>
 </body>
 </html>

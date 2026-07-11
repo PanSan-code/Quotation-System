@@ -1,0 +1,3 @@
+name = "quote-system-api-test"
+main = "src/worker-test.js"
+compatibility_date = "2026-07-09"

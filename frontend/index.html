@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PanSan报价系统</title>
+  <title>PanSan Quote System</title>
+  <meta name="description" content="PanSan Quote System — Submit product links for freight quotation, track orders, and manage forwarding from China to Philippines.">
+  <meta property="og:title" content="PanSan Quote System">
+  <meta property="og:description" content="Submit product links for freight quotation, track orders, and manage forwarding from China to Philippines.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pansanrequest.ccwu.cc/">
+  <meta property="og:site_name" content="PanSan Quote System">
   <style>
     :root {
       --bg: #f3f6fb;
@@ -249,6 +255,63 @@
       font-weight: normal;
     }
 
+    /* 公告弹窗 */
+    .announce-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .announce-overlay.active {
+      display: flex;
+    }
+
+    .announce-card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+      position: relative;
+      text-align: center;
+      margin: 0 16px;
+    }
+
+    .announce-card .announce-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+
+    .announce-card h2 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .announce-card .announce-body {
+      font-size: 0.93rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    .announce-card .announce-body p {
+      margin: 0.5em 0;
+    }
+
+    .announce-card .announce-body a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
     .step-list {
       list-style: none;
       padding: 0;
@@ -366,6 +429,7 @@
     input[type="url"],
     input[type="text"],
     input[type="number"],
+    select,
     textarea {
       width: 100%;
       border: 1px solid var(--line);
@@ -375,6 +439,17 @@
       font: inherit;
       color: var(--text);
       transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23ff6a3d' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 12px 8px;
+      padding-right: 38px;
     }
 
     textarea {
@@ -843,10 +918,16 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <nav class="sidebar-nav" id="sidebarNav">
     <button type="button" class="link-btn" id="orderBtn">下单流程</button>
-    <button type="button" class="link-btn" id="selfOrderBtn">自行下单</button>
-    <button type="button" class="link-btn" id="orderQueryBtn">查询订单</button>
+    <button type="button" class="link-btn" id="forwardingProcessBtn">转运流程</button>
+    <button type="button" class="link-btn" id="selfOrderBtn">转运服务</button>
+    <button type="button" class="link-btn" id="orderQueryBtn">查询转运订单</button>
     <button type="button" class="link-btn" id="toQueryLink">查询报价</button>
-    <button type="button" class="link-btn" id="addressBtn">收货地址</button>
+    <button type="button" class="link-btn" id="addressBtn">转运地址</button>
+    <button type="button" class="link-btn" id="myInquiriesBtn">我的询价</button>
+    <button type="button" class="link-btn" id="myForwardingBtn">我的转运</button>
+    <button type="button" class="link-btn" id="cartBtn">购物车</button>
+    <button type="button" class="link-btn" id="shippingCalcBtn" style="color:#0891b2;">运费估算</button>
+    <button type="button" class="link-btn" id="loginBtn" style="color:#15803d;">登录</button>
     <button type="button" class="lang-btn" id="langBtn">EN</button>
   </nav>
 
@@ -861,7 +942,7 @@
         </div>
 
         <div class="field">
-          <label id="imageLabel">商品图片</label>
+          <label for="imageInput" id="imageLabel">商品图片</label>
           <div class="hint" id="imageHint">可选，最多上传 5 张图片</div>
           <div class="upload-box" id="uploadTrigger">
             <div id="uploadText">点击上传图片</div>
@@ -893,7 +974,7 @@
           <label for="weightSlider" id="weightLabel">预估重量</label>
           <div class="weight-row">
             <input type="range" id="weightSlider" min="0.01" max="50" step="0.01" value="3">
-            <input type="number" id="weightInput" min="0.01" max="50" step="0.01" value="3" class="weight-input" placeholder="kg">
+            <input type="number" id="weightInput" min="0.01" max="50" step="0.01" value="3" class="weight-input" placeholder="kg" aria-label="预估重量">
             <div class="pill" id="weightDisplay">3.00 kg</div>
           </div>
         </div>
@@ -946,11 +1027,151 @@
         <div id="queryResult" style="margin-top: 16px;"></div>
       </div>
     </section>
+
+    <section class="page" id="loginPage">
+      <div class="card">
+        <h2 id="loginTitle">Login / Sign Up</h2>
+        <p class="subtitle" id="loginSubtitle">Enter your email to receive a verification code.</p>
+        <div class="field">
+          <label for="loginEmail" id="loginEmailLabel">Email</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com">
+        </div>
+        <div class="action-row" style="margin-top: 12px;">
+          <button type="button" class="primary-btn" id="sendCodeBtn" style="width:auto; min-width:140px;">Send Code</button>
+        </div>
+        <div class="field" id="codeField" style="display:none; margin-top: 16px;">
+          <label for="loginCode" id="loginCodeLabel">Verification Code</label>
+          <input type="text" id="loginCode" maxlength="6" placeholder="6-digit code" style="text-transform:uppercase;">
+        </div>
+        <div class="action-row" id="verifyRow" style="display:none; margin-top: 12px;">
+          <button type="button" class="primary-btn" id="verifyCodeBtn" style="width:auto; min-width:140px;">Verify & Login</button>
+        </div>
+        <p class="error-text" id="loginError" style="display:none;"></p>
+        <p class="muted" id="loginHint" style="margin-top: 12px;"></p>
+      </div>
+    </section>
+
+    <section class="page" id="myInquiriesPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="myInquiriesTitle">My Inquiries</h2>
+          <button type="button" class="link-btn" id="backFromMyInquiriesBtn">Back</button>
+        </div>
+        <div id="myInquiriesList" style="margin-top: 16px;">
+          <p class="muted">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="myForwardingPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="myForwardingTitle">My Forwarding</h2>
+          <button type="button" class="link-btn" id="backFromMyForwardingBtn">Back</button>
+        </div>
+        <div id="myForwardingList" style="margin-top: 16px;">
+          <p class="muted">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="cartPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="cartTitle">Cart</h2>
+          <button type="button" class="link-btn" id="backFromCartBtn">Back</button>
+        </div>
+        <div id="cartList" style="margin-top: 16px;">
+          <p class="muted">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="selfOrderPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="selfOrderPageTitle">转运服务</h2>
+          <button type="button" class="link-btn" id="backFromSelfOrderBtn">返回</button>
+        </div>
+        <div class="self-order-section" style="margin-top:16px;">
+          <label id="trackingLabel">物流单号</label>
+          <div id="trackingList"></div>
+          <button type="button" class="ghost-btn fill" id="addTrackingBtn">+ 添加物流单号</button>
+        </div>
+        <div class="self-order-section">
+          <button type="button" class="primary-btn" id="saveSelfOrderBtn">创建订单</button>
+        </div>
+        <div class="error-text" id="selfOrderError"></div>
+      </div>
+    </section>
+
+    <section class="page" id="selfOrderResultPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="selfOrderResultPageTitle">订单已创建</h2>
+          <button type="button" class="link-btn" id="backFromResultBtn">返回</button>
+        </div>
+        <div class="self-order-section" style="margin-top:16px;">
+          <label id="resultCodeLabel">八字单号</label>
+          <div class="result-code-display" id="resultCodeDisplay">--------</div>
+          <div style="text-align:center; margin-top:8px;">
+            <button type="button" class="ghost-btn" id="copyOrderCodeBtn">复制</button>
+          </div>
+          <p class="muted" id="resultCodeHint">请保存此单号，后续可在管理员后台查询</p>
+        </div>
+        <div class="self-order-section">
+          <label id="resultTrackingLabel">物流单号</label>
+          <div id="resultTrackingList"></div>
+        </div>
+        <div class="self-order-section">
+          <button type="button" class="primary-btn" id="selfOrderResultOkBtn">确定</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="orderQueryPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="orderQueryPageTitle">查询转运订单</h2>
+          <button type="button" class="link-btn" id="backFromOrderQueryBtn">返回</button>
+        </div>
+        <div class="self-order-section" style="margin-top:16px;">
+          <label id="orderQueryCodeLabel">八字单号</label>
+          <input type="text" id="orderQueryCodeInput" placeholder="输入8位订单号">
+        </div>
+        <div class="self-order-section">
+          <button type="button" class="primary-btn" id="orderQuerySearchBtn">查询</button>
+        </div>
+        <div class="error-text" id="orderQueryError"></div>
+        <div id="orderQueryResult" style="display: none;">
+          <div class="self-order-section">
+            <label id="orderQueryResultCodeLabel">八字单号</label>
+            <div class="result-code-display" id="orderQueryResultCode">--------</div>
+          </div>
+          <div class="self-order-section">
+            <label id="orderQueryResultTrackingLabel">物流单号</label>
+            <span class="hint" id="orderQueryTrackingHint"></span>
+            <div id="orderQueryResultTrackingList"></div>
+          </div>
+          <div class="self-order-section">
+            <label id="orderQueryAddTrackingLabel">添加物流单号</label>
+            <div id="orderQueryAddTrackingList"></div>
+            <button type="button" class="ghost-btn fill" id="orderQueryAddTrackingBtn">+ 添加物流单号</button>
+            <button type="button" class="primary-btn" id="orderQuerySaveTrackingBtn" style="margin-top: 12px;">保存</button>
+            <div class="error-text" id="orderQueryAddTrackingError"></div>
+          </div>
+          <div class="self-order-section">
+            <label id="orderQueryResultCreatedAtLabel">创建时间</label>
+            <div id="orderQueryResultCreatedAt"></div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <div class="modal-overlay" id="orderModal">
     <div class="modal-card">
-      <button type="button" class="modal-close" id="modalClose">&times;</button>
+      <button type="button" class="modal-close" id="modalClose" title="Close">&times;</button>
       <h2 id="orderModalTitle">下单流程</h2>
       <ol class="step-list" id="orderSteps">
         <li class="step-item">
@@ -985,90 +1206,71 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="selfOrderModal">
-    <div class="modal-card self-order-modal">
-      <button type="button" class="modal-close" id="selfOrderModalClose">&times;</button>
-      <h2 id="selfOrderModalTitle">自行下单</h2>
-
-      <div class="self-order-section">
-        <label id="trackingLabel">物流单号</label>
-        <div id="trackingList"></div>
-        <button type="button" class="ghost-btn fill" id="addTrackingBtn">+ 添加物流单号</button>
-      </div>
-
-      <div class="self-order-section">
-        <button type="button" class="primary-btn" id="saveSelfOrderBtn">创建订单</button>
-      </div>
-      <div class="error-text" id="selfOrderError"></div>
+  <div class="modal-overlay" id="forwardingProcessModal">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="forwardingProcessModalClose" title="Close">&times;</button>
+      <h2 id="forwardingProcessModalTitle">转运流程</h2>
+      <ol class="step-list" id="forwardingProcessSteps">
+        <li class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <p id="fwdStep1Title">复制转运地址</p>
+            <p class="step-hint" id="fwdStep1Hint">点击「转运地址」按钮，复制仓库地址信息</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <p id="fwdStep2Title">前往购物平台下单</p>
+            <p class="step-hint" id="fwdStep2Hint">在购物平台下单时，将收货地址填写为复制的转运地址</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <p id="fwdStep3Title">获取物流单号</p>
+            <p class="step-hint" id="fwdStep3Hint">等待卖家发货后，复制商品的物流单号</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <p id="fwdStep4Title">填写物流单号</p>
+            <p class="step-hint" id="fwdStep4Hint">到此系统「转运服务」中填写物流单号</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <p id="fwdStep5Title">等待商品到仓</p>
+            <p class="step-hint" id="fwdStep5Hint">耐心等待商品送达转运仓库</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">6</div>
+          <div class="step-content">
+            <p id="fwdStep6Title">检查商品</p>
+            <p class="step-hint" id="fwdStep6Hint">到仓后，PanSan 将称重及拍照提供给你检查</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-number">7</div>
+          <div class="step-content">
+            <p id="fwdStep7Title">付款发货</p>
+            <p class="step-hint" id="fwdStep7Hint">确认最终费用，付款后安排发货</p>
+          </div>
+        </li>
+      </ol>
     </div>
   </div>
 
-  <div class="modal-overlay" id="selfOrderResultModal">
-    <div class="modal-card self-order-modal">
-      <button type="button" class="modal-close" id="selfOrderResultClose">&times;</button>
-      <h2 id="selfOrderResultTitle">订单已创建</h2>
-      <div class="self-order-section">
-        <label id="resultCodeLabel">八字单号</label>
-        <div class="result-code-display" id="resultCodeDisplay">--------</div>
-        <div style="text-align:center; margin-top:8px;">
-          <button type="button" class="ghost-btn" id="copyOrderCodeBtn">复制</button>
-        </div>
-        <p class="muted" id="resultCodeHint">请保存此单号，后续可在管理员后台查询</p>
-      </div>
-      <div class="self-order-section">
-        <label id="resultTrackingLabel">物流单号</label>
-        <div id="resultTrackingList"></div>
-      </div>
-      <div class="self-order-section">
-        <button type="button" class="primary-btn" id="selfOrderResultOkBtn">确定</button>
-      </div>
-    </div>
-  </div>
 
-  <div class="modal-overlay" id="orderQueryModal">
-    <div class="modal-card self-order-modal">
-      <button type="button" class="modal-close" id="orderQueryModalClose">&times;</button>
-      <h2 id="orderQueryModalTitle">查询订单</h2>
-
-      <div class="self-order-section">
-        <label id="orderQueryCodeLabel">八字单号</label>
-        <input type="text" id="orderQueryCodeInput" placeholder="输入8位订单号">
-      </div>
-
-      <div class="self-order-section">
-        <button type="button" class="primary-btn" id="orderQuerySearchBtn">查询</button>
-      </div>
-      <div class="error-text" id="orderQueryError"></div>
-
-      <div id="orderQueryResult" style="display: none;">
-        <div class="self-order-section">
-          <label id="orderQueryResultCodeLabel">八字单号</label>
-          <div class="result-code-display" id="orderQueryResultCode">--------</div>
-        </div>
-        <div class="self-order-section">
-          <label id="orderQueryResultTrackingLabel">物流单号</label>
-          <div id="orderQueryResultTrackingList"></div>
-        </div>
-        <div class="self-order-section">
-          <label id="orderQueryAddTrackingLabel">添加物流单号</label>
-          <div id="orderQueryAddTrackingList"></div>
-          <button type="button" class="ghost-btn fill" id="orderQueryAddTrackingBtn">+ 添加物流单号</button>
-          <button type="button" class="primary-btn" id="orderQuerySaveTrackingBtn" style="margin-top: 12px;">保存</button>
-          <div class="error-text" id="orderQueryAddTrackingError"></div>
-        </div>
-        <div class="self-order-section">
-          <label id="orderQueryResultCreatedAtLabel">创建时间</label>
-          <div id="orderQueryResultCreatedAt"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="modal-overlay" id="addressModal">
     <div class="modal-content">
-      <button type="button" class="modal-close" id="addressModalClose">&times;</button>
+      <button type="button" class="modal-close" id="addressModalClose" title="Close">&times;</button>
       <div class="modal-header">
-        <h2 id="addressModalTitle">收货地址</h2>
+        <h2 id="addressModalTitle">转运地址</h2>
       </div>
       <div class="field">
         <div id="addressContent" style="white-space: pre-wrap; background:#f8f9fa; padding: 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; min-height: 60px;"></div>
@@ -1077,6 +1279,64 @@
         <button type="button" class="primary-btn" id="copyAddressBtn">复制地址</button>
       </div>
     </div>
+  </div>
+
+  <div class="modal-overlay" id="shippingCalcModal">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="shippingCalcModalClose" title="Close">&times;</button>
+      <h2 id="shippingCalcModalTitle">运费估算</h2>
+
+      <div class="calc-box">
+        <div class="row">
+          <div>
+            <label for="scChannelSelect" id="scChannelLabel">物流渠道</label>
+            <select id="scChannelSelect">
+              <option value="economy" data-i18n="scOptSea">海运</option>
+              <option value="standard" data-i18n="scOptAir">空运</option>
+            </select>
+          </div>
+          <div>
+            <label for="scZoneSelect" id="scZoneLabel">地区</label>
+            <select id="scZoneSelect">
+              <option value="A" data-i18n="scZoneA">Zone A</option>
+              <option value="B" data-i18n="scZoneB">Zone B</option>
+              <option value="C" data-i18n="scZoneC">Zone C</option>
+              <option value="D" data-i18n="scZoneD">Zone D</option>
+            </select>
+          </div>
+          <div>
+            <label for="scWeightInput" id="scWeightLabel">计费重量</label>
+            <input type="number" id="scWeightInput" min="0.01" step="0.001" placeholder="单位 kg">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 12px;">
+          <div style="flex: 1;">
+            <label id="scResultLabel">预估运费</label>
+            <div class="pill" id="scResultPill" style="font-size: 1.05rem; padding: 10px 18px;">PHP 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <button type="button" class="primary-btn" id="scCloseBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="announce-overlay" id="announceOverlay">
+    <div class="announce-card">
+      <button type="button" class="modal-close" id="announceCloseBtn" title="Close">&times;</button>
+      <div class="announce-icon">&#x1F4AC;</div>
+      <h2 id="announceTitle">温馨提示</h2>
+      <div class="announce-body" id="announceBody"></div>
+      <button type="button" class="primary-btn" id="announceGotBtn">我知道了</button>
+    </div>
+  </div>
+
+  <div class="lightbox" id="imgLightbox">
+    <span class="lightbox-close">&times;</span>
+    <img src="" alt="product image">
   </div>
 
   <script src="./config.js"></script>
@@ -1112,6 +1372,8 @@
           gcashPayment: "Gcash",
           shopeePayment: "Shopee全款",
           weightLabel: "预估重量",
+          shippingEstimateLabel: "运费预估：",
+          shippingEstimateHint: "基于海运 Zone A 的隐藏成本 + 买家支付价计算，最终运费以管理员报价为准。",
           submitBtn: "提交询价",
           submitting: "提交中...",
           successTitle: "询价已提交",
@@ -1127,8 +1389,24 @@
           queryHint: "输入提交后收到的查询码即可查看报价进度。",
           orderBtn: "下单流程",
           orderModalTitle: "下单流程",
-          selfOrderBtn: "自行下单",
-          selfOrderModalTitle: "自行下单",
+          forwardingProcessBtn: "转运流程",
+          forwardingProcessModalTitle: "转运流程",
+          fwdStep1Title: "复制转运地址",
+          fwdStep1Hint: "点击「转运地址」按钮，复制仓库地址信息",
+          fwdStep2Title: "前往购物平台下单",
+          fwdStep2Hint: "在购物平台下单时，将收货地址填写为复制的转运地址",
+          fwdStep3Title: "获取物流单号",
+          fwdStep3Hint: "等待卖家发货后，复制商品的物流单号",
+          fwdStep4Title: "填写物流单号",
+          fwdStep4Hint: "到此系统「转运服务」中填写物流单号",
+          fwdStep5Title: "等待商品到仓",
+          fwdStep5Hint: "耐心等待商品送达转运仓库",
+          fwdStep6Title: "检查商品",
+          fwdStep6Hint: "到仓后，PanSan 将称重及拍照提供给你检查",
+          fwdStep7Title: "付款发货",
+          fwdStep7Hint: "确认最终费用，付款后安排发货",
+          selfOrderBtn: "转运服务",
+          selfOrderModalTitle: "转运服务",
           trackingLabel: "物流单号",
           addTrackingBtn: "+ 添加物流单号",
           saveSelfOrderBtn: "创建订单",
@@ -1161,7 +1439,7 @@
           shipping: "运输方式",
           weight: "预估重量",
           freight: "运费",
-          serviceFee: "商品目前售价",
+          serviceFee: "Shopee税后价格",
           total: "总价",
           note: "报价备注",
           submitTime: "提交时间",
@@ -1173,13 +1451,14 @@
           alertImageLimit: "最多上传 5 张图片",
           requestFailed: "请求失败，请稍后重试",
           invalidCode: "未找到该查询码，请确认后重试。",
-          orderQueryBtn: "查询订单",
-          orderQueryModalTitle: "查询订单",
+          orderQueryBtn: "查询转运订单",
+          orderQueryModalTitle: "查询转运订单",
           orderQueryCodeLabel: "八字单号",
           orderQueryCodePlaceholder: "输入8位订单号",
           orderQuerySearchBtn: "查询",
           orderQueryResultCodeLabel: "八字单号",
           orderQueryResultTrackingLabel: "物流单号",
+          orderQueryTrackingHint: "✓ 表示物品已到仓",
           orderQueryResultCreatedAtLabel: "创建时间",
           orderQueryNotFound: "未找到该订单，请确认后重试。",
           orderQueryCreatedAt: "创建时间",
@@ -1193,11 +1472,83 @@
           orderQueryConfirmSave: "确认保存",
           confirmRemoveTracking: "确认删除该物流单号？",
           removeTrackingFailed: "删除失败，请稍后重试",
-          addressBtn: "收货地址",
-          addressModalTitle: "收货地址",
+          addressBtn: "转运地址",
+          addressModalTitle: "转运地址",
           copyAddressBtn: "复制地址",
           addressCopied: "地址已复制到剪贴板",
-          addressLoadFailed: "加载地址失败"
+          addressLoadFailed: "加载地址失败",
+          loginBtn: "登录",
+          logoutBtn: "退出",
+          myInquiriesBtn: "我的询价",
+          loginTitle: "登录 / 注册",
+          loginSubtitle: "输入邮箱地址，获取验证码登录。",
+          loginEmailLabel: "邮箱",
+          loginEmailPlaceholder: "your@email.com",
+          sendCodeBtn: "发送验证码",
+          sendingCode: "发送中...",
+          codeSent: "验证码已发送",
+          loginCodeLabel: "验证码",
+          loginCodePlaceholder: "6位验证码",
+          verifyCodeBtn: "验证并登录",
+          verifying: "验证中...",
+          loginErrorInvalidEmail: "请输入有效的邮箱地址",
+          loginErrorInvalidCode: "验证码无效或已过期",
+          loginSuccess: "登录成功",
+          loginHint: "未注册的邮箱将自动创建账号。",
+          myInquiriesTitle: "我的询价",
+          myInquiriesEmpty: "暂无询价记录，提交询价后会自动显示在这里。",
+          myInquiriesLoading: "加载中...",
+          myInquiriesNeedLogin: "请先登录以查看您的询价记录。",
+          backFromMyInquiriesBtn: "返回",
+          addToCartBtn: "加入购物车",
+          addedToCart: "已加入",
+          cartAddFailed: "加入购物车失败",
+          myInquiriesLoadFailed: "加载询价记录失败",
+          loginBackBtn: "返回首页",
+          cartBtn: "购物车",
+          shippingCalcBtn: "运费估算",
+          shippingCalcTitle: "运费估算",
+          scChannelLabel: "物流渠道",
+          scZoneLabel: "地区",
+          scWeightLabel: "计费重量 (kg)",
+          scResultLabel: "预估运费",
+          scOptSea: "海运",
+          scOptAir: "空运",
+          scZoneA: "Zone A",
+          scZoneB: "Zone B",
+          scZoneC: "Zone C",
+          scZoneD: "Zone D",
+          scDetailLabel: "明细",
+          scWeightPlaceholder: "单位 kg",
+          scCloseBtn: "关闭",
+          scWeightHint: "请输入大于 0 的重量。",
+          announceTitle: "温馨提示",
+          announceGotBtn: "我知道了",
+          cartTitle: "购物车",
+          cartEmpty: "购物车为空，去「我的询价」添加商品吧。",
+          cartLoading: "加载中...",
+          cartNeedLogin: "请先登录以查看购物车。",
+          backFromCartBtn: "返回",
+          removeFromCart: "移除",
+          removeFailed: "移除失败",
+          cartLoadFailed: "加载购物车失败",
+          myForwardingBtn: "我的转运",
+          myForwardingTitle: "我的转运",
+          myForwardingEmpty: "暂无转运记录，创建转运订单后会自动显示在这里。",
+          myForwardingLoading: "加载中...",
+          myForwardingNeedLogin: "请先登录以查看您的转运记录。",
+          backFromMyForwardingBtn: "返回",
+          myForwardingLoadFailed: "加载转运记录失败",
+          myForwardingCode: "单号",
+          myForwardingTracking: "物流单号",
+          myForwardingCreatedAt: "创建时间",
+          myForwardingNoTracking: "暂无物流单号",
+          selfOrderPageTitle: "转运服务",
+          selfOrderResultPageTitle: "订单已创建",
+          orderQueryPageTitle: "查询转运订单",
+          backFromSelfOrderBtn: "返回",
+          backFromResultBtn: "返回",
+          backFromOrderQueryBtn: "返回"
         },
         en: {
           formTitleText: "PanSan Quote System",
@@ -1217,6 +1568,8 @@
           gcashPayment: "Gcash",
           shopeePayment: "Shopee Full Payment",
           weightLabel: "Estimated Weight",
+          shippingEstimateLabel: "",
+          shippingEstimateHint: "",
           submitBtn: "Submit Inquiry",
           submitting: "Submitting...",
           successTitle: "Inquiry Submitted",
@@ -1232,8 +1585,24 @@
           queryHint: "Enter your inquiry code to track quote progress.",
           orderBtn: "Order Process",
           orderModalTitle: "Order Process",
-          selfOrderBtn: "Self Order",
-          selfOrderModalTitle: "Self Order",
+          forwardingProcessBtn: "Forwarding Process",
+          forwardingProcessModalTitle: "Forwarding Process",
+          fwdStep1Title: "Copy Forwarding Address",
+          fwdStep1Hint: "Click 'Forwarding Address' to copy the warehouse address",
+          fwdStep2Title: "Place Order on Shopping Platform",
+          fwdStep2Hint: "Use the copied forwarding address as the shipping address when placing an order",
+          fwdStep3Title: "Get Tracking Number",
+          fwdStep3Hint: "After the seller ships, copy the tracking number from the shopping platform",
+          fwdStep4Title: "Enter Tracking Number",
+          fwdStep4Hint: "Enter the tracking number in the 'Forwarding Service' section of this system",
+          fwdStep5Title: "Wait for Arrival at Warehouse",
+          fwdStep5Hint: "Wait patiently for the item to arrive at the forwarding warehouse",
+          fwdStep6Title: "Check Your Item",
+          fwdStep6Hint: "Upon arrival, PanSan will weigh and photograph the item for your review",
+          fwdStep7Title: "Confirm Payment & Ship",
+          fwdStep7Hint: "Confirm the final cost, pay, and we will arrange shipping",
+          selfOrderBtn: "Forwarding Service",
+          selfOrderModalTitle: "Forwarding Service",
           trackingLabel: "Tracking Numbers",
           addTrackingBtn: "+ Add Tracking",
           saveSelfOrderBtn: "Create Order",
@@ -1266,7 +1635,7 @@
           shipping: "Shipping",
           weight: "Weight",
           freight: "Freight",
-          serviceFee: "Current Product Price",
+          serviceFee: "Shopee After Tax",
           total: "Total",
           note: "Admin Note",
           submitTime: "Submitted At",
@@ -1278,13 +1647,14 @@
           alertImageLimit: "You can upload up to 5 images",
           requestFailed: "Request failed, please try again later",
           invalidCode: "Inquiry code not found",
-          orderQueryBtn: "Track Order",
-          orderQueryModalTitle: "Track Order",
+          orderQueryBtn: "Track Forwarding Order",
+          orderQueryModalTitle: "Track Forwarding Order",
           orderQueryCodeLabel: "Order Code",
           orderQueryCodePlaceholder: "Enter 8-character order code",
           orderQuerySearchBtn: "Search",
           orderQueryResultCodeLabel: "Order Code",
           orderQueryResultTrackingLabel: "Tracking Numbers",
+          orderQueryTrackingHint: "✓ indicates item has arrived at warehouse",
           orderQueryResultCreatedAtLabel: "Created At",
           orderQueryNotFound: "Order not found, please verify and try again.",
           orderQueryCreatedAt: "Created At",
@@ -1298,11 +1668,82 @@
           orderQueryConfirmSave: "Confirm Save",
           confirmRemoveTracking: "Confirm to remove this tracking number?",
           removeTrackingFailed: "Failed to remove, please try again later",
-          addressBtn: "Shipping Address",
-          addressModalTitle: "Shipping Address",
+          addressBtn: "Forwarding Address",
+          addressModalTitle: "Forwarding Address",
           copyAddressBtn: "Copy Address",
           addressCopied: "Address copied to clipboard",
-          addressLoadFailed: "Failed to load address"
+          addressLoadFailed: "Failed to load address",
+          loginBtn: "Login",
+          logoutBtn: "Logout",
+          myInquiriesBtn: "My Inquiries",
+          loginTitle: "Login / Sign Up",
+          loginSubtitle: "Enter your email to receive a verification code.",
+          loginEmailLabel: "Email",
+          loginEmailPlaceholder: "your@email.com",
+          sendCodeBtn: "Send Code",
+          sendingCode: "Sending...",
+          codeSent: "Code sent",
+          loginCodeLabel: "Verification Code",
+          loginCodePlaceholder: "6-digit code",
+          verifyCodeBtn: "Verify & Login",
+          verifying: "Verifying...",
+          loginErrorInvalidEmail: "Please enter a valid email address",
+          loginErrorInvalidCode: "Invalid or expired verification code",
+          loginSuccess: "Login successful",
+          loginHint: "New email will automatically create an account.",
+          myInquiriesTitle: "My Inquiries",
+          myInquiriesEmpty: "No inquiries yet. Submit an inquiry to see it here.",
+          myInquiriesLoading: "Loading...",
+          myInquiriesNeedLogin: "Please login to view your inquiries.",
+          backFromMyInquiriesBtn: "Back",
+          addToCartBtn: "Add to Cart",
+          addedToCart: "Added",
+          cartAddFailed: "Failed to add to cart",
+          myInquiriesLoadFailed: "Failed to load inquiries",
+          loginBackBtn: "Back to Home",
+          cartBtn: "Cart",
+          shippingCalcBtn: "Shipping Estimate",
+          shippingCalcTitle: "Shipping Estimate",
+          scChannelLabel: "Shipping Channel",
+          scZoneLabel: "Zone",
+          scWeightLabel: "Weight (kg)",
+          scResultLabel: "Final Estimated Freight",
+          scOptSea: "Sea Freight",
+          scOptAir: "Air Freight",
+          scZoneA: "Zone A",
+          scZoneB: "Zone B",
+          scZoneC: "Zone C",
+          scZoneD: "Zone D",
+          scWeightPlaceholder: "Unit: kg",
+          scCloseBtn: "Close",
+          scWeightHint: "Please enter a weight greater than 0.",
+          announceTitle: "Announcement",
+          announceGotBtn: "Got it",
+          cartTitle: "Shopping Cart",
+          cartEmpty: "Cart is empty. Go to My Inquiries to add items.",
+          cartLoading: "Loading...",
+          cartNeedLogin: "Please log in to view your cart.",
+          backFromCartBtn: "Back",
+          removeFromCart: "Remove",
+          removeFailed: "Remove failed",
+          cartLoadFailed: "Failed to load cart",
+          myForwardingBtn: "My Forwarding",
+          myForwardingTitle: "My Forwarding",
+          myForwardingEmpty: "No forwarding orders yet. Create one to see it here.",
+          myForwardingLoading: "Loading...",
+          myForwardingNeedLogin: "Please login to view your forwarding orders.",
+          backFromMyForwardingBtn: "Back",
+          myForwardingLoadFailed: "Failed to load forwarding orders",
+          myForwardingCode: "Code",
+          myForwardingTracking: "Tracking",
+          myForwardingCreatedAt: "Created At",
+          myForwardingNoTracking: "No tracking numbers",
+          selfOrderPageTitle: "Forwarding Service",
+          selfOrderResultPageTitle: "Order Created",
+          orderQueryPageTitle: "Track Forwarding Order",
+          backFromSelfOrderBtn: "Back",
+          backFromResultBtn: "Back",
+          backFromOrderQueryBtn: "Back"
         }
       };
 
@@ -1325,6 +1766,7 @@
         weightSlider: document.getElementById("weightSlider"),
         weightInput: document.getElementById("weightInput"),
         weightDisplay: document.getElementById("weightDisplay"),
+        shippingEstimate: null,
         submitBtn: document.getElementById("submitBtn"),
         formError: document.getElementById("formError"),
         displayCode: document.getElementById("displayCode"),
@@ -1336,27 +1778,31 @@
         queryResult: document.getElementById("queryResult"),
         backToFormBtn: document.getElementById("backToFormBtn"),
         selfOrderBtn: document.getElementById("selfOrderBtn"),
-        selfOrderModal: document.getElementById("selfOrderModal"),
-        selfOrderModalClose: document.getElementById("selfOrderModalClose"),
+        selfOrderPage: document.getElementById("selfOrderPage"),
+        selfOrderPageTitle: document.getElementById("selfOrderPageTitle"),
+        backFromSelfOrderBtn: document.getElementById("backFromSelfOrderBtn"),
         trackingList: document.getElementById("trackingList"),
         addTrackingBtn: document.getElementById("addTrackingBtn"),
         saveSelfOrderBtn: document.getElementById("saveSelfOrderBtn"),
         selfOrderError: document.getElementById("selfOrderError"),
-        selfOrderResultModal: document.getElementById("selfOrderResultModal"),
-        selfOrderResultClose: document.getElementById("selfOrderResultClose"),
+        selfOrderResultPage: document.getElementById("selfOrderResultPage"),
+        selfOrderResultPageTitle: document.getElementById("selfOrderResultPageTitle"),
+        backFromResultBtn: document.getElementById("backFromResultBtn"),
         resultCodeDisplay: document.getElementById("resultCodeDisplay"),
         copyOrderCodeBtn: document.getElementById("copyOrderCodeBtn"),
         resultTrackingList: document.getElementById("resultTrackingList"),
         selfOrderResultOkBtn: document.getElementById("selfOrderResultOkBtn"),
         orderQueryBtn: document.getElementById("orderQueryBtn"),
-        orderQueryModal: document.getElementById("orderQueryModal"),
-        orderQueryModalClose: document.getElementById("orderQueryModalClose"),
+        orderQueryPage: document.getElementById("orderQueryPage"),
+        orderQueryPageTitle: document.getElementById("orderQueryPageTitle"),
+        backFromOrderQueryBtn: document.getElementById("backFromOrderQueryBtn"),
         orderQueryCodeInput: document.getElementById("orderQueryCodeInput"),
         orderQuerySearchBtn: document.getElementById("orderQuerySearchBtn"),
         orderQueryError: document.getElementById("orderQueryError"),
         orderQueryResult: document.getElementById("orderQueryResult"),
         orderQueryResultCode: document.getElementById("orderQueryResultCode"),
         orderQueryResultTrackingList: document.getElementById("orderQueryResultTrackingList"),
+        orderQueryTrackingHint: document.getElementById("orderQueryTrackingHint"),
         orderQueryResultCreatedAt: document.getElementById("orderQueryResultCreatedAt"),
         orderQueryAddTrackingLabel: document.getElementById("orderQueryAddTrackingLabel"),
         orderQueryAddTrackingList: document.getElementById("orderQueryAddTrackingList"),
@@ -1367,15 +1813,38 @@
         addressModal: document.getElementById("addressModal"),
         addressModalClose: document.getElementById("addressModalClose"),
         addressContent: document.getElementById("addressContent"),
-        copyAddressBtn: document.getElementById("copyAddressBtn")
+        copyAddressBtn: document.getElementById("copyAddressBtn"),
+        loginPage: document.getElementById("loginPage"),
+        loginBtn: document.getElementById("loginBtn"),
+        loginEmail: document.getElementById("loginEmail"),
+        sendCodeBtn: document.getElementById("sendCodeBtn"),
+        codeField: document.getElementById("codeField"),
+        loginCode: document.getElementById("loginCode"),
+        verifyRow: document.getElementById("verifyRow"),
+        verifyCodeBtn: document.getElementById("verifyCodeBtn"),
+        loginError: document.getElementById("loginError"),
+        loginHint: document.getElementById("loginHint"),
+        myInquiriesPage: document.getElementById("myInquiriesPage"),
+        myInquiriesBtn: document.getElementById("myInquiriesBtn"),
+        myInquiriesList: document.getElementById("myInquiriesList"),
+        backFromMyInquiriesBtn: document.getElementById("backFromMyInquiriesBtn"),
+        myForwardingPage: document.getElementById("myForwardingPage"),
+        myForwardingBtn: document.getElementById("myForwardingBtn"),
+        myForwardingList: document.getElementById("myForwardingList"),
+        backFromMyForwardingBtn: document.getElementById("backFromMyForwardingBtn"),
+        cartPage: document.getElementById("cartPage"),
+        cartBtn: document.getElementById("cartBtn"),
+        cartList: document.getElementById("cartList"),
+        backFromCartBtn: document.getElementById("backFromCartBtn")
       };
 
-      const pages = [elements.formPage, elements.successPage, elements.queryPage];
+      const pages = [elements.formPage, elements.successPage, elements.queryPage, elements.loginPage, elements.myInquiriesPage, elements.myForwardingPage, elements.cartPage, elements.selfOrderPage, elements.selfOrderResultPage, elements.orderQueryPage];
       const labels = {
         formTitleText: document.getElementById("formTitleText"),
         formSubtitle: document.getElementById("formSubtitle"),
         toQueryLink: document.getElementById("toQueryLink"),
         orderBtn: document.getElementById("orderBtn"),
+        forwardingProcessBtn: document.getElementById("forwardingProcessBtn"),
         productUrlLabel: document.getElementById("productUrlLabel"),
         imageLabel: document.getElementById("imageLabel"),
         imageHint: document.getElementById("imageHint"),
@@ -1388,6 +1857,8 @@
         seaShipping: document.getElementById("seaShipping"),
         airShipping: document.getElementById("airShipping"),
         weightLabel: document.getElementById("weightLabel"),
+        shippingEstimateLabel: null,
+        shippingEstimateHint: null,
         submitBtn: document.getElementById("submitBtn"),
         successTitle: document.getElementById("successTitle"),
         successDesc: document.getElementById("successDesc"),
@@ -1407,30 +1878,72 @@
         step3Hint: document.getElementById("step3Hint"),
         step4Title: document.getElementById("step4Title"),
         step4Hint: document.getElementById("step4Hint"),
+        forwardingProcessModalTitle: document.getElementById("forwardingProcessModalTitle"),
+        fwdStep1Title: document.getElementById("fwdStep1Title"),
+        fwdStep1Hint: document.getElementById("fwdStep1Hint"),
+        fwdStep2Title: document.getElementById("fwdStep2Title"),
+        fwdStep2Hint: document.getElementById("fwdStep2Hint"),
+        fwdStep3Title: document.getElementById("fwdStep3Title"),
+        fwdStep3Hint: document.getElementById("fwdStep3Hint"),
+        fwdStep4Title: document.getElementById("fwdStep4Title"),
+        fwdStep4Hint: document.getElementById("fwdStep4Hint"),
+        fwdStep5Title: document.getElementById("fwdStep5Title"),
+        fwdStep5Hint: document.getElementById("fwdStep5Hint"),
+        fwdStep6Title: document.getElementById("fwdStep6Title"),
+        fwdStep6Hint: document.getElementById("fwdStep6Hint"),
+        fwdStep7Title: document.getElementById("fwdStep7Title"),
+        fwdStep7Hint: document.getElementById("fwdStep7Hint"),
         selfOrderBtn: document.getElementById("selfOrderBtn"),
-        selfOrderModalTitle: document.getElementById("selfOrderModalTitle"),
+        selfOrderPageTitle: document.getElementById("selfOrderPageTitle"),
         trackingLabel: document.getElementById("trackingLabel"),
         addTrackingBtn: document.getElementById("addTrackingBtn"),
         saveSelfOrderBtn: document.getElementById("saveSelfOrderBtn"),
-        selfOrderResultTitle: document.getElementById("selfOrderResultTitle"),
+        selfOrderResultPageTitle: document.getElementById("selfOrderResultPageTitle"),
         resultCodeLabel: document.getElementById("resultCodeLabel"),
         copyOrderCodeBtn: document.getElementById("copyOrderCodeBtn"),
         resultCodeHint: document.getElementById("resultCodeHint"),
         resultTrackingLabel: document.getElementById("resultTrackingLabel"),
         selfOrderResultOkBtn: document.getElementById("selfOrderResultOkBtn"),
         orderQueryBtn: document.getElementById("orderQueryBtn"),
-        orderQueryModalTitle: document.getElementById("orderQueryModalTitle"),
+        orderQueryPageTitle: document.getElementById("orderQueryPageTitle"),
         orderQueryCodeLabel: document.getElementById("orderQueryCodeLabel"),
         orderQuerySearchBtn: document.getElementById("orderQuerySearchBtn"),
         orderQueryResultCodeLabel: document.getElementById("orderQueryResultCodeLabel"),
         orderQueryResultTrackingLabel: document.getElementById("orderQueryResultTrackingLabel"),
+        orderQueryTrackingHint: document.getElementById("orderQueryTrackingHint"),
         orderQueryResultCreatedAtLabel: document.getElementById("orderQueryResultCreatedAtLabel"),
         orderQueryAddTrackingLabel: document.getElementById("orderQueryAddTrackingLabel"),
         orderQueryAddTrackingBtn: document.getElementById("orderQueryAddTrackingBtn"),
         orderQuerySaveTrackingBtn: document.getElementById("orderQuerySaveTrackingBtn"),
         addressBtn: document.getElementById("addressBtn"),
         addressModalTitle: document.getElementById("addressModalTitle"),
-        copyAddressBtn: document.getElementById("copyAddressBtn")
+        copyAddressBtn: document.getElementById("copyAddressBtn"),
+        // 登录 & 我的询价 labels
+        loginBtn: document.getElementById("loginBtn"),
+        myInquiriesBtn: document.getElementById("myInquiriesBtn"),
+        loginTitle: document.getElementById("loginTitle"),
+        loginSubtitle: document.getElementById("loginSubtitle"),
+        loginEmailLabel: document.getElementById("loginEmailLabel"),
+        sendCodeBtn: document.getElementById("sendCodeBtn"),
+        loginCodeLabel: document.getElementById("loginCodeLabel"),
+        verifyCodeBtn: document.getElementById("verifyCodeBtn"),
+        myInquiriesTitle: document.getElementById("myInquiriesTitle"),
+        backFromMyInquiriesBtn: document.getElementById("backFromMyInquiriesBtn"),
+        myForwardingBtn: document.getElementById("myForwardingBtn"),
+        myForwardingTitle: document.getElementById("myForwardingTitle"),
+        backFromMyForwardingBtn: document.getElementById("backFromMyForwardingBtn"),
+        cartBtn: document.getElementById("cartBtn"),
+        shippingCalcBtn: document.getElementById("shippingCalcBtn"),
+        shippingCalcTitle: document.getElementById("shippingCalcModalTitle"),
+        scChannelLabel: document.getElementById("scChannelLabel"),
+        scZoneLabel: document.getElementById("scZoneLabel"),
+        scWeightLabel: document.getElementById("scWeightLabel"),
+        scResultLabel: document.getElementById("scResultLabel"),
+        scCloseBtn: document.getElementById("scCloseBtn"),
+        announceTitle: document.getElementById("announceTitle"),
+        announceGotBtn: document.getElementById("announceGotBtn"),
+        cartTitle: document.getElementById("cartTitle"),
+        backFromCartBtn: document.getElementById("backFromCartBtn")
       };
 
       let currentLang = "en";
@@ -1445,6 +1958,148 @@
           style: "currency",
           currency: "PHP"
         }).format(Number(value || 0));
+      }
+
+      // 本地默认费率（与后端默认种子数据一致），用于后端不可达时降级
+      const DEFAULT_SHIPPING_RULES = {
+        standard: {
+          buyer_pays: 40,
+          tiers: [
+            { tier_index: 0, min_weight_g: 0, max_weight_g: 50, cost_type: "flat", flat_cost: 23, increment_g: null, rate_per_increment: null },
+            { tier_index: 1, min_weight_g: 50, max_weight_g: null, cost_type: "per_increment", flat_cost: null, increment_g: 10, rate_per_increment: 4.5 }
+          ]
+        },
+        economy: {
+          buyer_pays: 20,
+          tiers: [
+            { tier_index: 0, min_weight_g: 0, max_weight_g: 50, cost_type: "flat", flat_cost: 23, increment_g: null, rate_per_increment: null },
+            { tier_index: 1, min_weight_g: 50, max_weight_g: 140, cost_type: "per_increment", flat_cost: null, increment_g: 10, rate_per_increment: 4.5 },
+            { tier_index: 2, min_weight_g: 140, max_weight_g: null, cost_type: "per_increment", flat_cost: null, increment_g: 10, rate_per_increment: 1.9 }
+          ]
+        }
+      };
+
+      // 实际生效的费率：默认本地规则，被 fetchShippingRates 覆盖
+      let SHIPPING_RULES = JSON.parse(JSON.stringify(DEFAULT_SHIPPING_RULES));
+
+      const SHIPPING_RULES_CACHE_KEY = "pansan.shippingRates";
+      const SHIPPING_RULES_CACHE_TTL = 5 * 60 * 1000; // 5 分钟
+
+      function buildRulesByChannel(rates) {
+        const out = {};
+        for (const rate of rates) {
+          if (!out[rate.channel]) {
+            out[rate.channel] = {};
+          }
+          out[rate.channel][rate.zone] = {
+            buyer_pays: rate.buyer_pays,
+            tiers: rate.tiers
+          };
+        }
+        return out;
+      }
+
+      function applyRates(rates) {
+        const built = buildRulesByChannel(rates);
+        // 只覆盖后端返回的 (channel, zone)，缺失的用默认补齐
+        for (const channel of ["standard", "economy"]) {
+          if (!SHIPPING_RULES[channel]) {
+            SHIPPING_RULES[channel] = JSON.parse(JSON.stringify(DEFAULT_SHIPPING_RULES[channel]));
+          }
+          for (const zone of ["A", "B", "C", "D"]) {
+            if (built[channel] && built[channel][zone]) {
+              SHIPPING_RULES[channel][zone] = built[channel][zone];
+            } else if (!SHIPPING_RULES[channel][zone]) {
+              SHIPPING_RULES[channel][zone] = JSON.parse(JSON.stringify(DEFAULT_SHIPPING_RULES[channel][zone] || DEFAULT_SHIPPING_RULES[channel].A));
+            }
+          }
+        }
+      }
+
+      async function fetchShippingRates() {
+        // 先尝试从 localStorage 读取缓存（启动时不阻塞 UI）
+        try {
+          const cached = localStorage.getItem(SHIPPING_RULES_CACHE_KEY);
+          if (cached) {
+            const { rates, timestamp } = JSON.parse(cached);
+            if (Array.isArray(rates) && timestamp && (Date.now() - timestamp) < SHIPPING_RULES_CACHE_TTL) {
+              applyRates(rates);
+            }
+          }
+        } catch (e) {
+          // 忽略缓存错误
+        }
+
+        try {
+          const data = await requestJson("/api/shipping-rates", { method: "GET", auth: false });
+          if (data && Array.isArray(data.rates)) {
+            applyRates(data.rates);
+            try {
+              localStorage.setItem(SHIPPING_RULES_CACHE_KEY, JSON.stringify({ rates: data.rates, timestamp: Date.now() }));
+            } catch (e) {
+              // localStorage 满或被禁用，忽略
+            }
+          }
+        } catch (e) {
+          // 后端不可达时使用本地默认值
+        }
+      }
+
+      // 客户端使用费率规则计算（与后端 calculateShippingCost 一致）
+      function clientCalculate(rule, weightG) {
+        if (!rule || !Array.isArray(rule.tiers) || rule.tiers.length === 0) {
+          return null;
+        }
+        if (!Number.isFinite(weightG) || weightG <= 0) {
+          return null;
+        }
+        let hiddenCost = 0;
+        const sorted = rule.tiers.slice().sort((a, b) => a.tier_index - b.tier_index);
+        for (const tier of sorted) {
+          const minW = Number(tier.min_weight_g) || 0;
+          const maxW = tier.max_weight_g == null ? Infinity : Number(tier.max_weight_g);
+          if (weightG <= minW) {
+            continue;
+          }
+          const tierWeight = Math.min(weightG, maxW) - minW;
+          if (tierWeight <= 0) {
+            continue;
+          }
+          if (tier.cost_type === "flat") {
+            hiddenCost += Number(tier.flat_cost) || 0;
+          } else if (tier.cost_type === "per_increment") {
+            const inc = Number(tier.increment_g) || 10;
+            const rate = Number(tier.rate_per_increment) || 0;
+            hiddenCost += Math.ceil(tierWeight / inc) * rate;
+          }
+        }
+        const roundedHidden = Math.round(hiddenCost * 100) / 100;
+        const buyerPays = Number(rule.buyer_pays) || 0;
+        return {
+          hiddenCost: roundedHidden,
+          buyerPays,
+          sellerPays: Math.round((roundedHidden + buyerPays) * 100) / 100
+        };
+      }
+
+      function calcHiddenFreight(channel, weightKg) {
+        const numericWeight = Number(weightKg);
+        if (!Number.isFinite(numericWeight) || numericWeight <= 0) {
+          return null;
+        }
+        const weightG = Math.round(numericWeight * 1000 * 100) / 100;
+        // 用户侧默认按 Zone A 预估（管理员实际报价时可调整）
+        const rule = (SHIPPING_RULES[channel] && SHIPPING_RULES[channel].A) || null;
+        const result = clientCalculate(rule, weightG);
+        if (!result) {
+          return null;
+        }
+        return {
+          weightG,
+          hiddenCost: result.hiddenCost,
+          buyerPays: result.buyerPays,
+          sellerPays: result.sellerPays
+        };
       }
 
       function formatDate(value) {
@@ -1498,6 +2153,13 @@
           }
         });
 
+        // 翻译 data-i18n 标记的元素（如 <option>）
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const k = node.getAttribute("data-i18n");
+          const t = text(k);
+          if (t) node.textContent = t;
+        });
+
         elements.productUrl.placeholder = text("productUrlPlaceholder");
         elements.remark.placeholder = text("remarkPlaceholder");
         elements.queryCodeInput.placeholder = text("queryPlaceholder");
@@ -1544,11 +2206,51 @@
       }
 
       function fileToDataUrl(file) {
+        return compressImage(file);
+      }
+
+      function compressImage(file) {
+        const MAX_WIDTH = 1920;
+        const MAX_HEIGHT = 1920;
+        const QUALITY = 0.75;
+
         return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
+          // 非图片文件直接返回原始 data URL
+          if (!file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+            return;
+          }
+
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            let w = img.width;
+            let h = img.height;
+            if (w > MAX_WIDTH || h > MAX_HEIGHT) {
+              const ratio = Math.min(MAX_WIDTH / w, MAX_HEIGHT / h);
+              w = Math.round(w * ratio);
+              h = Math.round(h * ratio);
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", QUALITY));
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            // 降级：直接读原始文件
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          };
+          img.src = url;
         });
       }
 
@@ -1581,14 +2283,19 @@
       }
 
       async function requestJson(path, options = {}) {
+        const token = getToken();
+        const headers = {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          ...(options.headers || {})
+        };
+        if (token) {
+          headers["Authorization"] = "Bearer " + token;
+        }
         const response = await fetch(`${apiBaseUrl}${path}`, {
           ...options,
           cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
-            ...(options.headers || {})
-          }
+          headers
         });
 
         let payload = {};
@@ -1625,7 +2332,7 @@
           ? `
             <div class="price-box">
               <div class="price-row"><span>${text("freight")}</span><strong>${formatCurrency(freightDisplay)}</strong></div>
-              <div class="price-row"><span>${text("serviceFee")}</span><strong>${formatCurrency(payload.service_fee)}</strong></div>
+              <div class="price-row"><span>${text("serviceFee")}</span><strong>${formatCurrency(payload.shopee_after_tax)}</strong></div>
               <div class="price-row total"><span>${text("total")}</span><strong>${formatCurrency(payload.total_price)}</strong></div>
               ${payload.admin_note ? `<p><strong>${escapeHtml(text("note"))}</strong>${escapeHtml(payload.admin_note)}</p>` : ""}
             </div>
@@ -1742,10 +2449,12 @@
         closeSidebar();
         elements.queryCodeInput.value = "";
         renderQueryResult(null);
+        queryReturnPage = elements.formPage;
         showPage(elements.queryPage);
       });
 
-      elements.backToFormBtn.addEventListener("click", () => showPage(elements.formPage));
+      let queryReturnPage = elements.formPage;
+      elements.backToFormBtn.addEventListener("click", () => showPage(queryReturnPage));
       elements.newInquiryBtn.addEventListener("click", () => showPage(elements.formPage));
       elements.goQueryBtn.addEventListener("click", () => {
         const code = elements.displayCode.textContent;
@@ -1794,6 +2503,90 @@
         }
       });
 
+      // ============= 运费估算弹窗 =============
+      const scChannelSelect = document.getElementById("scChannelSelect");
+      const scZoneSelect = document.getElementById("scZoneSelect");
+      const scWeightInput = document.getElementById("scWeightInput");
+      const scResultPill = document.getElementById("scResultPill");
+      const scCloseBtn = document.getElementById("scCloseBtn");
+      const shippingCalcModal = document.getElementById("shippingCalcModal");
+      const shippingCalcModalClose = document.getElementById("shippingCalcModalClose");
+      const shippingCalcBtn = document.getElementById("shippingCalcBtn");
+
+      const FREIGHT_MARKUP = 1.25;
+
+      // 异步调用后端 /api/shipping/estimate 获取权威运费
+      async function scFetchRemote(channel, zone, weightKg) {
+        try {
+          const data = await requestJson("/api/shipping/estimate", {
+            method: "POST",
+            body: JSON.stringify({ channel, zone, weight_kg: weightKg })
+          });
+          if (data && typeof data.buyer_pays === "number") {
+            return data;
+          }
+        } catch (e) {
+          // 后端不可达时返回null，使用本地计算
+        }
+        return null;
+      }
+
+      let scRequestSeq = 0;
+      function scRender() {
+        const channel = scChannelSelect.value;
+        const zone = scZoneSelect.value;
+        const weightKg = Number(scWeightInput.value);
+        if (!Number.isFinite(weightKg) || weightKg <= 0) {
+          scResultPill.textContent = "PHP 0.00";
+          return;
+        }
+        // 本地即时计算
+        const local = calcHiddenFreight(channel, weightKg);
+        if (local) {
+          scResultPill.textContent = `PHP ${(local.sellerPays * FREIGHT_MARKUP).toFixed(2)}`;
+        } else {
+          scResultPill.textContent = "PHP 0.00";
+        }
+        // 250ms防抖异步校验
+        const mySeq = ++scRequestSeq;
+        setTimeout(async () => {
+          if (mySeq !== scRequestSeq) return;
+          const remote = await scFetchRemote(channel, zone, weightKg);
+          if (!remote || mySeq !== scRequestSeq) return;
+          scResultPill.textContent = `PHP ${(remote.seller_pays * FREIGHT_MARKUP).toFixed(2)}`;
+        }, 250);
+      }
+
+      function openShippingCalcModal() {
+        if (!scChannelSelect.value) scChannelSelect.value = "economy";
+        if (!scZoneSelect.value) scZoneSelect.value = "A";
+        if (!scWeightInput.value) scWeightInput.value = "1";
+        scRender();
+        shippingCalcModal.classList.add("active");
+      }
+
+      function closeShippingCalcModal() {
+        shippingCalcModal.classList.remove("active");
+      }
+
+      if (shippingCalcBtn) {
+        shippingCalcBtn.addEventListener("click", openShippingCalcModal);
+      }
+      if (shippingCalcModalClose) {
+        shippingCalcModalClose.addEventListener("click", closeShippingCalcModal);
+      }
+      if (scCloseBtn) {
+        scCloseBtn.addEventListener("click", closeShippingCalcModal);
+      }
+      if (shippingCalcModal) {
+        shippingCalcModal.addEventListener("click", (e) => {
+          if (e.target === shippingCalcModal) closeShippingCalcModal();
+        });
+      }
+      if (scChannelSelect) scChannelSelect.addEventListener("change", scRender);
+      if (scZoneSelect) scZoneSelect.addEventListener("change", scRender);
+      if (scWeightInput) scWeightInput.addEventListener("input", scRender);
+
       elements.copyCodeBtn.addEventListener("click", async () => {
         const code = elements.displayCode.textContent;
         try {
@@ -1834,7 +2627,9 @@
       });
 
       document.querySelectorAll('input[name="shipping"]').forEach((node) => {
-        node.addEventListener("change", syncChoiceState);
+        node.addEventListener("change", () => {
+          syncChoiceState();
+        });
       });
 
       document.querySelectorAll('input[name="payment"]').forEach((node) => {
@@ -1847,7 +2642,13 @@
       elements.weightInput.addEventListener("blur", formatWeightInput);
 
       const imgLightbox = document.getElementById("imgLightbox");
-      imgLightbox.addEventListener("click", () => imgLightbox.classList.remove("active"));
+      if (imgLightbox) {
+        imgLightbox.addEventListener("click", (e) => {
+          if (e.target === imgLightbox || e.target.classList.contains("lightbox-close")) {
+            imgLightbox.classList.remove("active");
+          }
+        });
+      }
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
       elements.queryCodeInput.addEventListener("keypress", (event) => {
@@ -1859,6 +2660,7 @@
       updateWeight();
       syncChoiceState();
       applyLanguage("en");
+      fetchShippingRates();
 
       const orderModal = document.getElementById("orderModal");
       const orderBtn = document.getElementById("orderBtn");
@@ -1879,15 +2681,31 @@
         }
       });
 
-      // Self Order Modal
-      const selfOrderModal = elements.selfOrderModal;
-      const selfOrderModalClose = elements.selfOrderModalClose;
+      // Forwarding Process Modal
+      const forwardingProcessModal = document.getElementById("forwardingProcessModal");
+      const forwardingProcessBtn = document.getElementById("forwardingProcessBtn");
+      const forwardingProcessModalClose = document.getElementById("forwardingProcessModalClose");
+
+      forwardingProcessBtn.addEventListener("click", () => {
+        closeSidebar();
+        forwardingProcessModal.classList.add("active");
+      });
+
+      forwardingProcessModalClose.addEventListener("click", () => {
+        forwardingProcessModal.classList.remove("active");
+      });
+
+      forwardingProcessModal.addEventListener("click", (e) => {
+        if (e.target === forwardingProcessModal) {
+          forwardingProcessModal.classList.remove("active");
+        }
+      });
+
+      // Self Order Page
       const trackingList = elements.trackingList;
       const addTrackingBtn = elements.addTrackingBtn;
       const saveSelfOrderBtn = elements.saveSelfOrderBtn;
       const selfOrderError = elements.selfOrderError;
-      const selfOrderResultModal = elements.selfOrderResultModal;
-      const selfOrderResultClose = elements.selfOrderResultClose;
       const resultCodeDisplay = elements.resultCodeDisplay;
       const copyOrderCodeBtn = elements.copyOrderCodeBtn;
       const resultTrackingList = elements.resultTrackingList;
@@ -1911,7 +2729,7 @@
         trackingList.innerHTML = trackingNumbers.map((num, idx) => `
           <div class="tracking-item">
             <input type="text" value="${escapeHtml(num)}" data-idx="${idx}" placeholder="输入物流单号">
-            <button type="button" class="tracking-remove" data-idx="${idx}">&times;</button>
+            <button type="button" class="tracking-remove" data-idx="${idx}" title="Remove">&times;</button>
           </div>
         `).join("");
       }
@@ -1987,10 +2805,9 @@
               tracking_numbers: validTrackings
             })
           });
-          selfOrderModal.classList.remove("active");
           resultCodeDisplay.textContent = code;
           renderResultTrackingList(result.confirmed_trackings || [], validTrackings);
-          selfOrderResultModal.classList.add("active");
+          showPage(elements.selfOrderResultPage);
         } catch (err) {
           selfOrderError.textContent = text("orderCreateFailed");
         } finally {
@@ -2042,27 +2859,11 @@
         trackingNumbers = [];
         selfOrderError.textContent = "";
         renderTrackingList();
-        selfOrderModal.classList.add("active");
+        showPage(elements.selfOrderPage);
       });
 
-      selfOrderModalClose.addEventListener("click", () => {
-        selfOrderModal.classList.remove("active");
-      });
-
-      selfOrderModal.addEventListener("click", (e) => {
-        if (e.target === selfOrderModal) {
-          selfOrderModal.classList.remove("active");
-        }
-      });
-
-      selfOrderResultClose.addEventListener("click", () => {
-        selfOrderResultModal.classList.remove("active");
-      });
-
-      selfOrderResultModal.addEventListener("click", (e) => {
-        if (e.target === selfOrderResultModal) {
-          selfOrderResultModal.classList.remove("active");
-        }
+      elements.backFromSelfOrderBtn.addEventListener("click", () => {
+        showPage(elements.formPage);
       });
 
       copyOrderCodeBtn.addEventListener("click", () => {
@@ -2083,26 +2884,25 @@
         }
       });
 
+      elements.backFromResultBtn.addEventListener("click", () => {
+        showPage(elements.selfOrderPage);
+      });
+
       selfOrderResultOkBtn.addEventListener("click", () => {
-        selfOrderResultModal.classList.remove("active");
+        showPage(elements.selfOrderPage);
       });
 
       elements.orderQueryBtn.addEventListener("click", () => {
         closeSidebar();
-        elements.orderQueryModal.classList.add("active");
         elements.orderQueryCodeInput.value = "";
         elements.orderQueryError.textContent = "";
         elements.orderQueryResult.style.display = "none";
+        showPage(elements.orderQueryPage);
       });
 
-      elements.orderQueryModalClose.addEventListener("click", () => {
-        elements.orderQueryModal.classList.remove("active");
-      });
-
-      elements.orderQueryModal.addEventListener("click", (e) => {
-        if (e.target === elements.orderQueryModal) {
-          elements.orderQueryModal.classList.remove("active");
-        }
+      let orderQueryReturnPage = elements.formPage;
+      elements.backFromOrderQueryBtn.addEventListener("click", () => {
+        showPage(orderQueryReturnPage);
       });
 
       elements.orderQuerySearchBtn.addEventListener("click", async () => {
@@ -2139,7 +2939,7 @@
                   ${isConfirmed ? '✓' : '○'}
                 </span>
                 <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
-                <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}">&times;</button>
+                <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}" title="Remove">&times;</button>
               </div>`;
             }).join("");
           } else {
@@ -2172,7 +2972,7 @@
         elements.orderQueryAddTrackingList.innerHTML = addTrackingNumbers.map((num, idx) => `
           <div class="tracking-item">
             <input type="text" value="${escapeHtml(num)}" data-idx="${idx}" placeholder="输入物流单号">
-            <button type="button" class="tracking-remove" data-idx="${idx}">&times;</button>
+            <button type="button" class="tracking-remove" data-idx="${idx}" title="Remove">&times;</button>
           </div>
         `).join("");
       }
@@ -2227,7 +3027,7 @@
                     ${isConfirmed ? '✓' : '○'}
                   </span>
                   <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
-                  <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}">&times;</button>
+                  <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}" title="Remove">&times;</button>
                 </div>`;
               }).join("");
             } else {
@@ -2320,26 +3120,578 @@
         }
       });
 
+      // ============================================================
+      // Token & Auth helpers
+      // ============================================================
+      const TOKEN_KEY = "pansan_token";
+
+      function getToken() {
+        try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (_) { return ""; }
+      }
+
+      function setToken(token) {
+        try { localStorage.setItem(TOKEN_KEY, token); } catch (_) {}
+      }
+
+      function removeToken() {
+        try { localStorage.removeItem(TOKEN_KEY); } catch (_) {}
+      }
+
+      async function apiFetch(path, options = {}) {
+        const headers = options.headers || {};
+        const token = getToken();
+        if (token) {
+          headers["Authorization"] = "Bearer " + token;
+        }
+        return requestJson(path, { ...options, headers });
+      }
+
+      function updateLoginUI() {
+        const token = getToken();
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            const email = payload.email || "";
+            elements.loginBtn.textContent = email;
+            elements.loginBtn.style.color = "#15803d";
+            elements.loginBtn.title = email + " — " + text("logoutBtn");
+          } catch (_) {
+            elements.loginBtn.textContent = text("loginBtn");
+            elements.loginBtn.style.color = "#15803d";
+          }
+        } else {
+          elements.loginBtn.textContent = text("loginBtn");
+          elements.loginBtn.style.color = "#15803d";
+        }
+      }
+
+      // ============================================================
+      // Login page
+      // ============================================================
+      elements.loginBtn.addEventListener("click", () => {
+        closeSidebar();
+        if (getToken()) {
+          // 已登录 -> 退出
+          if (confirm(text("logoutBtn") + "?")) {
+            removeToken();
+            updateLoginUI();
+            showPage(elements.formPage);
+          }
+          return;
+        }
+        // 未登录 -> 显示登录页
+        elements.loginEmail.value = "";
+        elements.loginCode.value = "";
+        elements.codeField.style.display = "none";
+        elements.verifyRow.style.display = "none";
+        elements.loginError.style.display = "none";
+        elements.loginHint.textContent = text("loginHint");
+        elements.sendCodeBtn.disabled = false;
+        elements.sendCodeBtn.textContent = text("sendCodeBtn");
+        showPage(elements.loginPage);
+      });
+
+      elements.sendCodeBtn.addEventListener("click", async () => {
+        const email = elements.loginEmail.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          elements.loginError.textContent = text("loginErrorInvalidEmail");
+          elements.loginError.style.display = "block";
+          return;
+        }
+        elements.loginError.style.display = "none";
+        elements.sendCodeBtn.disabled = true;
+        elements.sendCodeBtn.textContent = text("sendingCode");
+        try {
+          await requestJson("/api/auth/send-code", {
+            method: "POST",
+            body: JSON.stringify({ email })
+          });
+          elements.sendCodeBtn.textContent = text("codeSent");
+          elements.codeField.style.display = "block";
+          elements.verifyRow.style.display = "flex";
+          elements.loginCode.focus();
+        } catch (err) {
+          elements.loginError.textContent = err.message || "Failed to send code";
+          elements.loginError.style.display = "block";
+          elements.sendCodeBtn.disabled = false;
+          elements.sendCodeBtn.textContent = text("sendCodeBtn");
+        }
+      });
+
+      elements.verifyCodeBtn.addEventListener("click", async () => {
+        const email = elements.loginEmail.value.trim();
+        const code = elements.loginCode.value.trim();
+        if (!code) {
+          elements.loginError.textContent = text("loginErrorInvalidCode");
+          elements.loginError.style.display = "block";
+          return;
+        }
+        elements.loginError.style.display = "none";
+        elements.verifyCodeBtn.disabled = true;
+        elements.verifyCodeBtn.textContent = text("verifying");
+        try {
+          const data = await requestJson("/api/auth/verify", {
+            method: "POST",
+            body: JSON.stringify({ email, code })
+          });
+          setToken(data.token);
+          updateLoginUI();
+          elements.loginHint.textContent = text("loginSuccess");
+          setTimeout(() => { showPage(elements.formPage); }, 800);
+        } catch (err) {
+          elements.loginError.textContent = err.message || text("loginErrorInvalidCode");
+          elements.loginError.style.display = "block";
+          elements.verifyCodeBtn.disabled = false;
+          elements.verifyCodeBtn.textContent = text("verifyCodeBtn");
+        }
+      });
+
+      // Enter key on code input
+      elements.loginCode.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          elements.verifyCodeBtn.click();
+        }
+      });
+
+      // Enter key on email input
+      elements.loginEmail.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          elements.sendCodeBtn.click();
+        }
+      });
+
+      // ============================================================
+      // My Inquiries page
+      // ============================================================
+      function renderImages(images) {
+        if (!images || images.length === 0) return "";
+        return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">` +
+          images.map(img => {
+            const u = typeof img === "string" ? img : (img && img.url ? img.url : "");
+            return `<img src="${escapeHtml(u)}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb;" alt="" />`;
+          }).join("") +
+          `</div>`;
+      }
+
+      async function loadMyInquiries() {
+        const token = getToken();
+        if (!token) {
+          elements.myInquiriesList.innerHTML = `<p class="muted">${text("myInquiriesNeedLogin")}</p>`;
+          return;
+        }
+        elements.myInquiriesList.innerHTML = `<p class="muted">${text("myInquiriesLoading")}</p>`;
+        try {
+          const data = await apiFetch("/api/my-inquiries");
+          const inquiries = data.inquiries || [];
+          if (inquiries.length === 0) {
+            elements.myInquiriesList.innerHTML = `<p class="muted">${text("myInquiriesEmpty")}</p>`;
+            return;
+          }
+          // 获取购物车列表
+          let cartCodes = new Set();
+          try {
+            const cartData = await apiFetch("/api/cart");
+            (cartData.items || []).forEach(item => cartCodes.add(item.inquiry_code));
+          } catch (_) {}
+
+          elements.myInquiriesList.innerHTML = inquiries.map(inv => {
+            const isInCart = cartCodes.has(inv.code);
+            const dateStr = inv.created_at ? new Date(inv.created_at).toLocaleString() : "";
+            const statusLabel = inv.status === "finished" ? "报价完成" : (inv.status === "pending" ? "处理中" : inv.status);
+            return `<div class="inquiry-card" data-code="${escapeHtml(inv.code)}" style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div style="flex:1; min-width:0;">
+                  <div style="font-weight:600; font-size:0.95rem; word-break:break-all; margin-bottom:4px;">${escapeHtml(inv.product_url)}</div>
+                  <div style="font-size:0.8rem; color:#6b7280;">
+                    <span style="margin-right:12px;">Code: <strong>${escapeHtml(inv.code)}</strong></span>
+                    <span style="margin-right:12px;">Status: ${statusLabel}</span>
+                    <span>${dateStr}</span>
+                  </div>
+                  ${renderImages(inv.images)}
+                </div>
+                <button type="button" class="cart-btn ${isInCart ? "in-cart" : ""}"
+                  data-code="${escapeHtml(inv.code)}"
+                  style="flex-shrink:0; padding:6px 12px; border-radius:6px; border:1px solid #d1d5db; background:${isInCart ? "#15803d" : "#fff"}; color:${isInCart ? "#fff" : "#374151"}; cursor:pointer; font-size:0.85rem; white-space:nowrap;"
+                  ${isInCart ? "disabled" : ""}>
+                  ${isInCart ? text("addedToCart") : text("addToCartBtn")}
+                </button>
+              </div>
+            </div>`;
+          }).join("");
+
+          // 绑定购物车按钮事件
+          elements.myInquiriesList.querySelectorAll(".cart-btn:not(.in-cart)").forEach(btn => {
+            btn.addEventListener("click", async function(e) {
+              e.stopPropagation();
+              const code = this.dataset.code;
+              this.disabled = true;
+              this.textContent = "...";
+              try {
+                await apiFetch("/api/cart", {
+                  method: "POST",
+                  body: JSON.stringify({ inquiry_code: code })
+                });
+                this.classList.add("in-cart");
+                this.textContent = text("addedToCart");
+                this.style.background = "#15803d";
+                this.style.color = "#fff";
+                this.style.borderColor = "#15803d";
+              } catch (err) {
+                this.disabled = false;
+                this.textContent = text("addToCartBtn");
+                alert(err.message || text("cartAddFailed"));
+              }
+            });
+          });
+
+          // 绑定卡片点击事件 - 查看详情
+          elements.myInquiriesList.querySelectorAll(".inquiry-card").forEach(card => {
+            card.addEventListener("click", () => {
+              const code = card.dataset.code;
+              const inv = inquiries.find(i => i.code === code);
+              if (inv) {
+                queryReturnPage = elements.myInquiriesPage;
+                renderQueryResult(inv);
+                showPage(elements.queryPage);
+              }
+            });
+          });
+        } catch (err) {
+          elements.myInquiriesList.innerHTML = `<p class="error-text">${text("myInquiriesLoadFailed")}: ${escapeHtml(err.message || "")}</p>`;
+        }
+      }
+
+      elements.myInquiriesBtn.addEventListener("click", () => {
+        closeSidebar();
+        if (!getToken()) {
+          // 未登录，提示先去登录
+          elements.loginEmail.value = "";
+          elements.loginCode.value = "";
+          elements.codeField.style.display = "none";
+          elements.verifyRow.style.display = "none";
+          elements.loginError.style.display = "none";
+          elements.loginHint.textContent = text("myInquiriesNeedLogin");
+          elements.sendCodeBtn.disabled = false;
+          elements.sendCodeBtn.textContent = text("sendCodeBtn");
+          showPage(elements.loginPage);
+          return;
+        }
+        showPage(elements.myInquiriesPage);
+        loadMyInquiries();
+      });
+
+      elements.backFromMyInquiriesBtn.addEventListener("click", () => {
+        showPage(elements.formPage);
+      });
+
+      // ============================================================
+      // My Forwarding page
+      // ============================================================
+      function showOrderDetail(order) {
+        elements.orderQueryCodeInput.value = order.code;
+        elements.orderQueryError.textContent = "";
+        currentOrderCode = order.code;
+        addTrackingNumbers = [];
+        renderAddTrackingList();
+        elements.orderQueryResultCreatedAt.textContent = new Date(order.created_at).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+
+        if (order.tracking_numbers && order.tracking_numbers.length) {
+          elements.orderQueryResultTrackingList.innerHTML = order.tracking_numbers.map(t => {
+            const isConfirmed = order.confirmed_trackings && order.confirmed_trackings.includes(t);
+            return `<div class="tracking-item">
+              <span class="tracking-check ${isConfirmed ? 'checked' : ''}" style="font-size:1.1rem;">
+                ${isConfirmed ? '✓' : '○'}
+              </span>
+              <span style="flex:1; padding: 10px 12px; font-size: 0.95rem;">${escapeHtml(t)}</span>
+              <button type="button" class="tracking-remove" data-tracking="${escapeHtml(t)}" title="Remove">&times;</button>
+            </div>`;
+          }).join("");
+        } else {
+          elements.orderQueryResultTrackingList.innerHTML = `<div class="tracking-empty">${text("trackingEmpty")}</div>`;
+        }
+
+        elements.orderQueryResultCode.textContent = order.code;
+        elements.orderQueryResult.style.display = "block";
+        orderQueryReturnPage = elements.myForwardingPage;
+        showPage(elements.orderQueryPage);
+      }
+
+      async function loadMyForwarding() {
+        const token = getToken();
+        if (!token) {
+          elements.myForwardingList.innerHTML = `<p class="muted">${text("myForwardingNeedLogin")}</p>`;
+          return;
+        }
+        elements.myForwardingList.innerHTML = `<p class="muted">${text("myForwardingLoading")}</p>`;
+        try {
+          const data = await apiFetch("/api/my-orders");
+          const orders = data.orders || [];
+          if (orders.length === 0) {
+            elements.myForwardingList.innerHTML = `<p class="muted">${text("myForwardingEmpty")}</p>`;
+            return;
+          }
+          elements.myForwardingList.innerHTML = orders.map(order => {
+            const dateStr = order.created_at ? new Date(order.created_at).toLocaleString() : "";
+            const trackingHtml = order.tracking_numbers && order.tracking_numbers.length
+              ? order.tracking_numbers.map(t => `<span class="tracking-tag">${escapeHtml(t)}</span>`).join("")
+              : `<span class="muted">${text("myForwardingNoTracking")}</span>`;
+            return `<div class="inquiry-card" data-code="${escapeHtml(order.code)}" style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div style="flex:1; min-width:0;">
+                  <div style="font-weight:600; font-size:0.95rem; margin-bottom:4px;">${text("myForwardingCode")}: <strong>${escapeHtml(order.code)}</strong></div>
+                  <div style="font-size:0.8rem; color:#6b7280; margin-bottom:4px;">${text("myForwardingCreatedAt")}: ${dateStr}</div>
+                  <div style="font-size:0.8rem; color:#6b7280;">
+                    <span style="margin-right:4px;">${text("myForwardingTracking")}:</span>
+                    ${trackingHtml}
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          }).join("");
+
+          // 绑定卡片点击事件 - 查看详情
+          elements.myForwardingList.querySelectorAll(".inquiry-card").forEach(card => {
+            card.addEventListener("click", () => {
+              const code = card.dataset.code;
+              const order = orders.find(o => o.code === code);
+              if (order) {
+                showOrderDetail(order);
+              }
+            });
+          });
+        } catch (err) {
+          elements.myForwardingList.innerHTML = `<p class="error-text">${text("myForwardingLoadFailed")}: ${escapeHtml(err.message || "")}</p>`;
+        }
+      }
+
+      elements.myForwardingBtn.addEventListener("click", () => {
+        closeSidebar();
+        if (!getToken()) {
+          elements.loginEmail.value = "";
+          elements.loginCode.value = "";
+          elements.codeField.style.display = "none";
+          elements.verifyRow.style.display = "none";
+          elements.loginError.style.display = "none";
+          elements.loginHint.textContent = text("myForwardingNeedLogin");
+          elements.sendCodeBtn.disabled = false;
+          elements.sendCodeBtn.textContent = text("sendCodeBtn");
+          showPage(elements.loginPage);
+          return;
+        }
+        showPage(elements.myForwardingPage);
+        loadMyForwarding();
+      });
+
+      elements.backFromMyForwardingBtn.addEventListener("click", () => {
+        showPage(elements.formPage);
+      });
+
+      // ============================================================
+      // Cart page
+      // ============================================================
+      async function loadCart() {
+        const token = getToken();
+        if (!token) {
+          elements.cartList.innerHTML = `<p class="muted">${text("cartNeedLogin")}</p>`;
+          return;
+        }
+        elements.cartList.innerHTML = `<p class="muted">${text("cartLoading")}</p>`;
+        try {
+          const data = await apiFetch("/api/cart");
+          const items = data.items || [];
+          if (items.length === 0) {
+            elements.cartList.innerHTML = `<p class="muted">${text("cartEmpty")}</p>`;
+            return;
+          }
+          elements.cartList.innerHTML = items.map(item => {
+            const dateStr = item.added_at ? new Date(item.added_at).toLocaleString() : "";
+            let cartImages = [];
+            try { cartImages = JSON.parse(item.images_json || "[]"); } catch (_) {}
+            return `<div class="inquiry-card" data-code="${escapeHtml(item.inquiry_code)}" style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div style="flex:1; min-width:0;">
+                  <div style="font-weight:600; font-size:0.95rem; word-break:break-all; margin-bottom:4px;">${escapeHtml(item.product_url)}</div>
+                  <div style="font-size:0.8rem; color:#6b7280;">
+                    <span style="margin-right:12px;">Code: <strong>${escapeHtml(item.inquiry_code)}</strong></span>
+                    <span>${dateStr}</span>
+                  </div>
+                  ${renderImages(cartImages)}
+                </div>
+                <button type="button" class="remove-cart-btn"
+                  data-code="${escapeHtml(item.inquiry_code)}"
+                  style="flex-shrink:0; padding:6px 12px; border-radius:6px; border:1px solid #ef4444; background:#fff; color:#ef4444; cursor:pointer; font-size:0.85rem; white-space:nowrap;">
+                  ${text("removeFromCart")}
+                </button>
+              </div>
+            </div>`;
+          }).join("");
+
+          elements.cartList.querySelectorAll(".remove-cart-btn").forEach(btn => {
+            btn.addEventListener("click", async function(e) {
+              e.stopPropagation();
+              const code = this.dataset.code;
+              this.disabled = true;
+              this.textContent = "...";
+              try {
+                await apiFetch("/api/cart/" + code, { method: "DELETE" });
+                loadCart();
+              } catch (err) {
+                this.disabled = false;
+                this.textContent = text("removeFromCart");
+                alert(err.message || text("removeFailed"));
+              }
+            });
+          });
+
+          // 绑定卡片点击事件 - 查看详情
+          elements.cartList.querySelectorAll(".inquiry-card").forEach(card => {
+            card.addEventListener("click", () => {
+              const code = card.dataset.code;
+              const item = items.find(i => i.inquiry_code === code);
+              if (item) {
+                let imgs = [];
+                try { imgs = JSON.parse(item.images_json || "[]"); } catch (_) {}
+                const payload = {
+                  code: item.inquiry_code,
+                  product_url: item.product_url,
+                  images: imgs.map(url => ({ url })),
+                  remark: "",
+                  shipping: item.shipping || "",
+                  payment_method: "",
+                  weight_estimate: "",
+                  status: item.status || "pending",
+                  final_freight: null,
+                  freight2: null,
+                  service_fee: null,
+                  total_price: null,
+                  shopee_after_tax: null,
+                  admin_note: "",
+                  created_at: item.inquiry_created_at || ""
+                };
+                queryReturnPage = elements.cartPage;
+                renderQueryResult(payload);
+                showPage(elements.queryPage);
+              }
+            });
+          });
+        } catch (err) {
+          elements.cartList.innerHTML = `<p class="error-text">${text("cartLoadFailed")}: ${escapeHtml(err.message || "")}</p>`;
+        }
+      }
+
+      elements.cartBtn.addEventListener("click", () => {
+        closeSidebar();
+        if (!getToken()) {
+          elements.loginEmail.value = "";
+          elements.loginCode.value = "";
+          elements.codeField.style.display = "none";
+          elements.verifyRow.style.display = "none";
+          elements.loginError.style.display = "none";
+          elements.loginHint.textContent = text("cartNeedLogin");
+          elements.sendCodeBtn.disabled = false;
+          elements.sendCodeBtn.textContent = text("sendCodeBtn");
+          showPage(elements.loginPage);
+          return;
+        }
+        showPage(elements.cartPage);
+        loadCart();
+      });
+
+      elements.backFromCartBtn.addEventListener("click", () => {
+        showPage(elements.formPage);
+      });
+
+      // ============================================================
+      // Update applyLanguage to include new labels
+      // ============================================================
+      const origApplyLanguage = applyLanguage;
+      applyLanguage = function(lang) {
+        origApplyLanguage(lang);
+        elements.loginEmail.placeholder = text("loginEmailPlaceholder");
+        elements.loginCode.placeholder = text("loginCodePlaceholder");
+        elements.loginHint.textContent = text("loginHint");
+        updateLoginUI();
+      };
+
+      // 初始化登录UI
+      updateLoginUI();
+
+      // ============= 公告弹窗（温馨提示） =============
+      const ANNOUNCE_KEY = "announce_seen_version";
+      const ANNOUNCE_COOLDOWN_MS = 30 * 60 * 1000; // 30 分钟内不重复弹
+
+      async function initAnnouncement() {
+        const announceOverlay = document.getElementById("announceOverlay");
+        const announceBody = document.getElementById("announceBody");
+        const announceCloseBtn = document.getElementById("announceCloseBtn");
+        const announceGotBtn = document.getElementById("announceGotBtn");
+
+        function closeAnnounce(version) {
+          announceOverlay.classList.remove("active");
+          if (version) {
+            const record = JSON.stringify({ version, seen_at: Date.now() });
+            localStorage.setItem(ANNOUNCE_KEY, record);
+          }
+        }
+
+        // 检查是否在冷却期内
+        try {
+          const raw = localStorage.getItem(ANNOUNCE_KEY);
+          if (raw) {
+            const record = JSON.parse(raw);
+            if (record.seen_at && (Date.now() - record.seen_at) < ANNOUNCE_COOLDOWN_MS) {
+              return; // 冷却期内，不弹
+            }
+          }
+        } catch (e) { /* ignore */ }
+
+        try {
+          const data = await requestJson("/api/announcement");
+          if (!data || !data.is_enabled || !data.content) return;
+
+          const version = data.updated_at || "";
+
+          // 如果是同一版本，不做重复弹窗
+          try {
+            const raw = localStorage.getItem(ANNOUNCE_KEY);
+            if (raw) {
+              const record = JSON.parse(raw);
+              if (record.version === version) return;
+            }
+          } catch (e) { /* ignore */ }
+
+          announceBody.innerHTML = data.content;
+          announceOverlay.classList.add("active");
+
+          announceCloseBtn.onclick = () => closeAnnounce(version);
+          announceGotBtn.onclick = () => closeAnnounce(version);
+          announceOverlay.onclick = (e) => {
+            if (e.target === announceOverlay) closeAnnounce(version);
+          };
+        } catch (e) {
+          // 后端不可达时不弹窗
+        }
+      }
+
+      // 页面加载完成后执行
+      initAnnouncement();
+
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           const sidebarNav = document.getElementById("sidebarNav");
           if (sidebarNav && sidebarNav.classList.contains("open")) {
             closeSidebar();
-          } else if (selfOrderResultModal.classList.contains("active")) {
-            selfOrderResultModal.classList.remove("active");
-          } else if (selfOrderModal.classList.contains("active")) {
-            selfOrderModal.classList.remove("active");
-          } else if (elements.orderQueryModal.classList.contains("active")) {
-            elements.orderQueryModal.classList.remove("active");
+          } else if (elements.selfOrderResultPage.classList.contains("active")) {
+            showPage(elements.selfOrderPage);
+          } else if (elements.selfOrderPage.classList.contains("active")) {
+            showPage(elements.formPage);
+          } else if (elements.orderQueryPage.classList.contains("active")) {
+            showPage(elements.formPage);
           }
         }
       });
     })();
   </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"956d1b8221d34e09823b68cef9b3b4af","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<div class="lightbox" id="imgLightbox">
-    <span class="lightbox-close">&times;</span>
-    <img src="" alt="product image">
-  </div>
 </body>
 </html>

@@ -1,0 +1,1063 @@
+﻿﻿﻿﻿﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PanSan报价系统</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #66758f;
+      --line: #d9e2ef;
+      --accent: #ff6a3d;
+      --accent-soft: #fff1eb;
+      --success: #15803d;
+      --success-soft: #dcfce7;
+      --warning: #b45309;
+      --warning-soft: #fef3c7;
+      --danger: #b91c1c;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 14px 60px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .shell {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .lang-btn,
+    .link-btn,
+    .ghost-btn,
+    .primary-btn {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+    }
+
+    .lang-btn,
+    .ghost-btn {
+      background: #fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 6px 18px rgba(19, 31, 54, 0.06);
+    }
+
+    .lang-btn:hover,
+    .ghost-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(19, 31, 54, 0.12);
+    }
+
+    .lang-btn:active,
+    .ghost-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 12px rgba(19, 31, 54, 0.08);
+    }
+
+    .link-btn {
+      background: transparent;
+      color: var(--accent);
+      padding: 0;
+      font-weight: normal;
+      transition: opacity 0.15s;
+    }
+
+    .link-btn:hover {
+      opacity: 0.8;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 18px 40px rgba(24, 36, 58, 0.08);
+      margin-bottom: 16px;
+    }
+
+    h1,
+    h2 {
+      margin: 0 0 8px;
+      line-height: 1.15;
+      font-weight: normal;
+    }
+
+    .subtitle,
+    .hint,
+    .muted {
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+      font-weight: 400;
+    }
+
+    .field {
+      margin-top: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: normal;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+    }
+
+    input[type="url"],
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: #fbfcff;
+      font: inherit;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: 2px solid rgba(255, 106, 61, 0.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 106, 61, 0.08);
+    }
+
+    .upload-box {
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      background: #f8fbff;
+      cursor: pointer;
+      transition: 0.15s ease;
+      font-size: 0.9rem;
+    }
+
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .preview-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .preview-item {
+      width: 78px;
+      height: 78px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--line);
+      background: #fff;
+      transition: transform 0.2s;
+    }
+
+    .preview-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-item button {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(0, 0, 0, 0.64);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .preview-item button:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .choice {
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 12px;
+      text-align: center;
+      background: #fff;
+      cursor: pointer;
+      font-weight: normal;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .choice:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .choice input {
+      display: none;
+    }
+
+    .choice.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #d74b22;
+      box-shadow: 0 10px 22px rgba(255, 106, 61, 0.14);
+    }
+
+    .weight-row,
+    .action-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      min-width: 220px;
+      accent-color: var(--accent);
+    }
+
+    .pill {
+      min-width: 90px;
+      text-align: center;
+      background: #eef3fb;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: normal;
+      font-size: 1rem;
+    }
+
+    .primary-btn,
+    .ghost-btn {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: normal;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(255, 106, 61, 0.22);
+    }
+
+    .primary-btn:hover {
+      background: #e85a2e;
+      transform: translateY(-2px);
+      box-shadow: 0 20px 36px rgba(255, 106, 61, 0.32);
+    }
+
+    .primary-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 10px 20px rgba(255, 106, 61, 0.18);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+      box-shadow: 0 8px 16px rgba(255, 106, 61, 0.15);
+    }
+
+    .ghost-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .query-code {
+      text-align: center;
+      background: #f3f7ff;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 2rem;
+      letter-spacing: 0.18em;
+      font-weight: normal;
+      margin: 18px 0 14px;
+      font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.88rem;
+      font-weight: normal;
+    }
+
+    .status.pending {
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .status.quoted {
+      color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .result {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fcfdff;
+    }
+
+    .result h3 {
+      margin: 0 0 12px;
+    }
+
+    .result p {
+      margin: 10px 0;
+      word-break: break-word;
+      font-size: 0.95rem;
+    }
+
+    .result strong {
+      display: inline-block;
+      min-width: 96px;
+      font-weight: normal;
+    }
+
+    .gallery {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .gallery img {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      transition: transform 0.2s;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.08);
+    }
+
+    .price-box {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .price-row.total {
+      font-size: 1.08rem;
+      font-weight: normal;
+    }
+
+    .error-text {
+      color: var(--danger);
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 20px 16px;
+      }
+
+      .query-code {
+        font-size: 1.65rem;
+      }
+
+      .choice-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* =========================
+       English mode
+       ========================= */
+    html[lang="en"],
+    html[lang="en"] body,
+    html[lang="en"] * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: normal !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <button type="button" class="lang-btn" id="langBtn">EN</button>
+      <button type="button" class="link-btn" id="toQueryLink">查询报价</button>
+    </div>
+
+    <section class="page active" id="formPage">
+      <div class="card">
+        <h1 id="formTitle">代购转运报价</h1>
+        <p class="subtitle" id="formSubtitle">填写商品信息，提交询价后即可用查询码查看报价。</p>
+
+        <div class="field">
+          <label for="productUrl" id="productUrlLabel">商品链接</label>
+          <input type="url" id="productUrl" placeholder="https://item.taobao.com/...">
+        </div>
+
+        <div class="field">
+          <label id="imageLabel">商品图片</label>
+          <div class="hint" id="imageHint">可选，最多上传 5 张图片</div>
+          <div class="upload-box" id="uploadTrigger">
+            <div id="uploadText">点击上传图片</div>
+          </div>
+          <input class="hidden" type="file" id="imageInput" accept="image/*" multiple>
+          <div class="preview-list" id="previewList"></div>
+        </div>
+
+        <div class="field">
+          <label for="remark" id="remarkLabel">备注要求</label>
+          <textarea id="remark" placeholder="颜色、尺码、数量、包装要求等"></textarea>
+        </div>
+
+        <div class="field">
+          <label id="shippingLabel">运输方式</label>
+          <div class="choice-grid">
+            <label class="choice active" data-choice="sea">
+              <input type="radio" name="shipping" value="sea" checked>
+              <span id="seaShipping">海运</span>
+            </label>
+            <label class="choice" data-choice="air">
+              <input type="radio" name="shipping" value="air">
+              <span id="airShipping">空运</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="weightSlider" id="weightLabel">预估重量</label>
+          <div class="weight-row">
+            <input type="range" id="weightSlider" min="0.01" max="50" step="0.01" value="3">
+            <div class="pill" id="weightDisplay">3.00 kg</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label id="paymentLabel">付款方式</label>
+          <div class="choice-group">
+            <label class="choice">
+              <input type="radio" name="payment" value="gcash" checked>
+              <span>Gcash</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="payment" value="shopee">
+              <span>Shopee全款</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <button type="button" class="primary-btn" id="submitBtn">提交询价</button>
+          <div class="error-text" id="formError"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="successPage">
+      <div class="card">
+        <h2 id="successTitle">询价已提交</h2>
+        <p class="subtitle" id="successDesc">请保存查询码，后续查询报价会用到。</p>
+        <div class="query-code" id="displayCode">--------</div>
+        <button type="button" class="ghost-btn" id="copyCodeBtn">复制查询码</button>
+        <div class="action-row" style="margin-top: 12px;">
+          <button type="button" class="primary-btn" id="goQueryBtn">查询报价</button>
+          <button type="button" class="ghost-btn" id="newInquiryBtn">继续新建</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="queryPage">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h2 id="queryTitle">查询报价</h2>
+          <button type="button" class="link-btn" id="backToFormBtn">返回填写</button>
+        </div>
+        <div class="action-row" style="margin-top: 8px;">
+          <input type="text" id="queryCodeInput" maxlength="8" placeholder="输入 8 位查询码" style="flex:1; text-transform:uppercase;">
+          <button type="button" class="primary-btn" id="searchBtn" style="width:auto; min-width:120px;">查询</button>
+        </div>
+        <p class="muted" id="queryHint" style="margin-top: 10px;">输入提交后收到的查询码即可查看报价进度。</p>
+        <div id="queryResult" style="margin-top: 16px;"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./config.js"></script>
+  <script>
+    (() => {
+      const apiBaseUrl = String(window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl || "").replace(/\/$/, "");
+
+      const i18n = {
+        zh: {
+          formTitle: "PanSan报价系统",
+          formSubtitle: "填写商品信息，提交询价后即可用查询码查看报价。",
+          toQueryLink: "查询报价",
+          productUrlLabel: "商品链接",
+          productUrlPlaceholder: "https://item.taobao.com/...",
+          imageLabel: "商品图片",
+          imageHint: "可选，最多上传 5 张图片",
+          uploadText: "点击上传图片",
+          remarkLabel: "备注要求",
+          remarkPlaceholder: "颜色、尺码、数量、包装要求等",
+          shippingLabel: "运输方式",
+          seaShipping: "海运",
+          airShipping: "空运",
+          paymentLabel: "付款方式",
+          gcashPayment: "Gcash",
+          shopeePayment: "Shopee全款",
+          weightLabel: "预估重量",
+          submitBtn: "提交询价",
+          submitting: "提交中...",
+          successTitle: "询价已提交",
+          successDesc: "请保存查询码，后续查询报价会用到。",
+          copyCodeBtn: "复制查询码",
+          copied: "已复制",
+          goQueryBtn: "查询报价",
+          newInquiryBtn: "继续新建",
+          queryTitle: "查询报价",
+          backToFormBtn: "返回填写",
+          queryPlaceholder: "输入 8 位查询码",
+          searchBtn: "查询",
+          queryHint: "输入提交后收到的查询码即可查看报价进度。",
+          pending: "待报价",
+          quoted: "已报价",
+          product: "商品链接",
+          images: "商品图片",
+          remark: "备注",
+          shipping: "运输方式",
+          weight: "预估重量",
+          freight: "运费",
+          serviceFee: "商品目前售价",
+          total: "总价",
+          note: "报价备注",
+          submitTime: "提交时间",
+          noImages: "未上传图片",
+          pendingMessage: "客服正在处理询价，报价完成后会显示在这里。",
+          alertNoUrl: "请填写商品链接",
+          alertBadUrl: "商品链接格式不正确",
+          alertNoShipping: "请选择运输方式",
+          alertImageLimit: "最多上传 5 张图片",
+          requestFailed: "请求失败，请稍后重试",
+          invalidCode: "未找到该查询码，请确认后重试。"
+        },
+        en: {
+          formTitle: "PanSan Quote System",
+          formSubtitle: "Submit product details and check the result later with your inquiry code.",
+          toQueryLink: "Track Quote",
+          productUrlLabel: "Product URL",
+          productUrlPlaceholder: "https://item.taobao.com/...",
+          imageLabel: "Product Images",
+          imageHint: "Optional, up to 5 images",
+          uploadText: "Click to upload images",
+          remarkLabel: "Remarks",
+          remarkPlaceholder: "Color, size, quantity, packaging request...",
+          shippingLabel: "Shipping Method",
+          seaShipping: "Sea Freight",
+          airShipping: "Air Freight",
+          paymentLabel: "Payment Method",
+          gcashPayment: "Gcash",
+          shopeePayment: "Shopee Full Payment",
+          weightLabel: "Estimated Weight",
+          submitBtn: "Submit Inquiry",
+          submitting: "Submitting...",
+          successTitle: "Inquiry Submitted",
+          successDesc: "Save your code to check the quote later.",
+          copyCodeBtn: "Copy Inquiry Code",
+          copied: "Copied",
+          goQueryBtn: "Check Quote",
+          newInquiryBtn: "Create Another",
+          queryTitle: "Check Quote",
+          backToFormBtn: "Back",
+          queryPlaceholder: "Enter 8-character code",
+          searchBtn: "Search",
+          queryHint: "Enter your inquiry code to track quote progress.",
+          pending: "Pending",
+          quoted: "Quoted",
+          product: "Product URL",
+          images: "Images",
+          remark: "Remarks",
+          shipping: "Shipping",
+          weight: "Weight",
+          freight: "Freight",
+          serviceFee: "Current Product Price",
+          total: "Total",
+          note: "Admin Note",
+          submitTime: "Submitted At",
+          noImages: "No images uploaded",
+          pendingMessage: "Your inquiry is being processed. The quote will appear here once ready.",
+          alertNoUrl: "Please enter the product URL",
+          alertBadUrl: "The product URL is invalid",
+          alertNoShipping: "Please select a shipping method",
+          alertImageLimit: "You can upload up to 5 images",
+          requestFailed: "Request failed, please try again later",
+          invalidCode: "Inquiry code not found"
+        }
+      };
+
+      const elements = {
+        langBtn: document.getElementById("langBtn"),
+        toQueryLink: document.getElementById("toQueryLink"),
+        formPage: document.getElementById("formPage"),
+        successPage: document.getElementById("successPage"),
+        queryPage: document.getElementById("queryPage"),
+        productUrl: document.getElementById("productUrl"),
+        imageInput: document.getElementById("imageInput"),
+        uploadTrigger: document.getElementById("uploadTrigger"),
+        previewList: document.getElementById("previewList"),
+        remark: document.getElementById("remark"),
+        paymentGcash: document.querySelector('input[name="payment"][value="gcash"]'),
+        paymentShopee: document.querySelector('input[name="payment"][value="shopee"]'),
+        weightSlider: document.getElementById("weightSlider"),
+        weightDisplay: document.getElementById("weightDisplay"),
+        submitBtn: document.getElementById("submitBtn"),
+        formError: document.getElementById("formError"),
+        displayCode: document.getElementById("displayCode"),
+        copyCodeBtn: document.getElementById("copyCodeBtn"),
+        goQueryBtn: document.getElementById("goQueryBtn"),
+        newInquiryBtn: document.getElementById("newInquiryBtn"),
+        queryCodeInput: document.getElementById("queryCodeInput"),
+        searchBtn: document.getElementById("searchBtn"),
+        queryResult: document.getElementById("queryResult"),
+        backToFormBtn: document.getElementById("backToFormBtn")
+      };
+
+      const pages = [elements.formPage, elements.successPage, elements.queryPage];
+      const labels = {
+        formTitle: document.getElementById("formTitle"),
+        formSubtitle: document.getElementById("formSubtitle"),
+        toQueryLink: document.getElementById("toQueryLink"),
+        productUrlLabel: document.getElementById("productUrlLabel"),
+        imageLabel: document.getElementById("imageLabel"),
+        imageHint: document.getElementById("imageHint"),
+        uploadText: document.getElementById("uploadText"),
+        remarkLabel: document.getElementById("remarkLabel"),
+        paymentLabel: document.getElementById("paymentLabel"),
+        shippingLabel: document.getElementById("shippingLabel"),
+        seaShipping: document.getElementById("seaShipping"),
+        airShipping: document.getElementById("airShipping"),
+        weightLabel: document.getElementById("weightLabel"),
+        submitBtn: document.getElementById("submitBtn"),
+        successTitle: document.getElementById("successTitle"),
+        successDesc: document.getElementById("successDesc"),
+        copyCodeBtn: document.getElementById("copyCodeBtn"),
+        goQueryBtn: document.getElementById("goQueryBtn"),
+        newInquiryBtn: document.getElementById("newInquiryBtn"),
+        queryTitle: document.getElementById("queryTitle"),
+        backToFormBtn: document.getElementById("backToFormBtn"),
+        searchBtn: document.getElementById("searchBtn"),
+        queryHint: document.getElementById("queryHint")
+      };
+
+      let currentLang = "zh";
+      let selectedFiles = [];
+
+      function text(key) {
+        return i18n[currentLang][key];
+      }
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat(currentLang === "zh" ? "zh-CN" : "en-US", {
+          style: "currency",
+          currency: "PHP"
+        }).format(Number(value || 0));
+      }
+
+      function formatDate(value) {
+        return new Date(value).toLocaleString(currentLang === "zh" ? "zh-CN" : "en-US");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function safeUrl(value) {
+        try {
+          const parsed = new URL(String(value), window.location.origin);
+          return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '#';
+        } catch {
+          return '#';
+        }
+      }
+
+      function safeImageUrl(value) {
+        const str = String(value ?? '');
+        if (str.startsWith('data:image/')) {
+          return str;
+        }
+        return safeUrl(str);
+      }
+
+      function showPage(page) {
+        pages.forEach((item) => item.classList.remove("active"));
+        page.classList.add("active");
+      }
+
+      function applyLanguage(lang) {
+        currentLang = lang;
+        document.title = lang === "zh" ? "PanSan报价系统" : "PanSan Quote System";
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        elements.langBtn.textContent = lang === "zh" ? "EN" : "中文";
+
+        Object.keys(labels).forEach((key) => {
+          if (labels[key]) {
+            labels[key].textContent = text(key);
+          }
+        });
+
+        elements.productUrl.placeholder = text("productUrlPlaceholder");
+        elements.remark.placeholder = text("remarkPlaceholder");
+        elements.queryCodeInput.placeholder = text("queryPlaceholder");
+        renderQueryResult(elements.queryResult.dataset.payload ? JSON.parse(elements.queryResult.dataset.payload) : null);
+      }
+
+      function syncChoiceState() {
+        document.querySelectorAll(".choice").forEach((node) => {
+          const radio = node.querySelector("input");
+          node.classList.toggle("active", radio.checked);
+        });
+      }
+
+      function updateWeight() {
+        elements.weightDisplay.textContent = `${Number(elements.weightSlider.value).toFixed(2)} kg`;
+      }
+
+      function fileToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function renderPreviews() {
+        elements.previewList.innerHTML = "";
+        selectedFiles.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "preview-item";
+            wrapper.innerHTML = `<img alt="preview" src="${safeImageUrl(event.target.result)}"><button type="button" data-index="${index}">×</button>`;
+            elements.previewList.appendChild(wrapper);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function resetForm() {
+        elements.productUrl.value = "";
+        elements.remark.value = "";
+        selectedFiles = [];
+        elements.previewList.innerHTML = "";
+        elements.weightSlider.value = "3";
+        document.querySelector('input[name="shipping"][value="sea"]').checked = true;
+        syncChoiceState();
+        updateWeight();
+        elements.formError.textContent = "";
+      }
+
+      async function requestJson(path, options = {}) {
+        const response = await fetch(`${apiBaseUrl}${path}`, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+          }
+        });
+
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch (error) {
+          payload = {};
+        }
+
+        if (!response.ok) {
+          throw new Error(payload.error || text("requestFailed"));
+        }
+
+        return payload;
+      }
+
+      function renderQueryResult(payload) {
+        elements.queryResult.innerHTML = "";
+
+        if (!payload) {
+          elements.queryResult.dataset.payload = "";
+          return;
+        }
+
+        elements.queryResult.dataset.payload = JSON.stringify(payload);
+
+        const imagesHtml = payload.images && payload.images.length
+          ? `<div class="gallery">${payload.images.map((item) => `<a href="${safeUrl(item.url)}" target="_blank" rel="noreferrer"><img src="${safeImageUrl(item.url)}" alt="product image"></a>`).join("")}</div>`
+          : `<p class="muted">${text("noImages")}</p>`;
+
+        const isQuoted = payload.status === "quoted";
+        const priceHtml = isQuoted
+          ? `
+            <div class="price-box">
+              <div class="price-row"><span>${text("freight")}</span><strong>${formatCurrency(payload.final_freight)}</strong></div>
+              <div class="price-row"><span>${text("serviceFee")}</span><strong>${formatCurrency(payload.service_fee)}</strong></div>
+              <div class="price-row total"><span>${text("total")}</span><strong>${formatCurrency(payload.total_price)}</strong></div>
+              ${payload.admin_note ? `<p><strong>${escapeHtml(text("note"))}</strong>${escapeHtml(payload.admin_note)}</p>` : ""}
+            </div>
+          `
+          : `<p class="muted">${text("pendingMessage")}</p>`;
+
+        const shippingText = payload.shipping === "air" ? text("airShipping") : text("seaShipping");
+        const paymentText = payload.payment_method === "shopee" ? text("shopeePayment") : text("gcashPayment");
+        const statusText = payload.status === "quoted" ? text("quoted") : text("pending");
+        const statusClass = payload.status === "quoted" ? "quoted" : "pending";
+
+        elements.queryResult.innerHTML = `
+          <div class="result">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+              <h3>${escapeHtml(payload.code)}</h3>
+              <span class="status ${statusClass}">${escapeHtml(statusText)}</span>
+            </div>
+            <p><strong>${text("product")}</strong><a href="${safeUrl(payload.product_url)}" target="_blank" rel="noreferrer">${escapeHtml(payload.product_url)}</a></p>
+            <p><strong>${text("images")}</strong></p>
+            ${imagesHtml}
+            <p><strong>${text("remark")}</strong>${escapeHtml(payload.remark || "-")}</p>
+            <p><strong>${text("shipping")}</strong>${escapeHtml(shippingText)}</p>
+            <p><strong>${text("paymentLabel")}</strong>${escapeHtml(paymentText)}</p>
+            <p><strong>${text("weight")}</strong>${escapeHtml(payload.weight_estimate)} kg</p>
+            ${priceHtml}
+            <p class="muted"><strong>${text("submitTime")}</strong>${formatDate(payload.created_at)}</p>
+          </div>
+        `;
+      }
+
+      async function submitInquiry() {
+        elements.formError.textContent = "";
+        const productUrl = elements.productUrl.value.trim();
+        const shippingNode = document.querySelector('input[name="shipping"]:checked');
+
+        if (!productUrl) {
+          elements.formError.textContent = text("alertNoUrl");
+          return;
+        }
+
+        try {
+          const parsedUrl = new URL(productUrl);
+          if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+            throw new Error('Invalid protocol');
+          }
+        } catch (error) {
+          elements.formError.textContent = text("alertBadUrl");
+          return;
+        }
+
+        if (!shippingNode) {
+          elements.formError.textContent = text("alertNoShipping");
+          return;
+        }
+
+        elements.submitBtn.disabled = true;
+        elements.submitBtn.textContent = text("submitting");
+
+        try {
+          const images = await Promise.all(selectedFiles.map((file) => fileToDataUrl(file)));
+          const payload = await requestJson("/api/inquiries", {
+            method: "POST",
+            body: JSON.stringify({
+              product_url: productUrl,
+              images,
+              remark: elements.remark.value.trim(),
+              shipping: shippingNode.value,
+              payment_method: document.querySelector('input[name="payment"]:checked').value,
+              weight_estimate: Number(elements.weightSlider.value)
+            })
+          });
+
+          elements.displayCode.textContent = payload.code;
+          showPage(elements.successPage);
+          resetForm();
+        } catch (error) {
+          elements.formError.textContent = error.message || text("requestFailed");
+        } finally {
+          elements.submitBtn.disabled = false;
+          elements.submitBtn.textContent = text("submitBtn");
+        }
+      }
+
+      async function performQuery(code) {
+        if (!code) {
+          return;
+        }
+
+        elements.queryResult.innerHTML = `<p class="muted">${text("searchBtn")}...</p>`;
+
+        try {
+          const payload = await requestJson(`/api/inquiries/${code.toUpperCase()}`);
+          renderQueryResult(payload);
+        } catch (error) {
+          elements.queryResult.dataset.payload = "";
+          elements.queryResult.innerHTML = `<p class="error-text">${error.message || text("invalidCode")}</p>`;
+        }
+      }
+
+      elements.langBtn.addEventListener("click", () => {
+        applyLanguage(currentLang === "zh" ? "en" : "zh");
+      });
+
+      elements.toQueryLink.addEventListener("click", () => {
+        elements.queryCodeInput.value = "";
+        renderQueryResult(null);
+        showPage(elements.queryPage);
+      });
+
+      elements.backToFormBtn.addEventListener("click", () => showPage(elements.formPage));
+      elements.newInquiryBtn.addEventListener("click", () => showPage(elements.formPage));
+      elements.goQueryBtn.addEventListener("click", () => {
+        const code = elements.displayCode.textContent;
+        elements.queryCodeInput.value = code;
+        showPage(elements.queryPage);
+        performQuery(code);
+      });
+
+      elements.copyCodeBtn.addEventListener("click", async () => {
+        const code = elements.displayCode.textContent;
+        try {
+          await navigator.clipboard.writeText(code);
+          elements.copyCodeBtn.textContent = text("copied");
+          window.setTimeout(() => {
+            elements.copyCodeBtn.textContent = text("copyCodeBtn");
+          }, 1800);
+        } catch (error) {
+          elements.copyCodeBtn.textContent = code;
+        }
+      });
+
+      elements.uploadTrigger.addEventListener("click", () => elements.imageInput.click());
+      elements.imageInput.addEventListener("change", (event) => {
+        const nextFiles = Array.from(event.target.files || []);
+        if (selectedFiles.length + nextFiles.length > 5) {
+          elements.formError.textContent = text("alertImageLimit");
+          event.target.value = "";
+          return;
+        }
+
+        elements.formError.textContent = "";
+        selectedFiles = selectedFiles.concat(nextFiles);
+        renderPreviews();
+        event.target.value = "";
+      });
+
+      elements.previewList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement) || !target.dataset.index) {
+          return;
+        }
+
+        const index = Number(target.dataset.index);
+        selectedFiles.splice(index, 1);
+        renderPreviews();
+      });
+
+      document.querySelectorAll('input[name="shipping"]').forEach((node) => {
+        node.addEventListener("change", syncChoiceState);
+      });
+
+      document.querySelectorAll('input[name="payment"]').forEach((node) => {
+        node.addEventListener("change", syncChoiceState);
+      });
+
+      elements.weightSlider.addEventListener("input", updateWeight);
+      elements.submitBtn.addEventListener("click", submitInquiry);
+      elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
+      elements.queryCodeInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          performQuery(elements.queryCodeInput.value.trim());
+        }
+      });
+
+      updateWeight();
+      syncChoiceState();
+      applyLanguage("zh");
+    })();
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"956d1b8221d34e09823b68cef9b3b4af","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

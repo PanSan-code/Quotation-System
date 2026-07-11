@@ -1,0 +1,2 @@
+﻿馃  Logs were written to "C:\Users\13646\AppData\Roaming\xdg.config\.wrangler\l
+ogs\wrangler-2026-05-10_10-21-28_627.log"

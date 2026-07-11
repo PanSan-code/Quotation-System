@@ -1,11 +1,12 @@
 name = "quote-system-api"
 main = "src/worker.js"
-compatibility_date = "2026-05-07"
+compatibility_date = "2025-05-01"
 
 [vars]
-# Set this to your frontend domain(s), comma-separated. Do NOT use "*".
-ALLOWED_ORIGINS = "https://quote-system-frontend.pages.dev,https://pansanrequest.ccwu.cc"
+ALLOWED_ORIGINS = "https://quote-system-frontend.pages.dev,https://pansanrequest.ccwu.cc,https://api.pansanrequest.ccwu.cc"
 MAX_IMAGES = "5"
+ADMIN_EMAIL = "zp1364625224@163.com"
+FROM_EMAIL = "noreply@pansanrequest.ccwu.cc"
 
 [[d1_databases]]
 binding = "DB"
@@ -17,5 +18,4 @@ binding = "QUOTE_IMAGES"
 bucket_name = "pansan-request-images"
 
 [triggers]
-crons = ["0 0 1 */6 *"]
-
+crons = ["0 0 1 */6 *", "*/5 * * * *"]
