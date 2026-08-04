@@ -2323,11 +2323,11 @@
         elements.queryResult.dataset.payload = JSON.stringify(payload);
 
         const imagesHtml = payload.images && payload.images.length
-          ? `<div class="gallery">${payload.images.map((item) => `<img src="${safeImageUrl(item.url)}" alt="product image" onclick="document.getElementById('imgLightbox').querySelector('img').src='${safeImageUrl(item.url)}';document.getElementById('imgLightbox').classList.add('active')">`).join("")}</div>`
+          ? `<div class="gallery">${payload.images.map((item) => `<img src="${safeImageUrl(item.url)}" alt="product image" data-lightbox-src="${safeImageUrl(item.url)}">`).join("")}</div>`
           : `<p class="muted">${text("noImages")}</p>`;
 
         const isQuoted = payload.status === "quoted";
-        const freightDisplay = payload.freight2 ? payload.freight2 : (payload.final_freight ? Math.round(payload.final_freight * 1.15 * 100) / 100 : null);
+        const freightDisplay = payload.freight2 ? payload.freight2 : (payload.final_freight ? Math.round(payload.final_freight * 1.25 * 100) / 100 : null);
         const priceHtml = isQuoted
           ? `
             <div class="price-box">
@@ -2649,6 +2649,17 @@
           }
         });
       }
+      // Delegated lightbox open for gallery images (no inline onclick)
+      elements.queryResult.addEventListener("click", (e) => {
+        const img = e.target.closest("img[data-lightbox-src]");
+        if (img && imgLightbox) {
+          const lightboxImg = imgLightbox.querySelector("img");
+          if (lightboxImg) {
+            lightboxImg.src = img.getAttribute("data-lightbox-src");
+            imgLightbox.classList.add("active");
+          }
+        }
+      });
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
       elements.queryCodeInput.addEventListener("keypress", (event) => {

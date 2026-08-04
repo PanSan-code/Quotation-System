@@ -983,7 +983,7 @@
             </div>
             <div>
               <label for="freight2Input">运费2</label>
-              <input type="number" id="freight2Input" placeholder="自动计算（运费1 × 1.15），也可手动修改" min="0" step="0.01">
+              <input type="number" id="freight2Input" placeholder="自动计算（运费1 × 1.25），也可手动修改" min="0" step="0.01">
             </div>
             <div>
               <label for="serviceFeeInput">商品目前售价</label>
@@ -1000,7 +1000,7 @@
             </div>
             <div>
               <label for="shopeeAfterTaxInput">Shopee平台税后总价</label>
-              <input type="number" id="shopeeAfterTaxInput" placeholder="自动计算（总价 × 1.25）" min="0" step="0.01">
+              <input type="number" id="shopeeAfterTaxInput" placeholder="自动计算（总价 ÷ 0.75）" min="0" step="0.01">
             </div>
           </div>
           <div class="price-note">总价 = 运费2 + 商品目前售价。如果总价输入框留空，系统会自动计算。</div>
@@ -1762,7 +1762,7 @@
         // 如果运费2为空或为0，自动计算；否则使用用户手动输入的值
         if (!freight2Input.value || !Number.isFinite(freight2FromInput) || freight2FromInput === 0) {
           if (Number.isFinite(freight1) && freight1 > 0) {
-            freight2Input.value = roundMoney(freight1 * 1.15);
+            freight2Input.value = roundMoney(freight1 * 1.25);
           } else {
             freight2Input.value = "";
           }
@@ -1788,7 +1788,7 @@
         const totalPrice = Number(totalPriceInput.value);
         if (Number.isFinite(totalPrice) && totalPrice > 0) {
           if (!shopeeAfterTaxInput.dataset.manual || shopeeAfterTaxInput.dataset.manual === "false") {
-            shopeeAfterTaxInput.value = roundMoney(totalPrice * 1.25);
+            shopeeAfterTaxInput.value = roundMoney(totalPrice / 0.75);
           }
         } else if (!shopeeAfterTaxInput.dataset.manual || shopeeAfterTaxInput.dataset.manual === "false") {
           shopeeAfterTaxInput.value = "";
@@ -1814,7 +1814,7 @@
         
         const totalPrice = Number(totalPriceInput.value);
         if (Number.isFinite(totalPrice) && totalPrice > 0) {
-          shopeeAfterTaxInput.value = roundMoney(totalPrice * 1.25);
+          shopeeAfterTaxInput.value = roundMoney(totalPrice / 0.75);
         } else {
           shopeeAfterTaxInput.value = "";
         }
