@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS verification_codes (
   email TEXT NOT NULL,
   code TEXT NOT NULL,
   expires_at INTEGER NOT NULL,
+  ip TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL DEFAULT 0,
   used INTEGER NOT NULL DEFAULT 0
 );
 

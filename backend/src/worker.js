@@ -29,12 +29,23 @@ async function importJwtKey(secret) {
   );
 }
 
+const JWT_ISSUER = "pansan-request";
+const JWT_AUDIENCE = "pansan-api";
+
 async function signJwt(payload, secret) {
   const key = await importJwtKey(secret);
   const encoder = new TextEncoder();
   const header = { alg: "HS256", typ: "JWT" };
+  const now = Math.floor(Date.now() / 1000);
+  const fullPayload = {
+    ...payload,
+    iss: JWT_ISSUER,
+    aud: JWT_AUDIENCE,
+    nbf: now - 60, // 允许 60 秒时钟偏差
+    iat: now
+  };
   const headerB64 = base64UrlEncode(encoder.encode(JSON.stringify(header)));
-  const payloadB64 = base64UrlEncode(encoder.encode(JSON.stringify(payload)));
+  const payloadB64 = base64UrlEncode(encoder.encode(JSON.stringify(fullPayload)));
   const signingInput = `${headerB64}.${payloadB64}`;
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(signingInput));
   return `${signingInput}.${base64UrlEncode(signature)}`;
@@ -53,6 +64,9 @@ async function verifyJwt(token, secret) {
     const payloadBytes = base64UrlDecode(parts[1]);
     const payload = JSON.parse(new TextDecoder().decode(payloadBytes));
     if (!payload.exp || payload.exp * 1000 < Date.now()) return null;
+    if (payload.iss !== JWT_ISSUER) return null;
+    if (payload.aud !== JWT_AUDIENCE) return null;
+    if (payload.nbf && payload.nbf * 1000 > Date.now()) return null;
     return payload;
   } catch (e) {
     return null;
@@ -72,6 +86,16 @@ async function requireUser(request, env) {
   return payload;
 }
 
+// 可选登录：有有效 token 则返回用户，否则返回 null（不阻断匿名流程）
+async function getOptionalUser(request, env) {
+  if (!env.JWT_SECRET) return null;
+  const authHeader = request.headers.get("Authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+  const payload = await verifyJwt(token, env.JWT_SECRET);
+  if (!payload || !payload.email) return null;
+  return payload;
+}
+
 export default {
   async fetch(request, env, ctx) {
     try {
@@ -85,6 +109,12 @@ export default {
       // Skip rate limiting for health check
       if (path !== "/health") {
         await checkRateLimit(request, env);
+      }
+
+      // Enforce request body size limit for POST/PUT/PATCH
+      const contentLength = request.headers.get("Content-Length");
+      if (contentLength && Number(contentLength) > MAX_BODY_SIZE) {
+        throw error("Request body too large.", 413);
       }
 
       if (request.method === "GET" && path === "/health") {
@@ -128,7 +158,8 @@ export default {
       }
 
       if (path === "/api/orders" && request.method === "POST") {
-        return handleCreateOrder(request, env);
+        const user = await requireUser(request, env);
+        return handleCreateOrder(user, request, env);
       }
 
       if (path === "/api/admin/orders" && request.method === "GET") {
@@ -148,19 +179,23 @@ export default {
       }
 
       if (path === "/api/orders" && request.method === "GET") {
-        return handleGetOrder(request, env);
+        const user = await requireUser(request, env);
+        return handleGetOrder(user, request, env);
       }
 
       if (path === "/api/orders" && request.method === "PUT") {
-        return handleAddTrackingToOrder(request, env);
+        const user = await requireUser(request, env);
+        return handleAddTrackingToOrder(user, request, env);
       }
 
       if (path === "/api/orders/tracking" && request.method === "DELETE") {
-        return handleRemoveTrackingFromOrder(request, env);
+        const user = await requireUser(request, env);
+        return handleRemoveTrackingFromOrder(user, request, env);
       }
 
       if (path === "/api/orders/check-tracking" && request.method === "POST") {
-        return handleCheckTrackingConflict(request, env);
+        const user = await requireUser(request, env);
+        return handleCheckTrackingConflict(user, request, env);
       }
 
       if (path === "/api/admin/tracking-whitelist" && request.method === "GET") {
@@ -491,13 +526,14 @@ async function requireAdmin(request, env) {
 }
 
 const MAX_BASE64_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_BODY_SIZE = 2 * 1024 * 1024; // 2MB max request body
 
 const MAGIC_BYTES = {
   "image/jpeg": [[0xFF, 0xD8, 0xFF]],
   "image/png": [[0x89, 0x50, 0x4E, 0x47]],
   "image/webp": [[0x52, 0x49, 0x46, 0x46]],
   "image/gif": [[0x47, 0x49, 0x46, 0x38]],
-  "image/heic": [[0x00, 0x00, 0x00]] // HEIC encapsulated in ftyp box; relaxed check
+  "image/heic": [[0x00, 0x00, 0x00, -1, 0x66, 0x74, 0x79, 0x70]] // ISOBMFF: 4-byte size + "ftyp" (4th byte is variable)
 };
 
 function validateMagicBytes(bytes, mimeType) {
@@ -506,6 +542,7 @@ function validateMagicBytes(bytes, mimeType) {
 
   return signatures.some((sig) => {
     for (let i = 0; i < sig.length; i++) {
+      if (sig[i] === -1) continue; // wildcard: match any byte
       if (bytes[i] !== sig[i]) return false;
     }
     return true;
@@ -626,6 +663,8 @@ async function handleCreateInquiry(request, env, ctx) {
   const images = normalizeImages(body.images, env);
   const code = await generateUniqueCode(env);
   const createdAt = new Date().toISOString();
+  const user = await getOptionalUser(request, env);
+  const inquiryEmail = user ? user.email : "";
 
   const uploadedImages = [];
   for (const image of images) {
@@ -634,10 +673,10 @@ async function handleCreateInquiry(request, env, ctx) {
 
   await env.DB.prepare(
     `INSERT INTO inquiries
-      (code, product_url, remark, shipping, payment_method, weight_estimate, status, final_freight, freight2, service_fee, total_price, admin_note, images_json, notified_at, reminder_count, created_at, updated_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'pending', NULL, NULL, NULL, NULL, '', ?7, NULL, 0, ?8, ?8)`
+      (code, product_url, remark, shipping, payment_method, weight_estimate, status, final_freight, freight2, service_fee, total_price, admin_note, images_json, email, notified_at, reminder_count, created_at, updated_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'pending', NULL, NULL, NULL, NULL, '', ?7, ?8, NULL, 0, ?9, ?9)`
   )
-    .bind(code, productUrl, remark, shipping, paymentMethod, weightEstimate, JSON.stringify(uploadedImages), createdAt)
+    .bind(code, productUrl, remark, shipping, paymentMethod, weightEstimate, JSON.stringify(uploadedImages), inquiryEmail, createdAt)
     .run();
 
   // 异步发送邮件通知管理员，不阻塞主请求
@@ -672,6 +711,8 @@ async function handlePublicInquiry(code, request, env) {
   if (!inquiry) {
     return json({ error: "Inquiry not found." }, 404, request, env);
   }
+  // Sign image URLs for secure file access
+  inquiry.images = await signImageUrls(inquiry.images, env);
   return json(inquiry, 200, request, env);
 }
 
@@ -774,6 +815,7 @@ async function handleSaveQuote(code, request, env) {
 const SAFE_PATH_RE = /^inquiries\/[A-Z0-9]{8}\/[a-zA-Z0-9_-]+\.(jpg|png|webp|gif|heic)$/;
 
 async function handleFileRequest(path, request, env) {
+  const url = new URL(request.url);
   const rawKey = decodeURIComponent(path.slice("/files/".length));
 
   // Reject null bytes and other dangerous characters
@@ -785,6 +827,17 @@ async function handleFileRequest(path, request, env) {
     return new Response("Not found.", { status: 404, headers: buildCorsHeaders(request, env) });
   }
 
+  // Verify signed token (short-lived, 10 minutes) to prevent enumeration
+  const token = url.searchParams.get("token");
+  if (!token || !(await verifyFileToken(rawKey, token, env))) {
+    // Fallback: allow authenticated users
+    try {
+      await requireUser(request, env);
+    } catch {
+      return new Response("Not found.", { status: 404, headers: buildCorsHeaders(request, env) });
+    }
+  }
+
   const object = await env.QUOTE_IMAGES.get(rawKey);
   if (!object) {
     return new Response("Not found.", { status: 404, headers: buildCorsHeaders(request, env) });
@@ -793,7 +846,70 @@ async function handleFileRequest(path, request, env) {
   const headers = new Headers(buildCorsHeaders(request, env));
   object.writeHttpMetadata(headers);
   headers.set("etag", object.httpEtag);
+  headers.set("Cache-Control", "public, max-age=3600");
   return new Response(object.body, { headers });
+}
+
+// Sign a file URL with a short-lived token (10 minutes)
+async function signFileUrl(key, env) {
+  const encoder = new TextEncoder();
+  const secret = env.JWT_SECRET;
+  if (!secret) throw new Error("File URL signing is unavailable: JWT_SECRET is not set.");
+  const now = Math.floor(Date.now() / 1000);
+  const payload = `${key}:${now + 3600}`; // 1 hour expiry
+  const keyData = await crypto.subtle.importKey(
+    "raw", encoder.encode(secret).slice(0, 32),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", keyData, encoder.encode(payload));
+  const token = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  return `/files/${key}?token=${encodeURIComponent(token)}`;
+}
+
+async function verifyFileToken(key, token, env) {
+  try {
+    const encoder = new TextEncoder();
+    const secret = env.JWT_SECRET;
+    if (!secret) return false;
+    const keyData = await crypto.subtle.importKey(
+      "raw", encoder.encode(secret).slice(0, 32),
+      { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]
+    );
+    const now = Math.floor(Date.now() / 1000);
+    const window = 3600; // 1 hour
+    for (let offset = 0; offset <= window; offset++) {
+      const testPayload = `${key}:${now - offset}`;
+      const sig = await crypto.subtle.sign("HMAC", keyData, encoder.encode(testPayload));
+      const testToken = btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+      if (testToken === token) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// Sign all image URLs in an images array for secure file access
+async function signImageUrls(imagesJson, env) {
+  if (!imagesJson) return [];
+  const images = typeof imagesJson === "string" ? JSON.parse(imagesJson) : imagesJson;
+  if (!Array.isArray(images)) return [];
+  const signed = [];
+  for (const img of images) {
+    const url = img.url || img;
+    if (typeof url !== "string" || !url.startsWith("/files/")) {
+      signed.push(img.url ? { url: img.url } : { url: String(url) });
+      continue;
+    }
+    const key = url.slice("/files/".length);
+    try {
+      signed.push({ url: await signFileUrl(key, env) });
+    } catch {
+      // Signing unavailable (e.g. JWT_SECRET not set): leave the URL unsignable rather than crash.
+      signed.push({ url: String(url) });
+    }
+  }
+  return signed;
 }
 
 async function handleCleanupOldInquiries(request, env) {
@@ -873,7 +989,7 @@ async function handleScheduledCleanup(env) {
   console.log(`Scheduled cleanup completed. Deleted ${oldInquiries.results?.length || 0} old inquiries.`);
 }
 
-async function handleCreateOrder(request, env) {
+async function handleCreateOrder(user, request, env) {
   const body = await request.json();
   const code = cleanString(body.code, { max: 8, empty: false }).toUpperCase();
   if (!/^[A-Z0-9]{8}$/.test(code)) {
@@ -886,7 +1002,7 @@ async function handleCreateOrder(request, env) {
   }
 
   const trackingNumbers = Array.isArray(body.tracking_numbers) ? body.tracking_numbers : [];
-  const validTrackings = trackingNumbers.filter(t => typeof t === "string" && t.trim());
+  const validTrackings = trackingNumbers.filter(t => typeof t === "string" && t.trim() && t.length <= 100);
   const createdAt = new Date().toISOString();
 
   // Derive confirmed list from whitelist
@@ -902,8 +1018,8 @@ async function handleCreateOrder(request, env) {
 
   await env.DB.batch([
     env.DB.prepare(
-      "INSERT INTO orders (code, tracking_numbers_json, created_at) VALUES (?1, ?2, ?3)"
-    ).bind(code, JSON.stringify(validTrackings), createdAt)
+      "INSERT INTO orders (code, tracking_numbers_json, email, created_at) VALUES (?1, ?2, ?3, ?4)"
+    ).bind(code, JSON.stringify(validTrackings), user.email, createdAt)
   ]);
 
   return json({
@@ -1011,7 +1127,7 @@ async function handleConfirmOrder(code, request, env) {
   }
 }
 
-async function handleGetOrder(request, env) {
+async function handleGetOrder(user, request, env) {
   const url = new URL(request.url);
   const code = (url.searchParams.get("code") || "").trim().toUpperCase();
 
@@ -1020,10 +1136,15 @@ async function handleGetOrder(request, env) {
   }
 
   const order = await env.DB.prepare(
-    "SELECT code, tracking_numbers_json, created_at FROM orders WHERE code = ?1"
+    "SELECT code, tracking_numbers_json, email, created_at FROM orders WHERE code = ?1"
   ).bind(code).first();
 
   if (!order) {
+    return json({ error: "Order not found." }, 404, request, env);
+  }
+
+  // Verify ownership
+  if (order.email && order.email !== user.email) {
     return json({ error: "Order not found." }, 404, request, env);
   }
 
@@ -1048,7 +1169,7 @@ async function handleGetOrder(request, env) {
   }, 200, request, env);
 }
 
-async function handleAddTrackingToOrder(request, env) {
+async function handleAddTrackingToOrder(user, request, env) {
   const body = await request.json();
   const code = cleanString(body.code, { max: 8, empty: false }).toUpperCase();
   if (!/^[A-Z0-9]{8}$/.test(code)) {
@@ -1056,16 +1177,20 @@ async function handleAddTrackingToOrder(request, env) {
   }
 
   const order = await env.DB.prepare(
-    "SELECT code, tracking_numbers_json FROM orders WHERE code = ?1"
+    "SELECT code, tracking_numbers_json, email FROM orders WHERE code = ?1"
   ).bind(code).first();
 
   if (!order) {
     throw error("Order not found.");
   }
 
+  if (order.email && order.email !== user.email) {
+    throw error("Order not found.");
+  }
+
   const trackingNumbers = JSON.parse(order.tracking_numbers_json || "[]");
   const newTrackings = Array.isArray(body.tracking_numbers) ? body.tracking_numbers : [];
-  const validNewTrackings = newTrackings.filter(t => typeof t === "string" && t.trim());
+  const validNewTrackings = newTrackings.filter(t => typeof t === "string" && t.trim() && t.length <= 100);
   const addedTrackings = [];
 
   for (const tracking of validNewTrackings) {
@@ -1100,7 +1225,7 @@ async function handleAddTrackingToOrder(request, env) {
   }, 200, request, env);
 }
 
-async function handleRemoveTrackingFromOrder(request, env) {
+async function handleRemoveTrackingFromOrder(user, request, env) {
   const body = await request.json();
   const code = cleanString(body.code, { max: 8, empty: false }).toUpperCase();
   const trackingNumber = cleanString(body.tracking_number, { max: 100, empty: false });
@@ -1110,10 +1235,14 @@ async function handleRemoveTrackingFromOrder(request, env) {
   }
 
   const order = await env.DB.prepare(
-    "SELECT code, tracking_numbers_json FROM orders WHERE code = ?1"
+    "SELECT code, tracking_numbers_json, email FROM orders WHERE code = ?1"
   ).bind(code).first();
 
   if (!order) {
+    throw error("Order not found.");
+  }
+
+  if (order.email && order.email !== user.email) {
     throw error("Order not found.");
   }
 
@@ -1149,7 +1278,7 @@ async function handleRemoveTrackingFromOrder(request, env) {
   }, 200, request, env);
 }
 
-async function handleCheckTrackingConflict(request, env) {
+async function handleCheckTrackingConflict(user, request, env) {
   const body = await request.json();
   const code = cleanString(body.code, { max: 8, empty: false }).toUpperCase();
   const trackingNumbers = Array.isArray(body.tracking_numbers) ? body.tracking_numbers : [];
@@ -1159,8 +1288,8 @@ async function handleCheckTrackingConflict(request, env) {
   }
 
   const allOrders = await env.DB.prepare(
-    "SELECT code, tracking_numbers_json FROM orders WHERE code != ?1"
-  ).bind(code).all();
+    "SELECT code, tracking_numbers_json, email FROM orders WHERE code != ?1 AND email = ?2"
+  ).bind(code, user.email).all();
 
   const conflicts = [];
   for (const row of allOrders.results || []) {
@@ -1257,7 +1386,9 @@ function isValidEmail(email) {
 }
 
 function generateVerificationCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return String(100000 + (arr[0] % 900000));
 }
 
 async function sendVerificationEmail(env, toEmail, code) {
@@ -1287,8 +1418,8 @@ async function sendVerificationEmail(env, toEmail, code) {
     return { sent: true, via: "resend" };
   }
 
-  // 没有配置邮件服务，仅记录日志（开发测试时可从响应中看到验证码）
-  console.log(`[DEV] Verification code for ${toEmail}: ${code}`);
+  // 没有配置邮件服务，仅记录日志（开发测试时可通过日志查看验证码）
+  console.log(`[DEV] Verification code requested for ${toEmail} (no RESEND_API_KEY configured)`);
   return { sent: false, via: "console" };
 }
 
@@ -1435,21 +1566,47 @@ async function handleAuthSendCode(request, env) {
     throw error("Invalid email address.", 400);
   }
 
+  // Rate limit: per email (60s cooldown, 10 per day), per IP (60s cooldown, 20 per day)
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const now = Math.floor(Date.now() / 1000);
+  const cooldown = 60; // 60 seconds
+  const dayStart = now - (now % 86400);
+
+  const [emailRecentCount, ipRecentCount] = await Promise.all([
+    env.DB.prepare(
+      "SELECT COUNT(*) as cnt FROM verification_codes WHERE email = ?1 AND created_at > ?2"
+    ).bind(email, dayStart).first(),
+    env.DB.prepare(
+      "SELECT COUNT(*) as cnt FROM verification_codes WHERE ip = ?1 AND created_at > ?2"
+    ).bind(ip, dayStart).first()
+  ]);
+
+  if (emailRecentCount && emailRecentCount.cnt >= 10) {
+    throw error("Too many verification codes sent to this email today. Please try again tomorrow.", 429);
+  }
+  if (ipRecentCount && ipRecentCount.cnt >= 20) {
+    throw error("Too many verification codes sent from this IP today. Please try again tomorrow.", 429);
+  }
+
+  // Check cooldown
+  const lastCode = await env.DB.prepare(
+    "SELECT created_at FROM verification_codes WHERE email = ?1 ORDER BY created_at DESC LIMIT 1"
+  ).bind(email).first();
+  if (lastCode && lastCode.created_at && (now - lastCode.created_at) < cooldown) {
+    throw error(`Please wait ${cooldown - (now - lastCode.created_at)} seconds before requesting another code.`, 429);
+  }
+
   const code = generateVerificationCode();
-  const expiresAt = Math.floor(Date.now() / 1000) + 30 * 60; // 30 minutes
+  const expiresAt = now + 30 * 60; // 30 minutes
 
   await env.DB.prepare(
-    "INSERT INTO verification_codes (email, code, expires_at, used) VALUES (?1, ?2, ?3, 0)"
-  ).bind(email, code, expiresAt).run();
+    "INSERT INTO verification_codes (email, code, expires_at, ip, created_at, used) VALUES (?1, ?2, ?3, ?4, ?5, 0)"
+  ).bind(email, code, expiresAt, ip, now).run();
 
   const result = await sendVerificationEmail(env, email, code);
 
-  return json({
-    sent: result.sent,
-    via: result.via,
-    // 未配置邮件服务时返回验证码，方便测试
-    ...(result.via === "console" ? { code } : {})
-  }, 200, request, env);
+  // Never return the code in production response
+  return json({ sent: result.sent }, 200, request, env);
 }
 
 async function handleAuthVerify(request, env) {
@@ -1466,12 +1623,28 @@ async function handleAuthVerify(request, env) {
     throw error("Verification code is required.", 400);
   }
 
+  // Check brute force: max 5 failed attempts per email in 15 minutes
   const now = Math.floor(Date.now() / 1000);
+  const window15min = now - 15 * 60;
+  const [failCount] = await Promise.all([
+    env.DB.prepare(
+      "SELECT COUNT(*) as cnt FROM verification_codes WHERE email = ?1 AND used = -1 AND created_at > ?2"
+    ).bind(email, window15min).first()
+  ]);
+
+  if (failCount && failCount.cnt >= 5) {
+    throw error("Too many failed attempts. Please wait 15 minutes before trying again.", 429);
+  }
+
   const row = await env.DB.prepare(
-    "SELECT id, email, code, used FROM verification_codes WHERE email = ?1 AND code = ?2 AND expires_at > ?3 ORDER BY id DESC LIMIT 1"
+    "SELECT id, email, code, used FROM verification_codes WHERE email = ?1 AND code = ?2 AND expires_at > ?3 AND used = 0 ORDER BY id DESC LIMIT 1"
   ).bind(email, code, now).first();
 
-  if (!row || row.used) {
+  if (!row) {
+    // Record failed attempt
+    await env.DB.prepare(
+      "INSERT INTO verification_codes (email, code, expires_at, ip, created_at, used) VALUES (?1, ?2, ?3, ?4, ?5, -1)"
+    ).bind(email, code, now, request.headers.get("CF-Connecting-IP") || "unknown", now).run();
     throw error("Invalid or expired verification code.", 400);
   }
 
@@ -1483,7 +1656,7 @@ async function handleAuthVerify(request, env) {
   ).bind(email, nowIso).run();
 
   const token = await signJwt(
-    { email, iat: now, exp: now + 30 * 24 * 60 * 60 }, // 30 days
+    { email, exp: now + 7 * 24 * 60 * 60 }, // 7 days
     env.JWT_SECRET
   );
 
@@ -1524,8 +1697,8 @@ async function handleMyForwarding(user, request, env) {
 
   const orders = (result.results || []).map(row => ({
     code: row.code,
-    tracking_numbers_json: row.tracking_numbers_json,
-    confirmed_trackings_json: row.confirmed_trackings_json,
+    tracking_numbers: JSON.parse(row.tracking_numbers_json || "[]"),
+    confirmed_trackings: JSON.parse(row.confirmed_trackings_json || "[]"),
     created_at: row.created_at
   }));
 
@@ -1864,6 +2037,25 @@ async function handleAdminResetShippingRates(request, env) {
 
 // === Announcement Handlers ===
 
+// HTML sanitizer: strip all tags except safe whitelist, strip all attributes except href
+const SAFE_TAGS = new Set(["b", "i", "strong", "em", "u", "br", "p", "ul", "ol", "li", "a", "span", "div", "h3", "h4"]);
+function sanitizeHtml(html) {
+  if (typeof html !== "string") return "";
+  // Strip all tags except safe ones, remove all attributes
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<(\/?)([a-zA-Z0-9]+)([^>]*)>/g, (_, slash, tag, attrs) => {
+      const lower = tag.toLowerCase();
+      if (!SAFE_TAGS.has(lower)) return "";
+      if (lower === "a") {
+        const hrefMatch = /href\s*=\s*["']([^"']+)["']/i.exec(attrs);
+        const href = hrefMatch && /^https?:\/\//i.test(hrefMatch[1]) ? ` href="${hrefMatch[1]}"` : "";
+        return `<${slash}${lower}${href} rel="noopener noreferrer">`;
+      }
+      return `<${slash}${lower}>`;
+    });
+}
+
 async function handleGetAnnouncement(request, env) {
   const row = await env.DB.prepare(
     "SELECT id, content, is_enabled, updated_at FROM site_announcement WHERE is_enabled = 1 ORDER BY updated_at DESC LIMIT 1"
@@ -1876,7 +2068,7 @@ async function handleGetAnnouncement(request, env) {
 
 async function handleAdminUpdateAnnouncement(request, env) {
   const body = await request.json();
-  const content = typeof body.content === "string" ? body.content.trim() : "";
+  const content = sanitizeHtml(typeof body.content === "string" ? body.content : "");
   const isEnabled = body.is_enabled === false ? 0 : 1;
   const now = new Date().toISOString();
 

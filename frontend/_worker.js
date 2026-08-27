@@ -2,16 +2,25 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // Allowed CORS origins
+    const ALLOWED_ORIGINS = [
+      "https://pansanrequest.ccwu.cc",
+      "https://pansanrequest.pages.dev",
+      "https://www.pansanrequest.ccwu.cc"
+    ];
+    const requestOrigin = request.headers.get("Origin");
+    const isAllowedOrigin = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);
+
     // 处理 CORS 预检请求
     if (request.method === "OPTIONS") {
-      const origin = request.headers.get("Origin");
       const resHeaders = new Headers();
-      if (origin) {
-        resHeaders.set("Access-Control-Allow-Origin", origin);
+      if (isAllowedOrigin) {
+        resHeaders.set("Access-Control-Allow-Origin", requestOrigin);
         resHeaders.set("Access-Control-Allow-Credentials", "true");
       } else {
         resHeaders.set("Access-Control-Allow-Origin", "*");
       }
+      resHeaders.set("Vary", "Origin");
       resHeaders.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
       resHeaders.set("Access-Control-Allow-Headers", "Content-Type,Authorization,Cache-Control");
       resHeaders.set("Access-Control-Max-Age", "86400");
@@ -61,13 +70,13 @@ export default {
     }
 
     const resHeaders = new Headers(response.headers);
-    const origin = request.headers.get("Origin");
-    if (origin) {
-      resHeaders.set("Access-Control-Allow-Origin", origin);
+    if (isAllowedOrigin) {
+      resHeaders.set("Access-Control-Allow-Origin", requestOrigin);
       resHeaders.set("Access-Control-Allow-Credentials", "true");
     } else {
       resHeaders.set("Access-Control-Allow-Origin", "*");
     }
+    resHeaders.set("Vary", "Origin");
     resHeaders.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
     resHeaders.set("Access-Control-Allow-Headers", "Content-Type,Authorization,Cache-Control");
     resHeaders.set("Access-Control-Max-Age", "86400");

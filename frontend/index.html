@@ -25,10 +25,35 @@
       --warning-soft: #fef3c7;
       --danger: #b91c1c;
       --radius: 18px;
+
+      /* design-system tokens (keep in sync across index/admin/orders) */
+      --info: #0891b2;
+      --info-soft: #e0f7fa;
+      --danger-solid: #ef4444;
+      --danger-soft: #fee2e2;
+      --gray-50: #f8f9fa;
+      --gray-100: #eef1f5;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --accent-deep: #d74b22;
+      --accent-strong: #e85a2e;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-sm: 0 1px 2px rgba(23, 32, 51, .06);
+      --shadow-md: 0 4px 14px rgba(23, 32, 51, .10);
+      --focus-ring: 0 0 0 3px rgba(255, 106, 61, .35);
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     body {
@@ -54,7 +79,7 @@
       z-index: 1002;
       background: #fff;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       width: 44px;
       height: 44px;
       display: flex;
@@ -118,15 +143,15 @@
       width: 100%;
       text-align: left;
       padding: 14px 18px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       font-size: 1rem;
-      background: #f8f9fa;
+      background: var(--gray-50);
       border: none;
       box-shadow: none;
     }
 
     .sidebar-nav .link-btn:hover {
-      background: #eef1f5;
+      background: var(--gray-100);
       transform: none;
       box-shadow: none;
     }
@@ -136,7 +161,7 @@
       text-align: left;
       padding: 14px 18px;
       margin-top: auto;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       font-size: 1rem;
     }
 
@@ -400,7 +425,7 @@
     .title-logo {
       width: 36px;
       height: 36px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       object-fit: cover;
     }
 
@@ -495,7 +520,7 @@
     .preview-item {
       width: 78px;
       height: 78px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       overflow: hidden;
       position: relative;
       border: 1px solid var(--line);
@@ -565,7 +590,7 @@
     .choice.active {
       border-color: var(--accent);
       background: var(--accent-soft);
-      color: #d74b22;
+      color: var(--accent-deep);
       box-shadow: 0 10px 22px rgba(255, 106, 61, 0.14);
     }
 
@@ -603,7 +628,7 @@
       min-width: 90px;
       text-align: center;
       background: #eef3fb;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       padding: 10px 12px;
       font-weight: normal;
       font-size: 1rem;
@@ -626,7 +651,7 @@
     }
 
     .primary-btn:hover {
-      background: #e85a2e;
+      background: var(--accent-strong);
       transform: translateY(-2px);
       box-shadow: 0 20px 36px rgba(255, 106, 61, 0.32);
     }
@@ -651,7 +676,7 @@
     .query-code {
       text-align: center;
       background: #f3f7ff;
-      border-radius: 18px;
+      border-radius: var(--radius-lg);
       padding: 16px;
       font-size: 2rem;
       letter-spacing: 0.18em;
@@ -739,7 +764,7 @@
     .lightbox img {
       max-width: 92vw;
       max-height: 92vh;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       object-fit: contain;
       cursor: default;
     }
@@ -799,6 +824,31 @@
       }
     }
 
+    @media (max-width: 900px) {
+      .self-order-code-row {
+        flex-direction: column;
+      }
+
+      .self-order-code-row > * {
+        width: 100%;
+      }
+
+      .price-row {
+        flex-wrap: wrap;
+      }
+
+      /* keep primary interactive targets comfortably tappable on narrow screens */
+      .primary-btn,
+      .ghost-btn,
+      .link-btn,
+      .lang-btn,
+      input,
+      select,
+      textarea {
+        min-height: 44px;
+      }
+    }
+
     /* =========================
        Self Order Modal
        ========================= */
@@ -832,7 +882,7 @@
       text-align: center;
       padding: 16px;
       background: var(--accent-soft);
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       border: 2px dashed var(--accent);
       font-weight: normal;
     }
@@ -852,7 +902,7 @@
       flex: 1;
       padding: 10px 12px;
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       font-size: 0.95rem;
       background: #fff;
       color: var(--text);
@@ -906,6 +956,34 @@
       font-family: Arial, Helvetica, sans-serif !important;
       font-weight: normal !important;
     }
+
+    /* =========================
+       State blocks (spinner / empty feedback)
+       ========================= */
+    .state-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 28px 12px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      text-align: center;
+    }
+    .spinner {
+      width: 26px;
+      height: 26px;
+      border: 3px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: pansan-spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pansan-spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -926,7 +1004,7 @@
     <button type="button" class="link-btn" id="myInquiriesBtn">我的询价</button>
     <button type="button" class="link-btn" id="myForwardingBtn">我的转运</button>
     <button type="button" class="link-btn" id="cartBtn">购物车</button>
-    <button type="button" class="link-btn" id="shippingCalcBtn" style="color:#0891b2;">运费估算</button>
+    <button type="button" class="link-btn" id="shippingCalcBtn" style="color:var(--info);">运费估算</button>
     <button type="button" class="link-btn" id="loginBtn" style="color:#15803d;">登录</button>
     <button type="button" class="lang-btn" id="langBtn">EN</button>
   </nav>
@@ -977,6 +1055,7 @@
             <input type="number" id="weightInput" min="0.01" max="50" step="0.01" value="3" class="weight-input" placeholder="kg" aria-label="预估重量">
             <div class="pill" id="weightDisplay">3.00 kg</div>
           </div>
+          <span class="error-text" id="weightError" style="display:none;"></span>
         </div>
 
         <div class="field">
@@ -1081,6 +1160,9 @@
           <h2 id="cartTitle">Cart</h2>
           <button type="button" class="link-btn" id="backFromCartBtn">Back</button>
         </div>
+        <div style="display:flex; justify-content:flex-end; margin:4px 0 8px;">
+          <button type="button" class="ghost-btn" id="clearCartBtn">Empty Cart</button>
+        </div>
         <div id="cartList" style="margin-top: 16px;">
           <p class="muted">Loading...</p>
         </div>
@@ -1137,7 +1219,7 @@
         </div>
         <div class="self-order-section" style="margin-top:16px;">
           <label id="orderQueryCodeLabel">八字单号</label>
-          <input type="text" id="orderQueryCodeInput" placeholder="输入8位订单号">
+          <input type="text" id="orderQueryCodeInput" maxlength="8" placeholder="输入8位订单号" style="text-transform:uppercase;">
         </div>
         <div class="self-order-section">
           <button type="button" class="primary-btn" id="orderQuerySearchBtn">查询</button>
@@ -1273,7 +1355,7 @@
         <h2 id="addressModalTitle">转运地址</h2>
       </div>
       <div class="field">
-        <div id="addressContent" style="white-space: pre-wrap; background:#f8f9fa; padding: 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; min-height: 60px;"></div>
+        <div id="addressContent" style="white-space: pre-wrap; background:var(--gray-50); padding: 16px; border-radius: var(--radius-md); font-size: 0.95rem; line-height: 1.6; min-height: 60px;"></div>
       </div>
       <div style="margin-top: 16px;">
         <button type="button" class="primary-btn" id="copyAddressBtn">复制地址</button>
@@ -1449,6 +1531,7 @@
           alertBadUrl: "商品链接格式不正确",
           alertNoShipping: "请选择运输方式",
           alertImageLimit: "最多上传 5 张图片",
+          alertNotImage: "只能上传图片文件",
           requestFailed: "请求失败，请稍后重试",
           invalidCode: "未找到该查询码，请确认后重试。",
           orderQueryBtn: "查询转运订单",
@@ -1548,7 +1631,20 @@
           orderQueryPageTitle: "查询转运订单",
           backFromSelfOrderBtn: "返回",
           backFromResultBtn: "返回",
-          backFromOrderQueryBtn: "返回"
+          backFromOrderQueryBtn: "返回",
+          statusFinished: "报价完成",
+          statusProcessing: "处理中",
+          resendIn: "已发送({n}s)",
+          confirmRemoveCart: "确认从购物车移除该商品？",
+          emptyCart: "清空购物车",
+          confirmEmptyCart: "确认清空购物车？此操作不可恢复。",
+          emptyCartFailed: "清空购物车失败，请稍后重试",
+          weightInvalidHint: "请输入大于 0 的有效重量",
+          scEstimate: "估算",
+          scCalibrated: "已校准",
+          scComputing: "计算中…",
+          queryCodeHint: "请输入 8 位大写字母或数字组成的查询码（满 8 位方可查询）",
+          orderQueryCodeHint: "请输入 8 位大写字母或数字组成的订单号（满 8 位方可查询）"
         },
         en: {
           formTitleText: "PanSan Quote System",
@@ -1645,6 +1741,7 @@
           alertBadUrl: "The product URL is invalid",
           alertNoShipping: "Please select a shipping method",
           alertImageLimit: "You can upload up to 5 images",
+          alertNotImage: "Only image files are allowed",
           requestFailed: "Request failed, please try again later",
           invalidCode: "Inquiry code not found",
           orderQueryBtn: "Track Forwarding Order",
@@ -1743,7 +1840,20 @@
           orderQueryPageTitle: "Track Forwarding Order",
           backFromSelfOrderBtn: "Back",
           backFromResultBtn: "Back",
-          backFromOrderQueryBtn: "Back"
+          backFromOrderQueryBtn: "Back",
+          statusFinished: "Quote Complete",
+          statusProcessing: "Processing",
+          resendIn: "resent in {n}s",
+          confirmRemoveCart: "Remove this item from the cart?",
+          emptyCart: "Empty Cart",
+          confirmEmptyCart: "Empty the entire cart? This cannot be undone.",
+          emptyCartFailed: "Failed to empty cart, please try again later",
+          weightInvalidHint: "Please enter a valid weight greater than 0",
+          scEstimate: "Estimated",
+          scCalibrated: "Calibrated",
+          scComputing: "Computing…",
+          queryCodeHint: "Enter an 8-character code using uppercase letters/digits (enabled at 8 characters)",
+          orderQueryCodeHint: "Enter an 8-character order code using uppercase letters/digits (enabled at 8 characters)"
         }
       };
 
@@ -1766,6 +1876,7 @@
         weightSlider: document.getElementById("weightSlider"),
         weightInput: document.getElementById("weightInput"),
         weightDisplay: document.getElementById("weightDisplay"),
+        weightError: document.getElementById("weightError"),
         shippingEstimate: null,
         submitBtn: document.getElementById("submitBtn"),
         formError: document.getElementById("formError"),
@@ -1943,6 +2054,7 @@
         announceTitle: document.getElementById("announceTitle"),
         announceGotBtn: document.getElementById("announceGotBtn"),
         cartTitle: document.getElementById("cartTitle"),
+        clearCartBtn: document.getElementById("clearCartBtn"),
         backFromCartBtn: document.getElementById("backFromCartBtn")
       };
 
@@ -2187,8 +2299,13 @@
         if (!Number.isFinite(rawValue) || rawValue <= 0) {
           elements.weightSlider.value = 0.01;
           elements.weightDisplay.textContent = "0.01 kg";
+          if (elements.weightError) {
+            elements.weightError.textContent = text("weightInvalidHint");
+            elements.weightError.style.display = "block";
+          }
           return;
         }
+        if (elements.weightError) elements.weightError.style.display = "none";
         const clamped = Math.min(50, Math.max(0.01, rawValue));
         elements.weightSlider.value = clamped;
         elements.weightDisplay.textContent = `${clamped.toFixed(2)} kg`;
@@ -2420,7 +2537,9 @@
       }
 
       async function performQuery(code) {
-        if (!code) {
+        if (!code || code.length < 8) {
+          elements.queryHint.textContent = text("queryCodeHint");
+          elements.queryHint.style.display = "block";
           return;
         }
 
@@ -2540,20 +2659,27 @@
           scResultPill.textContent = "PHP 0.00";
           return;
         }
-        // 本地即时计算
+        // 本地即时计算（估算）
         const local = calcHiddenFreight(channel, weightKg);
         if (local) {
-          scResultPill.textContent = `PHP ${(local.sellerPays * FREIGHT_MARKUP).toFixed(2)}`;
+          scResultPill.textContent = `${text("scEstimate")} PHP ${(local.sellerPays * FREIGHT_MARKUP).toFixed(2)}`;
         } else {
           scResultPill.textContent = "PHP 0.00";
         }
-        // 250ms防抖异步校验
+        // 250ms防抖异步校验（服务端校准）
         const mySeq = ++scRequestSeq;
         setTimeout(async () => {
           if (mySeq !== scRequestSeq) return;
+          scResultPill.textContent = text("scComputing");
           const remote = await scFetchRemote(channel, zone, weightKg);
-          if (!remote || mySeq !== scRequestSeq) return;
-          scResultPill.textContent = `PHP ${(remote.seller_pays * FREIGHT_MARKUP).toFixed(2)}`;
+          if (mySeq !== scRequestSeq) return;
+          if (remote) {
+            scResultPill.textContent = `${text("scCalibrated")} PHP ${(remote.seller_pays * FREIGHT_MARKUP).toFixed(2)}`;
+          } else {
+            // 校准失败，降级回本地估算
+            const fallback = local ? `PHP ${(local.sellerPays * FREIGHT_MARKUP).toFixed(2)}` : "PHP 0.00";
+            scResultPill.textContent = `${text("scEstimate")} ${fallback}`;
+          }
         }, 250);
       }
 
@@ -2602,7 +2728,14 @@
 
       elements.uploadTrigger.addEventListener("click", () => elements.imageInput.click());
       elements.imageInput.addEventListener("change", (event) => {
-        const nextFiles = Array.from(event.target.files || []);
+        const picked = Array.from(event.target.files || []);
+        const nonImages = picked.filter(f => !f.type || !f.type.startsWith("image/"));
+        if (nonImages.length > 0) {
+          elements.formError.textContent = text("alertNotImage");
+          event.target.value = "";
+          return;
+        }
+        const nextFiles = picked;
         if (selectedFiles.length + nextFiles.length > 5) {
           elements.formError.textContent = text("alertImageLimit");
           event.target.value = "";
@@ -2624,6 +2757,7 @@
         const index = Number(target.dataset.index);
         selectedFiles.splice(index, 1);
         renderPreviews();
+        if (elements.formError.textContent) elements.formError.textContent = "";
       });
 
       document.querySelectorAll('input[name="shipping"]').forEach((node) => {
@@ -2640,6 +2774,14 @@
       elements.weightInput.addEventListener("input", updateWeightFromInput);
       elements.weightInput.addEventListener("change", formatWeightInput);
       elements.weightInput.addEventListener("blur", formatWeightInput);
+
+      // 用户修正输入后立即清除错误提示
+      elements.productUrl.addEventListener("input", () => {
+        if (elements.formError.textContent) elements.formError.textContent = "";
+      });
+      elements.remark.addEventListener("input", () => {
+        if (elements.formError.textContent) elements.formError.textContent = "";
+      });
 
       const imgLightbox = document.getElementById("imgLightbox");
       if (imgLightbox) {
@@ -2662,6 +2804,18 @@
       });
       elements.submitBtn.addEventListener("click", submitInquiry);
       elements.searchBtn.addEventListener("click", () => performQuery(elements.queryCodeInput.value.trim()));
+      // 查询码输入指引：仅允许大写字母 + 数字，满 8 位提示消失
+      elements.queryCodeInput.addEventListener("input", () => {
+        const clean = elements.queryCodeInput.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8);
+        elements.queryCodeInput.value = clean;
+        if (clean.length > 0 && clean.length < 8) {
+          elements.queryHint.textContent = text("queryCodeHint");
+          elements.queryHint.style.display = "block";
+        } else {
+          elements.queryHint.textContent = text("queryHint");
+          elements.queryHint.style.display = "block";
+        }
+      });
       elements.queryCodeInput.addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
           performQuery(elements.queryCodeInput.value.trim());
@@ -2896,10 +3050,14 @@
       });
 
       elements.backFromResultBtn.addEventListener("click", () => {
+        trackingNumbers = [];
+        renderTrackingList();
         showPage(elements.selfOrderPage);
       });
 
       selfOrderResultOkBtn.addEventListener("click", () => {
+        trackingNumbers = [];
+        renderTrackingList();
         showPage(elements.selfOrderPage);
       });
 
@@ -2921,8 +3079,8 @@
         elements.orderQueryError.textContent = "";
         elements.orderQueryResult.style.display = "none";
 
-        if (!code) {
-          elements.orderQueryError.textContent = text("orderQueryNotFound");
+        if (!code || code.length < 8) {
+          elements.orderQueryError.textContent = text("orderQueryCodeHint");
           return;
         }
 
@@ -2969,6 +3127,16 @@
       elements.orderQueryCodeInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           elements.orderQuerySearchBtn.click();
+        }
+      });
+      // 订单号输入指引：仅允许大写字母 + 数字，满 8 位方可查询
+      elements.orderQueryCodeInput.addEventListener("input", () => {
+        const clean = elements.orderQueryCodeInput.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8);
+        elements.orderQueryCodeInput.value = clean;
+        if (clean.length > 0 && clean.length < 8) {
+          elements.orderQueryError.textContent = text("orderQueryCodeHint");
+        } else if (clean.length === 8) {
+          elements.orderQueryError.textContent = "";
         }
       });
 
@@ -3179,6 +3347,7 @@
       // ============================================================
       // Login page
       // ============================================================
+      let loginReturnPage = elements.formPage;
       elements.loginBtn.addEventListener("click", () => {
         closeSidebar();
         if (getToken()) {
@@ -3217,10 +3386,23 @@
             method: "POST",
             body: JSON.stringify({ email })
           });
-          elements.sendCodeBtn.textContent = text("codeSent");
           elements.codeField.style.display = "block";
           elements.verifyRow.style.display = "flex";
           elements.loginCode.focus();
+          // 60 秒倒计时，结束后可重新发送或换邮箱
+          let remaining = 60;
+          elements.sendCodeBtn.disabled = true;
+          elements.sendCodeBtn.textContent = text("resendIn").replace("{n}", remaining);
+          const cooldownTimer = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+              clearInterval(cooldownTimer);
+              elements.sendCodeBtn.disabled = false;
+              elements.sendCodeBtn.textContent = text("sendCodeBtn");
+            } else {
+              elements.sendCodeBtn.textContent = text("resendIn").replace("{n}", remaining);
+            }
+          }, 1000);
         } catch (err) {
           elements.loginError.textContent = err.message || "Failed to send code";
           elements.loginError.style.display = "block";
@@ -3248,7 +3430,14 @@
           setToken(data.token);
           updateLoginUI();
           elements.loginHint.textContent = text("loginSuccess");
-          setTimeout(() => { showPage(elements.formPage); }, 800);
+          const targetPage = loginReturnPage || elements.formPage;
+          loginReturnPage = elements.formPage;
+          setTimeout(() => {
+            showPage(targetPage);
+            if (targetPage === elements.myInquiriesPage) loadMyInquiries();
+            else if (targetPage === elements.myForwardingPage) loadMyForwarding();
+            else if (targetPage === elements.cartPage) loadCart();
+          }, 800);
         } catch (err) {
           elements.loginError.textContent = err.message || text("loginErrorInvalidCode");
           elements.loginError.style.display = "block";
@@ -3279,9 +3468,16 @@
         return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">` +
           images.map(img => {
             const u = typeof img === "string" ? img : (img && img.url ? img.url : "");
-            return `<img src="${escapeHtml(u)}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb;" alt="" />`;
+            return `<img src="${escapeHtml(u)}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid var(--gray-200);" alt="" />`;
           }).join("") +
           `</div>`;
+      }
+
+      function spinnerBlock(msg) {
+        return `<div class="state-block"><span class="spinner"></span><span class="muted">${escapeHtml(msg)}</span></div>`;
+      }
+      function emptyBlock(msg) {
+        return `<div class="state-block"><span style="font-size:1.8rem; color:var(--muted);">&#9783;</span><span class="muted">${escapeHtml(msg)}</span></div>`;
       }
 
       async function loadMyInquiries() {
@@ -3290,12 +3486,12 @@
           elements.myInquiriesList.innerHTML = `<p class="muted">${text("myInquiriesNeedLogin")}</p>`;
           return;
         }
-        elements.myInquiriesList.innerHTML = `<p class="muted">${text("myInquiriesLoading")}</p>`;
+        elements.myInquiriesList.innerHTML = spinnerBlock(text("myInquiriesLoading"));
         try {
           const data = await apiFetch("/api/my-inquiries");
           const inquiries = data.inquiries || [];
           if (inquiries.length === 0) {
-            elements.myInquiriesList.innerHTML = `<p class="muted">${text("myInquiriesEmpty")}</p>`;
+            elements.myInquiriesList.innerHTML = emptyBlock(text("myInquiriesEmpty"));
             return;
           }
           // 获取购物车列表
@@ -3308,12 +3504,12 @@
           elements.myInquiriesList.innerHTML = inquiries.map(inv => {
             const isInCart = cartCodes.has(inv.code);
             const dateStr = inv.created_at ? new Date(inv.created_at).toLocaleString() : "";
-            const statusLabel = inv.status === "finished" ? "报价完成" : (inv.status === "pending" ? "处理中" : inv.status);
-            return `<div class="inquiry-card" data-code="${escapeHtml(inv.code)}" style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer;">
+            const statusLabel = escapeHtml(inv.status === "finished" ? text("statusFinished") : (inv.status === "pending" ? text("statusProcessing") : text("statusProcessing")));
+            return `<div class="inquiry-card" data-code="${escapeHtml(inv.code)}" style="border:1px solid var(--gray-200); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; cursor:pointer;">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                 <div style="flex:1; min-width:0;">
                   <div style="font-weight:600; font-size:0.95rem; word-break:break-all; margin-bottom:4px;">${escapeHtml(inv.product_url)}</div>
-                  <div style="font-size:0.8rem; color:#6b7280;">
+                  <div style="font-size:0.8rem; color:var(--gray-500);">
                     <span style="margin-right:12px;">Code: <strong>${escapeHtml(inv.code)}</strong></span>
                     <span style="margin-right:12px;">Status: ${statusLabel}</span>
                     <span>${dateStr}</span>
@@ -3322,7 +3518,7 @@
                 </div>
                 <button type="button" class="cart-btn ${isInCart ? "in-cart" : ""}"
                   data-code="${escapeHtml(inv.code)}"
-                  style="flex-shrink:0; padding:6px 12px; border-radius:6px; border:1px solid #d1d5db; background:${isInCart ? "#15803d" : "#fff"}; color:${isInCart ? "#fff" : "#374151"}; cursor:pointer; font-size:0.85rem; white-space:nowrap;"
+                  style="flex-shrink:0; padding:6px 12px; border-radius:6px; border:1px solid #d1d5db; background:${isInCart ? "#15803d" : "#fff"}; color:${isInCart ? "#fff" : "var(--gray-700)"}; cursor:pointer; font-size:0.85rem; white-space:nowrap;"
                   ${isInCart ? "disabled" : ""}>
                   ${isInCart ? text("addedToCart") : text("addToCartBtn")}
                 </button>
@@ -3384,6 +3580,7 @@
           elements.loginHint.textContent = text("myInquiriesNeedLogin");
           elements.sendCodeBtn.disabled = false;
           elements.sendCodeBtn.textContent = text("sendCodeBtn");
+          loginReturnPage = elements.myInquiriesPage;
           showPage(elements.loginPage);
           return;
         }
@@ -3435,7 +3632,7 @@
         }
         elements.myForwardingList.innerHTML = `<p class="muted">${text("myForwardingLoading")}</p>`;
         try {
-          const data = await apiFetch("/api/my-orders");
+          const data = await apiFetch("/api/my-forwarding");
           const orders = data.orders || [];
           if (orders.length === 0) {
             elements.myForwardingList.innerHTML = `<p class="muted">${text("myForwardingEmpty")}</p>`;
@@ -3446,12 +3643,12 @@
             const trackingHtml = order.tracking_numbers && order.tracking_numbers.length
               ? order.tracking_numbers.map(t => `<span class="tracking-tag">${escapeHtml(t)}</span>`).join("")
               : `<span class="muted">${text("myForwardingNoTracking")}</span>`;
-            return `<div class="inquiry-card" data-code="${escapeHtml(order.code)}" style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer;">
+            return `<div class="inquiry-card" data-code="${escapeHtml(order.code)}" style="border:1px solid var(--gray-200); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; cursor:pointer;">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                 <div style="flex:1; min-width:0;">
                   <div style="font-weight:600; font-size:0.95rem; margin-bottom:4px;">${text("myForwardingCode")}: <strong>${escapeHtml(order.code)}</strong></div>
-                  <div style="font-size:0.8rem; color:#6b7280; margin-bottom:4px;">${text("myForwardingCreatedAt")}: ${dateStr}</div>
-                  <div style="font-size:0.8rem; color:#6b7280;">
+                  <div style="font-size:0.8rem; color:var(--gray-500); margin-bottom:4px;">${text("myForwardingCreatedAt")}: ${dateStr}</div>
+                  <div style="font-size:0.8rem; color:var(--gray-500);">
                     <span style="margin-right:4px;">${text("myForwardingTracking")}:</span>
                     ${trackingHtml}
                   </div>
@@ -3486,6 +3683,7 @@
           elements.loginHint.textContent = text("myForwardingNeedLogin");
           elements.sendCodeBtn.disabled = false;
           elements.sendCodeBtn.textContent = text("sendCodeBtn");
+          loginReturnPage = elements.myForwardingPage;
           showPage(elements.loginPage);
           return;
         }
@@ -3518,11 +3716,11 @@
             const dateStr = item.added_at ? new Date(item.added_at).toLocaleString() : "";
             let cartImages = [];
             try { cartImages = JSON.parse(item.images_json || "[]"); } catch (_) {}
-            return `<div class="inquiry-card" data-code="${escapeHtml(item.inquiry_code)}" style="border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer;">
+            return `<div class="inquiry-card" data-code="${escapeHtml(item.inquiry_code)}" style="border:1px solid var(--gray-200); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; cursor:pointer;">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                 <div style="flex:1; min-width:0;">
                   <div style="font-weight:600; font-size:0.95rem; word-break:break-all; margin-bottom:4px;">${escapeHtml(item.product_url)}</div>
-                  <div style="font-size:0.8rem; color:#6b7280;">
+                  <div style="font-size:0.8rem; color:var(--gray-500);">
                     <span style="margin-right:12px;">Code: <strong>${escapeHtml(item.inquiry_code)}</strong></span>
                     <span>${dateStr}</span>
                   </div>
@@ -3530,7 +3728,7 @@
                 </div>
                 <button type="button" class="remove-cart-btn"
                   data-code="${escapeHtml(item.inquiry_code)}"
-                  style="flex-shrink:0; padding:6px 12px; border-radius:6px; border:1px solid #ef4444; background:#fff; color:#ef4444; cursor:pointer; font-size:0.85rem; white-space:nowrap;">
+                  style="flex-shrink:0; padding:6px 12px; border-radius:6px; border:1px solid var(--danger-solid); background:#fff; color:var(--danger-solid); cursor:pointer; font-size:0.85rem; white-space:nowrap;">
                   ${text("removeFromCart")}
                 </button>
               </div>
@@ -3541,6 +3739,7 @@
             btn.addEventListener("click", async function(e) {
               e.stopPropagation();
               const code = this.dataset.code;
+              if (!confirm(text("confirmRemoveCart"))) return;
               this.disabled = true;
               this.textContent = "...";
               try {
@@ -3566,17 +3765,17 @@
                   code: item.inquiry_code,
                   product_url: item.product_url,
                   images: imgs.map(url => ({ url })),
-                  remark: "",
+                  remark: item.remark || "",
                   shipping: item.shipping || "",
-                  payment_method: "",
-                  weight_estimate: "",
+                  payment_method: item.payment_method,
+                  weight_estimate: item.weight_estimate,
                   status: item.status || "pending",
-                  final_freight: null,
-                  freight2: null,
-                  service_fee: null,
-                  total_price: null,
-                  shopee_after_tax: null,
-                  admin_note: "",
+                  final_freight: item.final_freight,
+                  freight2: item.freight2,
+                  service_fee: item.service_fee,
+                  total_price: item.total_price,
+                  shopee_after_tax: item.shopee_after_tax,
+                  admin_note: item.admin_note,
                   created_at: item.inquiry_created_at || ""
                 };
                 queryReturnPage = elements.cartPage;
@@ -3601,6 +3800,7 @@
           elements.loginHint.textContent = text("cartNeedLogin");
           elements.sendCodeBtn.disabled = false;
           elements.sendCodeBtn.textContent = text("sendCodeBtn");
+          loginReturnPage = elements.cartPage;
           showPage(elements.loginPage);
           return;
         }
@@ -3611,6 +3811,28 @@
       elements.backFromCartBtn.addEventListener("click", () => {
         showPage(elements.formPage);
       });
+
+      const clearCartBtn = document.getElementById("clearCartBtn");
+      if (clearCartBtn) {
+        clearCartBtn.addEventListener("click", async () => {
+          if (!getToken()) return;
+          if (!confirm(text("confirmEmptyCart"))) return;
+          clearCartBtn.disabled = true;
+          try {
+            const data = await apiFetch("/api/cart");
+            const items = data.items || [];
+            for (const item of items) {
+              await apiFetch("/api/cart/" + encodeURIComponent(item.inquiry_code), { method: "DELETE" });
+            }
+            loadCart();
+          } catch (err) {
+            alert(err.message || text("emptyCartFailed"));
+            clearCartBtn.disabled = false;
+          } finally {
+            clearCartBtn.disabled = false;
+          }
+        });
+      }
 
       // ============================================================
       // Update applyLanguage to include new labels
@@ -3671,7 +3893,7 @@
             }
           } catch (e) { /* ignore */ }
 
-          announceBody.innerHTML = data.content;
+          announceBody.textContent = data.content;
           announceOverlay.classList.add("active");
 
           announceCloseBtn.onclick = () => closeAnnounce(version);
@@ -3688,17 +3910,39 @@
       initAnnouncement();
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          const sidebarNav = document.getElementById("sidebarNav");
-          if (sidebarNav && sidebarNav.classList.contains("open")) {
-            closeSidebar();
-          } else if (elements.selfOrderResultPage.classList.contains("active")) {
-            showPage(elements.selfOrderPage);
-          } else if (elements.selfOrderPage.classList.contains("active")) {
-            showPage(elements.formPage);
-          } else if (elements.orderQueryPage.classList.contains("active")) {
-            showPage(elements.formPage);
-          }
+        if (e.key !== "Escape") return;
+        // 1. 图片灯箱
+        const lightboxEl = document.getElementById("imgLightbox");
+        if (lightboxEl && lightboxEl.classList.contains("active")) {
+          lightboxEl.classList.remove("active");
+          return;
+        }
+        // 2. 已打开的弹窗（下单流程 / 转运地址 / 运费估算）
+        if (orderModal.classList.contains("active")) {
+          orderModal.classList.remove("active");
+          return;
+        }
+        if (elements.addressModal.classList.contains("active")) {
+          elements.addressModal.classList.remove("active");
+          return;
+        }
+        if (shippingCalcModal.classList.contains("active")) {
+          closeShippingCalcModal();
+          return;
+        }
+        // 3. 侧边栏
+        const sidebarNav = document.getElementById("sidebarNav");
+        if (sidebarNav && sidebarNav.classList.contains("open")) {
+          closeSidebar();
+          return;
+        }
+        // 4. 转运 / 订单查询页面
+        if (elements.selfOrderResultPage.classList.contains("active")) {
+          showPage(elements.selfOrderPage);
+        } else if (elements.selfOrderPage.classList.contains("active")) {
+          showPage(elements.formPage);
+        } else if (elements.orderQueryPage.classList.contains("active")) {
+          showPage(elements.formPage);
         }
       });
     })();

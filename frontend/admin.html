@@ -25,6 +25,25 @@
       --warning-soft: #fef3c7;
       --danger: #b91c1c;
       --radius: 18px;
+      /* design-system tokens (keep in sync across index/admin/orders) */
+      --info: #0891b2;
+      --info-soft: #e0f7fa;
+      --danger-solid: #ef4444;
+      --danger-soft: #fee2e2;
+      --gray-50: #f8f9fa;
+      --gray-100: #eef1f5;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --accent-deep: #d74b22;
+      --accent-strong: #e85a2e;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-sm: 0 1px 2px rgba(23, 32, 51, .06);
+      --shadow-md: 0 4px 14px rgba(23, 32, 51, .10);
+      --focus-ring: 0 0 0 3px rgba(255, 106, 61, .35);
     }
 
     * { box-sizing: border-box; }
@@ -52,7 +71,7 @@
       z-index: 1002;
       background: #fff;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       width: 44px;
       height: 44px;
       display: flex;
@@ -116,9 +135,9 @@
       width: 100%;
       text-align: left;
       padding: 14px 18px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       font-size: 1rem;
-      background: #f8f9fa;
+      background: var(--gray-50);
       border: none;
       box-shadow: none;
       text-decoration: none;
@@ -126,7 +145,7 @@
     }
 
     .sidebar-nav .link-btn:hover {
-      background: #eef1f5;
+      background: var(--gray-100);
       transform: none;
       box-shadow: none;
       opacity: 1;
@@ -355,6 +374,11 @@
       box-shadow: 0 0 0 3px rgba(255, 106, 61, 0.08);
     }
 
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     .row {
       display: flex;
       gap: 12px;
@@ -410,7 +434,7 @@
 
     .list-item {
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       padding: 10px 12px;
       cursor: pointer;
       background: #fbfcff;
@@ -496,7 +520,7 @@
       width: 88px;
       height: 88px;
       object-fit: cover;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       border: 1px solid var(--line);
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -523,7 +547,7 @@
     .lightbox img {
       max-width: 92vw;
       max-height: 92vh;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       object-fit: contain;
       cursor: default;
     }
@@ -1027,6 +1051,7 @@
         </div>
 
         <div class="error" id="detailError"></div>
+        <div class="success" id="detailSuccess" style="display:none; color: #16a34a; font-size: 0.9rem; margin-top: 8px;"></div>
       </div>
     </div>
   </div>
@@ -1038,7 +1063,8 @@
   <script src="./config.js"></script>
   <div class="lightbox" id="imgLightbox">
     <span class="lightbox-close">&times;</span>
-    <img src="" alt="product image">
+    <img id="lightboxImg" src="" alt="product image">
+    <div id="lightboxError" style="display:none; color:#fff; font-size:1rem; text-align:center; padding:16px;"></div>
   </div>
   <script>
     (() => {
@@ -1138,6 +1164,7 @@
       const reloadDetailBtn = document.getElementById("reloadDetailBtn");
       const modalCloseBtn = document.getElementById("modalCloseBtn");
       const detailError = document.getElementById("detailError");
+      const detailSuccess = document.getElementById("detailSuccess");
       const backToTopBtn = document.getElementById("backToTopBtn");
       const modalBackToTopBtn = document.getElementById("modalBackToTopBtn");
 
@@ -1250,6 +1277,34 @@
           }
         });
       }
+      // 事件委托：点击相册缩略图时读取 data-src 打开灯箱
+      const lightboxImg = document.getElementById("lightboxImg");
+      const lightboxError = document.getElementById("lightboxError");
+      if (lightboxImg) {
+        lightboxImg.addEventListener("error", () => {
+          if (lightboxError) lightboxError.style.display = "";
+          lightboxImg.style.visibility = "hidden";
+        });
+        lightboxImg.addEventListener("load", () => {
+          if (lightboxError) lightboxError.style.display = "none";
+          lightboxImg.style.visibility = "visible";
+        });
+      }
+      if (detailGallery) {
+        detailGallery.addEventListener("click", (event) => {
+          const thumb = event.target.closest("[data-src]");
+          if (!thumb || !thumb.dataset.src) return;
+          if (lightboxImg) {
+            if (lightboxError) {
+              lightboxError.textContent = t("imgLoadFailed");
+              lightboxError.style.display = "none";
+            }
+            lightboxImg.style.visibility = "visible";
+            lightboxImg.src = thumb.dataset.src;
+          }
+          imgLightbox.classList.add("active");
+        });
+      }
 
       tokenInput.value = localStorage.getItem("quote_admin_token") || "";
 
@@ -1304,6 +1359,34 @@
           return str;
         }
         return safeUrl(str);
+      }
+
+      // 中英双语文案
+      const labels = {
+        busySaving: { zh: "保存中…", en: "Saving…" },
+        busyCalculating: { zh: "计算中…", en: "Calculating…" },
+        quoteSaved: { zh: "保存成功", en: "Saved" },
+        noImages: { zh: "该询价没有上传图片。", en: "No images uploaded for this inquiry." },
+        imgLoadFailed: { zh: "图片加载失败", en: "Image failed to load" },
+        invalidWeight: { zh: "请先输入有效的重量。", en: "Please enter a valid weight." },
+        calcUnavailable: { zh: "请先选择可计算的渠道、地区和重量。", en: "Please select a calculable channel, zone and weight." }
+      };
+      function t(key) {
+        const isEn = String(document.documentElement.lang || "").toLowerCase().startsWith("en");
+        const entry = labels[key] || {};
+        return isEn ? (entry.en ?? "") : (entry.zh ?? "");
+      }
+      // 按钮忙碌态：禁用 + 显示加载文案，finally 中恢复（防重复提交）
+      function setBusy(btn, busy, busyLabel) {
+        if (busy) {
+          if (!btn.dataset.origLabel) btn.dataset.origLabel = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = busyLabel;
+        } else {
+          btn.textContent = btn.dataset.origLabel || "";
+          delete btn.dataset.origLabel;
+          btn.disabled = false;
+        }
       }
 
       function roundMoney(value) {
@@ -1553,8 +1636,11 @@
         `;
 
         detailGallery.innerHTML = item.images && item.images.length
-          ? item.images.map((image) => `<img src="${safeUrl(image.url)}" alt="product image" onclick="document.getElementById('imgLightbox').querySelector('img').src='${safeUrl(image.url)}';document.getElementById('imgLightbox').classList.add('active')">`).join("")
-          : `<div class="empty-state muted" style="width:100%;">该询价没有上传图片。</div>`;
+          ? item.images.map((image) => {
+              const url = escapeHtml(safeUrl(image.url));
+              return `<img src="${url}" data-src="${url}" alt="product image">`;
+            }).join("")
+          : `<div class="empty-state muted" style="width:100%;">${t("noImages")}</div>`;
 
         quoteStatus.value = item.status;
         finalFreightInput.value = item.final_freight ?? 0;
@@ -1663,7 +1749,8 @@
         }
 
         detailError.textContent = "";
-        saveQuoteBtn.disabled = true;
+        detailSuccess.style.display = "none";
+        setBusy(saveQuoteBtn, true, t("busySaving"));
 
         try {
           const autoFreight = lastCalculatedFreight ? lastCalculatedFreight.sellerPays : "";
@@ -1688,10 +1775,15 @@
           loadList();
           // 用返回的数据渲染详情，避免额外请求
           renderDetail(updated);
+          detailSuccess.textContent = t("quoteSaved");
+          detailSuccess.style.display = "";
+          setTimeout(() => {
+            detailSuccess.style.display = "none";
+          }, 3000);
         } catch (err) {
           detailError.textContent = err.message;
         } finally {
-          saveQuoteBtn.disabled = false;
+          setBusy(saveQuoteBtn, false);
         }
       }
 
@@ -1728,31 +1820,33 @@
         const zone = zoneSelect.value;
         const weightKg = Number(calcWeightInput.value);
         if (!Number.isFinite(weightKg) || weightKg <= 0) {
-          detailError.textContent = "请先输入有效的重量。";
+          detailError.textContent = t("invalidWeight");
           return;
         }
-        applyCalcBtn.disabled = true;
         detailError.textContent = "";
-        // 优先调用后端获取权威运费
-        const remote = await calculateFreightRemote(channel, zone, weightKg);
-        if (remote) {
-          lastCalculatedFreight = remote;
-          calcFormula.textContent = remote.formula;
-          finalFreightInput.value = remote.sellerPays;
-        } else {
-          // 后端失败：使用本地规则
-          const local = calculateFreight(channel, zone, weightKg);
-          if (!local) {
-            detailError.textContent = "请先选择可计算的渠道、地区和重量。";
-            applyCalcBtn.disabled = false;
-            return;
+        setBusy(applyCalcBtn, true, t("busyCalculating"));
+        try {
+          // 优先调用后端获取权威运费
+          const remote = await calculateFreightRemote(channel, zone, weightKg);
+          if (remote) {
+            lastCalculatedFreight = remote;
+            calcFormula.textContent = remote.formula;
+            finalFreightInput.value = remote.sellerPays;
+          } else {
+            // 后端失败：使用本地规则
+            const local = calculateFreight(channel, zone, weightKg);
+            if (!local) {
+              detailError.textContent = t("calcUnavailable");
+              return;
+            }
+            lastCalculatedFreight = local;
+            calcFormula.textContent = local.formula + "（后端不可达，使用本地预估）";
+            finalFreightInput.value = local.sellerPays;
           }
-          lastCalculatedFreight = local;
-          calcFormula.textContent = local.formula + "（后端不可达，使用本地预估）";
-          finalFreightInput.value = local.sellerPays;
+          updateAutoCalculations();
+        } finally {
+          setBusy(applyCalcBtn, false);
         }
-        updateAutoCalculations();
-        applyCalcBtn.disabled = false;
       });
 
       function updateAutoCalculations() {
@@ -1814,8 +1908,10 @@
         
         const totalPrice = Number(totalPriceInput.value);
         if (Number.isFinite(totalPrice) && totalPrice > 0) {
-          shopeeAfterTaxInput.value = roundMoney(totalPrice / 0.75);
-        } else {
+          if (!shopeeAfterTaxInput.dataset.manual || shopeeAfterTaxInput.dataset.manual === "false") {
+            shopeeAfterTaxInput.value = roundMoney(totalPrice / 0.75);
+          }
+        } else if (!shopeeAfterTaxInput.dataset.manual || shopeeAfterTaxInput.dataset.manual === "false") {
           shopeeAfterTaxInput.value = "";
         }
       });
@@ -1849,6 +1945,7 @@
       saveAddressBtn.addEventListener("click", async () => {
         addressError.textContent = "";
         addressSuccess.style.display = "none";
+        setBusy(saveAddressBtn, true, t("busySaving"));
         try {
           await requestJson("/api/settings/address", {
             method: "PUT",
@@ -1861,6 +1958,8 @@
           }, 3000);
         } catch (err) {
           addressError.textContent = err.message;
+        } finally {
+          setBusy(saveAddressBtn, false);
         }
       });
 
@@ -2265,6 +2364,7 @@
       saveAnnounceBtn.addEventListener("click", async () => {
         announceError.textContent = "";
         announceSuccess.style.display = "none";
+        setBusy(saveAnnounceBtn, true, t("busySaving"));
         try {
           await requestJson("/api/admin/announcement", {
             method: "PUT",
@@ -2280,6 +2380,8 @@
           }, 3000);
         } catch (err) {
           announceError.textContent = err.message;
+        } finally {
+          setBusy(saveAnnounceBtn, false);
         }
       });
 
