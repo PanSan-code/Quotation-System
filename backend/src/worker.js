@@ -122,174 +122,174 @@ export default {
       }
 
       if (request.method === "GET" && path.startsWith("/files/")) {
-        return handleFileRequest(path, request, env);
+        return await handleFileRequest(path, request, env);
       }
 
       if (request.method === "POST" && path === "/api/inquiries") {
-        return handleCreateInquiry(request, env, ctx);
+        return await handleCreateInquiry(request, env, ctx);
       }
 
       if (request.method === "GET" && path.startsWith("/api/inquiries/")) {
         const code = normalizeCode(path.split("/").pop() || "");
-        return handlePublicInquiry(code, request, env);
+        return await handlePublicInquiry(code, request, env);
       }
 
       if (path === "/api/admin/inquiries" && request.method === "GET") {
         await requireAdmin(request, env);
-        return handleAdminList(request, env);
+        return await handleAdminList(request, env);
       }
 
       if (path.startsWith("/api/admin/inquiries/") && request.method === "GET") {
         await requireAdmin(request, env);
         const code = normalizeCode(path.split("/").pop() || "");
-        return handleAdminDetail(code, request, env);
+        return await handleAdminDetail(code, request, env);
       }
 
       if (path.startsWith("/api/admin/inquiries/") && path.endsWith("/quote") && request.method === "PUT") {
         await requireAdmin(request, env);
         const parts = path.split("/");
         const code = normalizeCode(parts[4] || "");
-        return handleSaveQuote(code, request, env);
+        return await handleSaveQuote(code, request, env);
       }
 
       if (path === "/api/admin/cleanup" && request.method === "POST") {
         await requireAdmin(request, env);
-        return handleCleanupOldInquiries(request, env);
+        return await handleCleanupOldInquiries(request, env);
       }
 
       if (path === "/api/orders" && request.method === "POST") {
         const user = await requireUser(request, env);
-        return handleCreateOrder(user, request, env);
+        return await handleCreateOrder(user, request, env);
       }
 
       if (path === "/api/admin/orders" && request.method === "GET") {
         await requireAdmin(request, env);
-        return handleAdminOrders(request, env);
+        return await handleAdminOrders(request, env);
       }
 
       if (path === "/api/admin/orders/search" && request.method === "GET") {
         await requireAdmin(request, env);
-        return handleSearchOrders(request, env);
+        return await handleSearchOrders(request, env);
       }
 
       if (path.startsWith("/api/admin/orders/") && path.endsWith("/confirm") && request.method === "PUT") {
         await requireAdmin(request, env);
         const code = normalizeCode(path.split("/")[4] || "");
-        return handleConfirmOrder(code, request, env);
+        return await handleConfirmOrder(code, request, env);
       }
 
       if (path === "/api/orders" && request.method === "GET") {
         const user = await requireUser(request, env);
-        return handleGetOrder(user, request, env);
+        return await handleGetOrder(user, request, env);
       }
 
       if (path === "/api/orders" && request.method === "PUT") {
         const user = await requireUser(request, env);
-        return handleAddTrackingToOrder(user, request, env);
+        return await handleAddTrackingToOrder(user, request, env);
       }
 
       if (path === "/api/orders/tracking" && request.method === "DELETE") {
         const user = await requireUser(request, env);
-        return handleRemoveTrackingFromOrder(user, request, env);
+        return await handleRemoveTrackingFromOrder(user, request, env);
       }
 
       if (path === "/api/orders/check-tracking" && request.method === "POST") {
         const user = await requireUser(request, env);
-        return handleCheckTrackingConflict(user, request, env);
+        return await handleCheckTrackingConflict(user, request, env);
       }
 
       if (path === "/api/admin/tracking-whitelist" && request.method === "GET") {
         await requireAdmin(request, env);
-        return handleGetTrackingWhitelist(request, env);
+        return await handleGetTrackingWhitelist(request, env);
       }
 
       if (path === "/api/admin/tracking-whitelist" && request.method === "POST") {
         await requireAdmin(request, env);
-        return handleAddTrackingWhitelist(request, env);
+        return await handleAddTrackingWhitelist(request, env);
       }
 
       if (path.startsWith("/api/admin/tracking-whitelist/") && request.method === "DELETE") {
         await requireAdmin(request, env);
         const id = path.split("/")[4] || "";
-        return handleDeleteTrackingWhitelist(id, request, env);
+        return await handleDeleteTrackingWhitelist(id, request, env);
       }
 
       if (path === "/api/settings/address" && request.method === "GET") {
-        return handleGetAddress(request, env);
+        return await handleGetAddress(request, env);
       }
 
       if (path === "/api/settings/address" && request.method === "PUT") {
         await requireAdmin(request, env);
-        return handleUpdateAddress(request, env);
+        return await handleUpdateAddress(request, env);
       }
 
       // === Auth ===
       if (path === "/api/auth/send-code" && request.method === "POST") {
-        return handleAuthSendCode(request, env);
+        return await handleAuthSendCode(request, env);
       }
 
       if (path === "/api/auth/verify" && request.method === "POST") {
-        return handleAuthVerify(request, env);
+        return await handleAuthVerify(request, env);
       }
 
       // === User pages ===
       if (path === "/api/my-inquiries" && request.method === "GET") {
         const user = await requireUser(request, env);
-        return handleMyInquiries(user, request, env);
+        return await handleMyInquiries(user, request, env);
       }
 
       if (path === "/api/my-forwarding" && request.method === "GET") {
         const user = await requireUser(request, env);
-        return handleMyForwarding(user, request, env);
+        return await handleMyForwarding(user, request, env);
       }
 
       if (path === "/api/cart" && request.method === "GET") {
         const user = await requireUser(request, env);
-        return handleGetCart(user, request, env);
+        return await handleGetCart(user, request, env);
       }
 
       if (path === "/api/cart" && request.method === "POST") {
         const user = await requireUser(request, env);
-        return handleAddToCart(user, request, env);
+        return await handleAddToCart(user, request, env);
       }
 
       if (path === "/api/cart" && request.method === "DELETE") {
         const user = await requireUser(request, env);
-        return handleRemoveFromCart(user, request, env);
+        return await handleRemoveFromCart(user, request, env);
       }
 
       // === Shipping Rate Management ===
       if (path === "/api/shipping-rates" && request.method === "GET") {
-        return handleGetShippingRates(request, env);
+        return await handleGetShippingRates(request, env);
       }
 
       if (path === "/api/shipping/estimate" && request.method === "POST") {
-        return handleEstimateShipping(request, env);
+        return await handleEstimateShipping(request, env);
       }
 
       if (path === "/api/admin/shipping-rates" && request.method === "GET") {
         await requireAdmin(request, env);
-        return handleAdminGetShippingRates(request, env);
+        return await handleAdminGetShippingRates(request, env);
       }
 
       if (path === "/api/admin/shipping-rates" && request.method === "PUT") {
         await requireAdmin(request, env);
-        return handleAdminUpdateShippingRates(request, env);
+        return await handleAdminUpdateShippingRates(request, env);
       }
 
       if (path === "/api/admin/shipping-rates/reset" && request.method === "POST") {
         await requireAdmin(request, env);
-        return handleAdminResetShippingRates(request, env);
+        return await handleAdminResetShippingRates(request, env);
       }
 
       // === Announcement Management ===
       if (path === "/api/announcement" && request.method === "GET") {
-        return handleGetAnnouncement(request, env);
+        return await handleGetAnnouncement(request, env);
       }
 
       if (path === "/api/admin/announcement" && request.method === "PUT") {
         await requireAdmin(request, env);
-        return handleAdminUpdateAnnouncement(request, env);
+        return await handleAdminUpdateAnnouncement(request, env);
       }
 
       return json({ error: "Not found." }, 404, request, env);
@@ -764,6 +764,8 @@ async function handleAdminDetail(code, request, env) {
   if (!inquiry) {
     return json({ error: "Inquiry not found." }, 404, request, env);
   }
+  // 修复：管理端响应同样重新签名图片 URL，避免数据库中旧签名过期导致破图
+  inquiry.images = await signImageUrls(inquiry.images, env);
   return json(inquiry, 200, request, env);
 }
 
@@ -1655,8 +1657,9 @@ async function handleAuthVerify(request, env) {
     "INSERT INTO users (email, created_at) VALUES (?1, ?2) ON CONFLICT(email) DO UPDATE SET email = email"
   ).bind(email, nowIso).run();
 
+  const EXPIRES_IN_SECONDS = 60 * 60 * 24 * 30; // 30 天
   const token = await signJwt(
-    { email, exp: now + 7 * 24 * 60 * 60 }, // 7 days
+    { email, exp: now + EXPIRES_IN_SECONDS },
     env.JWT_SECRET
   );
 

@@ -5,8 +5,8 @@ export default {
     // Allowed CORS origins
     const ALLOWED_ORIGINS = [
       "https://pansanrequest.ccwu.cc",
-      "https://pansanrequest.pages.dev",
-      "https://www.pansanrequest.ccwu.cc"
+      "https://www.pansanrequest.ccwu.cc",
+      "https://quote-system-frontend.pages.dev"
     ];
     const requestOrigin = request.headers.get("Origin");
     const isAllowedOrigin = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);

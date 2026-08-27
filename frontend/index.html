@@ -1578,6 +1578,7 @@
           loginErrorInvalidCode: "验证码无效或已过期",
           loginSuccess: "登录成功",
           loginHint: "未注册的邮箱将自动创建账号。",
+          loginDomainHint: "请使用主域名 https://pansanrequest.ccwu.cc 登录，两个域名的登录状态不互通。",
           myInquiriesTitle: "我的询价",
           myInquiriesEmpty: "暂无询价记录，提交询价后会自动显示在这里。",
           myInquiriesLoading: "加载中...",
@@ -1788,6 +1789,7 @@
           loginErrorInvalidCode: "Invalid or expired verification code",
           loginSuccess: "Login successful",
           loginHint: "New email will automatically create an account.",
+          loginDomainHint: "Please log in via the main domain https://pansanrequest.ccwu.cc. Login state is not shared between domains.",
           myInquiriesTitle: "My Inquiries",
           myInquiriesEmpty: "No inquiries yet. Submit an inquiry to see it here.",
           myInquiriesLoading: "Loading...",
@@ -3366,6 +3368,9 @@
         elements.verifyRow.style.display = "none";
         elements.loginError.style.display = "none";
         elements.loginHint.textContent = text("loginHint");
+        if (location.hostname.endsWith("pages.dev")) {
+          elements.loginHint.textContent = text("loginDomainHint");
+        }
         elements.sendCodeBtn.disabled = false;
         elements.sendCodeBtn.textContent = text("sendCodeBtn");
         showPage(elements.loginPage);
